@@ -14,7 +14,7 @@ original_vcf2phylip_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
 root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm/"
 
 # Tsv file with scaffold names and length in base pairs
-scaffold_info_file = "scaffolds.tsv"
+scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.txt"
 
 posterior_probability_threshold = 90
 
