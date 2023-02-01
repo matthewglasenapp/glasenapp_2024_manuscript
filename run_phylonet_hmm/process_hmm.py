@@ -8,13 +8,13 @@ import statistics
 import csv
 
 # Directory where vcf2phylip was run
-original_vcf2phylip_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
+original_vcf2phylip_dir = "/hb/scratch/mglasena/phylonet_hmm/run_1/hmm_input/"
 
 # Root directory where phylonet_hmm was run
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/run_1/hmm/"
 
 # Tsv file with scaffold names and length in base pairs
-scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.txt"
+scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.tsv"
 
 posterior_probability_threshold = 90
 
@@ -89,11 +89,24 @@ def get_tracts(introgression_probabilities,coordinates):
 	
 	# Append each introgression tract from index_tract_list to coordinate_tract_list in format of [start_coordinate, stop_coordinate, length in base pairs] 
 	for tract in index_tract_list:
-		start_coordinate = coordinates[tract[0]]
-		stop_coordinate = coordinates[tract[1]]
-		length = int(stop_coordinate.split(":")[1]) - int(start_coordinate.split(":")[1]) + 1
+		# Format chr:coordinate. These coordinates are from the vcf file which is 1-based. Need to convert to zero-based
+		start = coordinates[tract[0]]
+		stop = coordinates[tract[1]]
+
+		chrm = start.split(":")[0]
+
+		start_coordinate = int(start.split(":")[1])
+		stop_coordinate = int(stop.split(":")[1])
+		
+		# Convert to zero-based
+		# Only need to decrement start by 1 because in bed files, the start position is 0-based. 
+		start_coordinate -= 1
+		start = chrm + ":" + str(start_coordinate)
+
+		length = stop_coordinate - start_coordinate 
+		
 		if length > 1:
-			coordinate_tract_list.append([start_coordinate, stop_coordinate, length])
+			coordinate_tract_list.append([start, stop, length])
 	
 	# Sort coordinate_tract_list by index 2 of each list (length in bp) in order of highest to lowest 
 	coordinate_tract_list.sort(reverse=True, key=itemgetter(2))
