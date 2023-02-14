@@ -4,21 +4,22 @@ from joblib import Parallel, delayed
 
 num_scaffolds = 21
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/run_1/hmm_input/scaffold_nexus_alignments/"
 
 # Directory for phylonet_hmm scaffold input files 
-output_dir = root_dir + "/hmm_nexus_files/"
-make_output_dir = "mkdir -p {}".format(output_dir)
-os.system(make_output_dir)
+output_dir = "/hb/scratch/mglasena/phylonet_hmm/run_3/hmm_input/hmm_nexus_files/"
+#output_dir = root_dir + "/hmm_nexus_files/"
+#make_output_dir = "mkdir -p {}".format(output_dir)
+#os.system(make_output_dir)
 
 # Copy/paste from phylonet InferNetwork_ML run with 1 retiulcation age
 phylogenetic_network = "Network net = (pulcherrimus,((#H1,pallidus),(fragilis,(droebachiensis)#H1)));"
 allele_map = "<pulcherrimus:QB3KMK016; pallidus:QB3KMK002; droebachiensis:QB3KMK014; fragilis:QB3KMK013>"
 
 number_taxa = 4 
-number_runs = 100
-number_iterations = 1000
-threads = 6
+number_runs = 10
+number_iterations = 300
+threads = 2
 
 def get_scaffold_file_paths():
     # Create file containing paths to scaffold alignments produced by vcf2phylip.

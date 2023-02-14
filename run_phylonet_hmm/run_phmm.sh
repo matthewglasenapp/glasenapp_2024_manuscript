@@ -7,8 +7,8 @@
 #SBATCH --partition=128x24
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=3
-#SBATCH --mem=15GB
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=5GB
 #SBATCH --array=[0-20]
 #SBATCH --time=7-0
 

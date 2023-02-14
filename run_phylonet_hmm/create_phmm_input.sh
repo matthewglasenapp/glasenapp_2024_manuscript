@@ -12,5 +12,6 @@
 
 module load python-3.6.5
 
-python3 -u /hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.py
-python3 -u /hb/home/mglasena/dissertation/scripts/phylonet_hmm/create_matrices.py
+#python3 -u /hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.py
+#python3 -u /hb/home/mglasena/dissertation/scripts/phylonet_hmm/create_matrices.py
+python3 -u /hb/scratch/mglasena/phylonet_hmm/run_3/create_matrices.py

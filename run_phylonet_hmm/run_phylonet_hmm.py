@@ -2,13 +2,13 @@ import os
 import multiprocessing
 from joblib import Parallel, delayed
 
-memory = 15
+memory = 5
 
-phylonet_hmm_path = "/hb/groups/pogson_group/dissertation/software/phylonet/PhyloNetv3_8_2.jar"
+phylonet_hmm_path = "/hb/groups/pogson_group/dissertation/software/phylonet/PHiMM.jar"
 
-input_file_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/hmm_nexus_files/"
+input_file_dir = "/hb/scratch/mglasena/phylonet_hmm/run_3/hmm_input/hmm_nexus_files/"
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/run_3/"
 hmm_dir = root_dir + "hmm/"
 
 def get_scaffold_input_nexus_file_path_list():
