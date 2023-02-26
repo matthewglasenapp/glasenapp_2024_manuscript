@@ -4,7 +4,7 @@ from joblib import Parallel, delayed
 
 num_scaffolds = 21
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
 
 # Directory for phylonet_hmm scaffold input files 
 output_dir = root_dir + "/hmm_nexus_files/"

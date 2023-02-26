@@ -8,10 +8,13 @@ import statistics
 import csv
 
 # Directory where vcf2phylip was run
-original_vcf2phylip_dir = "/hb/scratch/mglasena/phylonet_hmm/run_1/hmm_input/"
+original_vcf2phylip_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
 
 # Root directory where phylonet_hmm was run
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/run_1/hmm/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm/"
+
+# Directory with json files of introgression probability arrays from cat.py
+probability_file_dir = "/hb/scratch/mglasena/phylonet_hmm/probability_files"
 
 # Tsv file with scaffold names and length in base pairs
 scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.tsv"
@@ -35,7 +38,7 @@ def get_file_paths_pairs_list():
 	os.system('find ' + original_vcf2phylip_dir + ' -name "coordinates" -type f > coordinate_file_list')
 		
 	# Create file of paths of rawOutput.json files for each scaffold produced by phylonet_hmm. We only want the rawOutput.json file from the "bestrun" folder. Save this file as output_file_list in hmm directory
-	os.system('find ' + root_dir + ' -name "rawOutput.json" -type f | grep "best" > output_file_list')
+	os.system('find ' + probability_file_dir + ' -type f > output_file_list')
 	
 	# Get zipped list matching rawOutput.json file path to global coordinate file path for each scaffold. [[Scaffold_1_rawOutput.json path, Scaffold_1_coordinates], []]
 	with open("output_file_list","r") as f1:
@@ -64,7 +67,7 @@ def get_coordinate_list(coordinate_file_path):
 #Get list of introgression probabilities. Save to "introgression_probabilites" variable
 def get_introgression_probabilities_list(json_file_path):
 	with open(json_file_path,"r") as probability_file:
-		introgression_probabilities = json.load(probability_file).get("posteriorProbabilityOfSpeciesTrees")[1]
+		introgression_probabilities = json.load(probability_file)
 	introgression_probabilities = [probability * 100 for probability in introgression_probabilities]
 
 	return introgression_probabilities 
