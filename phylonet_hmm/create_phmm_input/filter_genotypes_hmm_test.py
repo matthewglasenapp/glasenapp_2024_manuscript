@@ -59,18 +59,16 @@ def merge_vcfs():
 def select_passed_variants():
 	filtered_vcf = "filtered_genotype_calls.g.vcf.gz"
 	output_file = output_directory + "filtered_genotype_calls_pf.g.vcf.gz"
-	select_variants = "gatk SelectVariants -R {} -V {} -O {} -select-type SNP --exclude-filtered true --select-type-to-exclude SYMBOLIC".format(reference_genome, filtered_vcf, output_file)
+	select_variants = "gatk SelectVariants -R {} -V {} -O {} --exclude-filtered true".format(reference_genome, filtered_vcf, output_file)
 	os.system(select_variants)
-	# Alternative option: cat $filtered_vcf | awk -F '\t' '{if($0 ~ /\#/) print; else if($7 == "PASS") print}' > my_PASS.vcf
-	#os.system("rm " + filtered_vcf)
 
-# Set individual genotypes with low quality or read depth to missing: -S . -e 'FMT/DP<3 | FMT/GQ<20'
 # Filter SNPs within 3 base pairs of indel: --SnpGap 3
 # Remove monomorphic SNPs where no alternative alleles are called for any of the samples: -e 'AC==0'
+# Set individual genotypes with low quality or read depth to missing: -S . -e 'FMT/DP<3 | FMT/GQ<20'
 def bcftools_filter():
 	input_file = output_directory + "filtered_genotype_calls_pf.g.vcf.gz"
 	output_file = output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz"
-	filter = '''bcftools filter -e 'FMT/DP<3 | FMT/GQ<20' -Ou {} | bcftools filter --SnpGap 5 -e 'AC==0' | bcftools norm -m +any -f {} | bcftools filter -e 'ALT="*"' -Oz -o {}'''.format(input_file, reference_genome, output_file)
+	filter = '''bcftools filter --SnpGap 3 -e 'AC==0' -Ou {} | bcftools filter -S . -e 'FMT/DP<3 | FMT/GQ<20' | bcftools norm -m +any -f {} | bcftools filter -e 'ALT="*"' -Oz -o {}'''.format(input_file, reference_genome, output_file)
 	os.system(filter)
 	os.system("rm " + input_file)
 
@@ -86,10 +84,10 @@ def vcf_stats(input_file):
 	os.system("rm samples_file.txt")
 
 def main():
-	#separate_SNP_INDEL()
-	#filter_variants()
-	#merge_vcfs()
-	#select_passed_variants()
+	separate_SNP_INDEL()
+	filter_variants()
+	merge_vcfs()
+	select_passed_variants()
 	bcftools_filter()
 	index_vcf(output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz")
 	vcf_stats(output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz")
