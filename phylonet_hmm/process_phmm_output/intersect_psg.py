@@ -2,24 +2,28 @@ import csv
 
 overlap_lst = []
 
-csv_file = "psg.csv"
-csv_file_2 = "intersect.csv"
+# CSV file of 6,520 single copy orthologs from Kober and Pogson. Rows 5 - 1,012 contain the 1,008 genes with significant tests for positive selection
+psg_file = "psg.csv"
 
-with open(csv_file,"r") as file1, open(csv_file_2,"r") as file2:
+# CSV file of the genes overlapping with introgression tracts 
+introgressed_genes = "intersect.csv"
+
+with open(psg_file,"r") as file1, open(introgressed_genes,"r") as file2:
 	csv1 = csv.reader(file1)
 	csv2 = csv.reader(file2)
-	inputs = list(csv1)
-	inputs2 = list(csv2)
+	psg_list = list(csv1)
+	introgressed_genes_list = list(csv2)
 
-gene_id_lst = [n[0] for n in inputs[4:1012]]
+# Get list of SPU identifiers from the set of positively selected genes 
+psg_list = [n for n in psg_list[4:1012]]
 
-for item in gene_id_lst:
-	for record in inputs2:
-		if item in record[7]:
-			if float(record[5]) == 100.0:
-				print(item)
-				print(record[1])
-				print(record[2])
-				print(gene_id_lst.index(item))
-				print(" ")
+for gene in psg_list:
+	for record in introgressed_genes_list:
+		if gene[0] in record[7]:
+			print(gene)
+			print(record[1])
+			print(record[2])
+			print(record)
+			print("Positively Selected Gene #{}".format(psg_list.index(gene)))
+			print(" ")
 
