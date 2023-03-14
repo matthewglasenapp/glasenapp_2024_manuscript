@@ -63,7 +63,7 @@ def get_gene_identifier_dict():
 def create_intersection_file():
 	csv_file = open("/Users/matt/desktop/investigate_tracts/intersect.csv","w")
 	writer = csv.writer(csv_file)	
-	header = ["introgression_tract", "overlapping_gene", "gene_name", "gene_length", "overlapping_bases", "percent_introgressed", "gene_coordinates", "GO Terms", "gene_info"]
+	header = ["introgression_tract", "overlapping_gene", "gene_name", "gene_length", "overlapping_bases", "percent_introgressed", "gene_coordinates", "Echinobase GO Terms", "gene_info"]
 	writer.writerow(header)
 	overlaps = open("/Users/matt/desktop/investigate_tracts/overlap").read().splitlines()
 
