@@ -163,7 +163,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 
 	# Add Echinobase KO Terms to Gene Dictionary 
 	for gene in gene_ko_terms_list:
-		# Account for duplicate records in GeneGoTerms.txt
+		# Account for duplicate records in GeneKoTerms.txt
 		if len(gene_dictionary[gene[0]]) == 6:
 			gene_dictionary[gene[0]].append([gene[3]])
 		elif len(gene_dictionary[gene[0]]) == 7:
