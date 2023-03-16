@@ -1,0 +1,45 @@
+Investigate tracts notes: 
+
+Manually fixed four records that were a new line by mistake in GenePageGenralInfo_AllGenes.txt
+
+['|SPU_025960|SPU_011790|SPU_003726|furry homolog-like|LOC110973286', 'partially curated']
+['adaptor-related protein complex 2, beta 1 subunit-1|SPU_011577|SPU_013675|Sp-Ap2b1|LOC110981968', 'partially curated']
+['|LOC762909|SPU_016605|SPU_011157|RAS-Related Protein RAB-14|LOC110976282', 'curated']
+['|SPU_016879|SPU_015300|SPU_014823|Sp-Gpr115_5', 'partially curated']
+
+Manually fixed this record:
+ECB-GENEPAGE-23123188	LOC100888211	histamine N-methyltransferase		Sp-Hnmtl| histamine N-methyltransferase	|SPU_006135|SPU_000201	partially curated
+
+
+Every record begins with ECB-GENEPAGE-
+
+There are duplicat records in the GO Terms file:
+
+There are duplicate records in the All Gene Info page:
+['ift57', 'asah1', 'abcb4', 'znf135l', 'lrp4', 'slc31a1', 'disp1', 'nprl2', 'rbpj', 'slc17a5', 'rrh']
+
+['ift57', 'asah1', 'abcb4', 'znf135l', 'lrp4', 'slc31a1', 'disp1', 'nprl2', 'rbpj', 'slc17a5', 'rrh']
+ECB-GENEPAGE-23012205
+ECB-GENEPAGE-23031763
+ECB-GENEPAGE-23031800
+ECB-GENEPAGE-23042296
+ECB-GENEPAGE-23042345
+ECB-GENEPAGE-23045269
+ECB-GENEPAGE-23048462
+ECB-GENEPAGE-23084169
+ECB-GENEPAGE-23084175
+ECB-GENEPAGE-23085490
+ECB-GENEPAGE-23094178
+ECB-GENEPAGE-23095307
+ECB-GENEPAGE-23106061
+ECB-GENEPAGE-23116804
+ECB-GENEPAGE-23130671
+ECB-GENEPAGE-23140428
+ECB-GENEPAGE-23143904
+ECB-GENEPAGE-23147438
+ECB-GENEPAGE-23163848
+ECB-GENEPAGE-23165153
+ECB-GENEPAGE-23178220
+ECB-GENEPAGE-23186667
+
+What do I do about the cases where multiple SPU map to one LOC? Is it appropriate to append all the SPU Tu terms to the one LOC number?
