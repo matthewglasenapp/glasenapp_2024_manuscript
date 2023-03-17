@@ -7,6 +7,7 @@ tract_file = "ten_kb_tracts.bed"
 # Bed file of all S. purpuratus protein coding genes 
 gene_list_file = "protein_coding_genes.bed"
 
+# File of unique protein-coding exons 
 exon_list_file = "unique_exons.bed"
 
 # Gene metadata from Echinobase 
@@ -26,113 +27,109 @@ gene_ko_terms = "GeneKoTerms.txt"
 # Supp table S2
 tu_go_terms = "tu_2012_go.csv"
 
+# Gene dictionary in the format of {ECB-GENEPAGE_ID: symbol, name, synonyms, curation_status, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
 gene_dictionary = dict()
 
+# Dictionary of {ECCB-GENEPAGE_ID: [SPU_IDs]}
 ECB_SPU_dict = dict()
 
+# Same dictionary as gene_dictionary, but formatted as {LOC_ID: ECB-GENEPAGE-ID, name, synonyms, curation_stats, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
+LOC_gene_dictionary = dict()
+
+# 
 gene_intersection_dict = dict()
 
-# Create gene dictionary from GenePageGeneralInfo_AllGenes.txt and write to csv
+# Create gene dictionary from GenePageGeneralInfo_AllGenes.txt
 def create_gene_dictionary():
-	#os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
 	inputs = open(gene_info_file,"r").read().splitlines()
 
 	record_lst = [record.split("\t") for record in inputs]
 
+	# Parse each record for info
 	for lst in record_lst:
+		
+		# Delete any empty lists that occurred due to consecutive tab characters. Each record was split into a list on each "\t"
 		lst = list(filter(None, lst))
+		
+		# Each record begins with an ECB-GENEPAGE- numer 
 		echinobase_gene_id = lst[0]
+		
+		# Symbol is generally the corresponding LOC number, but sometimes it is a name
 		symbol = lst[1]
 		name = lst[2]
 
+		# Delete echinobase_gene_id, symbol, and name form list after saving them to variables. This makes parsing the rest of the list easier. 
 		del lst[0:3]
 
+		# Define variables to be filled later.
 		curation_status = "n/a"
 		synonyms = "n/a"
-		synonyms_2 = "n/a"
-		synonyms_3 = "n/a"
 		info = "n/a"
 
+		# Populate curation_status variable and remove item from list. Each record should have a status of either "partially curated" or "curated"
 		for item in lst:
 			if "curated" in item:
 				curation_status = item
 				lst.pop(lst.index(curation_status))
 
+		# If there is only one item left in the list, that item is the gene synonyms. Assign this item to synonyms variable
 		if len(lst) == 1:
 			synonyms = lst[0]
 			lst.pop(0)
 
-		elif len(lst) >= 1:
+		# If there are multiple items left in the list, one of them is synonyms and the other is a general info column. 
+		# Find the synonyms record and assign it to synonyms. Remove that item from the list 
+		elif len(lst) > 1:
 			for item in lst:			
-				# I checked to make sure that "|" only appears in the list once. Won't have problems with overwriting synonyms_2
+				# I checked to make sure that "|" only appears in one item per list. If it appeared twice, synonyms would be overwritten
 				if "|" in item:
-					synonyms_2 = item
+					synonyms = item
 					lst.pop(lst.index(item))
 			
+		# There is one weird edge case where the list still has two records: ['Metallothioneins have a high content of cysteine residues that bind various heavy metals.', 'SPU_017134']
+		# I checked to ensure that this records synonyms variable is "n/a"
+		# Assigned 'SPU_017134' to synonyms variable 
 		if len(lst) > 1:
 			for item in lst:
 				if "SPU_" in item:
-					synonyms_3 = item
-					lst.pop(lst.index(synonyms_3))
+					synonyms = item
+					lst.pop(lst.index(synonyms))
 
+		# Now all records are a list of 1 or empty lists. The records with a list of one are the info column. Populate info variable.
+		# After this chunk, all records will be an empty list 
 		if len(lst) == 1:
 			info = lst[0].strip()
 			lst.pop(0)
 
+		# Control for weird edge cases where what we stored as the name is actually a list of synonyms. Example: name = SPU_010482|Sp-PolypL_68|polyprotein-like-68
 		if "|" in name and synonyms == "n/a":
 			synonyms = name
 			name = "missing"
 
+		# Control for three weird edge case where what we stored as the name is actually the info
 		if len(name) > 200 and info == "n/a":
 			info = name
 			name = "missing"
-	
-		# There is only one case of synonyms_3 and its record does not have synonyms or synonyms_1
-
-		if synonyms != "n/a" and synonyms_2 == "n/a" and synonyms_3 == "n/a":
-			combined_synonyms = synonyms
-	
-		elif synonyms == "n/a" and synonyms_2 != "n/a" and synonyms_3 == "n/a":
-			combined_synonyms = synonyms_2
-	
-		elif synonyms == "n/a" and synonyms_2 == "n/a" and synonyms_3 != "n/a":
-			combined_synonyms = synonyms_3
-
-		elif synonyms != "n/a" and synonyms_2 != "n/a":
-			combined_synonyms = synonyms.strip() + "|" + synonyms_2.strip()
-
-		else:
-			combined_synonyms = "n/a"
 
 		# Get rid of any "||". I will splitting the synonyms into a list by the "|" delimiter 
-		if "||" in combined_synonyms:
-			combined_synonyms = "|".join(combined_synonyms.split("||"))
+		if "||" in synonyms:
+			synonyms = "|".join(synonyms.split("||"))
 
-		combined_synonyms = combined_synonyms.split("|")
+		synonyms = synonyms.split("|")
 		
-		# Population Gene Dictionary with info
-		if not symbol in gene_dictionary.keys():
-			gene_dictionary[echinobase_gene_id] = [symbol, name, combined_synonyms, curation_status, info]
-		
-		# Deal with duplicate records 
-		else:
-			if gene_dictionary[echinobase_gene_id][3] == "curated" or gene_dictionary[echinobase_gene_id][3] == "manually curated":
-				if curation_status != "curated" or curation_status != "manually curated":
-					continue
-			elif gene_dictionary[echinobase_gene_id][3] != "curated" or gene_dictionary[echinobase_gene_id][3] != "manually curated":
-				if curation_status == "curated" or curation_status == "manually curated":
-					gene_dictionary[echinobase_gene_id] = [symbol, name, combined_synonyms, curation_status, info]
+		# Populate Gene Dictionary with info
+		gene_dictionary[echinobase_gene_id] = [symbol, name, synonyms, curation_status, info]
 
-				# Just stick with the first entry. Was more reliable in the only two edge cases
-				else:
-					continue
-
+# Dictionary of {ECCB-GENEPAGE_ID: [SPU_ID(s)]}. This will be needed when trying to assign Tu et al. 2012 GO Terms to gene_dictionary
 def create_ECB_SPU_mapping_dict():
 	for key,value in gene_dictionary.items():
+		
+		# Nine cases where the name (value[1]) is an SPU_ number. 
 		if "SPU_" in gene_dictionary[key][1]:
 			spu_id = gene_dictionary[key][1]
 			ECB_SPU_dict[key] = [spu_id]
 		
+		# For all other cases, parse the synonyms list for "SPU_" numbers
 		else:
 			spu_lst = []
 			for item in gene_dictionary[key][2]:
@@ -141,35 +138,46 @@ def create_ECB_SPU_mapping_dict():
 				ECB_SPU_dict[key] = spu_lst
 
 def add_GO_KO_termns_to_gene_dictionary():
+	# List of GO Terms by ECB-GENEPAGE record 
 	gene_go_terms_list = [gene.split("\t") for gene in open(gene_go_terms,"r").read().splitlines()]
 
+	# List of KO Terms by ECB-GENEPAGE record
 	gene_ko_terms_list = [gene.split("\t") for gene in open(gene_ko_terms,"r").read().splitlines()]
 
+	# List of Tu et al. 2012 GO Terms by SPU_ number 
 	# File has one line header
 	tu_go_terms_list = [gene.split(",",1) for gene in open("tu_2012_go.csv","r").read().splitlines()[1:]]
 
 	# Add Echinobase GO Terms to gene dictionary
+	# Add GO Terms as a list because there are duplicate ECB-GENEPAGE numbers in the GO Terms file
 	for gene in gene_go_terms_list:
-		# Account for duplicate records in GeneGoTerms.txt
+		# If the length of the value is 5, GO terms have not been added for this key (ECB-GENEPAGE ID)
 		if len(gene_dictionary[gene[0]]) == 5:
 			gene_dictionary[gene[0]].append([gene[3]])
+		
+		# If the length of the value is 6, GO terms have already been added for this key (ECB-GENEPAGE ID)
+		# Append the additional GO terms to the pre-existing list 
 		elif len(gene_dictionary[gene[0]]) == 6:
 			gene_dictionary[gene[0]][5].append(gene[3])
 
-	# Append "n\a" to gene dictionary records if didn't append GO Terms
+	# Append "n/a" to gene dictionary records if GO Terms weren't appended
 	for key,value in gene_dictionary.items():
 		if len(value) == 5:
 			gene_dictionary[key].append("n/a")
 
 	# Add Echinobase KO Terms to Gene Dictionary 
+	# Add KO Terms as a list because there are duplicate ECB-GENEPAGE numbers in the KO Terms file
 	for gene in gene_ko_terms_list:
-		# Account for duplicate records in GeneKoTerms.txt
+		# If the length of the value is 6, KO terms have not been added for this key (ECB-GENEPAGE ID)
 		if len(gene_dictionary[gene[0]]) == 6:
 			gene_dictionary[gene[0]].append([gene[3]])
+		
+		# If the length of the value is 7, KO terms have already been added for this key (ECB-GENEPAGE ID)
+		# Append the additional KO terms to the pre-existing list 
 		elif len(gene_dictionary[gene[0]]) == 7:
 			gene_dictionary[gene[0]][5].append(gene[3])
 
-	# Append "n\a" to gene dictionary records if didn't append GO Terms
+	# Append "n\a" to gene dictionary records if didn't append KO Terms
 	for key,value in gene_dictionary.items():
 		if len(value) == 6:
 			gene_dictionary[key].append("n/a")
@@ -180,36 +188,66 @@ def add_GO_KO_termns_to_gene_dictionary():
 	for item in tu_go_terms_list:
 		tu_go_dict[item[0]] = item[1]
 
+	# Is this appropriate? When multiple SPU IDs map to one ECB-GENEPAGE ID? Is it appropriate to append all the SPU Tu et al. GO Terms to the one ECB-GENEPAGE ID?
 	for gene in gene_dictionary:
+		# If there are multiple SPU_ IDs for the given ECB-GENEPAGE number, create go_lst and add the GO terms for all SPU numbers to this list
 		if len(ECB_SPU_dict[gene]) > 1:
 			spu_lst = ECB_SPU_dict[gene]
 			go_lst =[]
 			for spu_number in spu_lst:
 				if spu_number in tu_go_dict.keys():
 					go_lst.append(tu_go_dict[spu_number])
+			
+			# If there are multiple items (independent strings) in the go_lst, combine these into a single item separated by a "|"
 			if len(go_lst) >= 1:
-				go = ",".join(go_lst)
+				go = "|".join(go_lst)
 				gene_dictionary[gene].append(go)
+			
+			# If there were no Tu et al. 2012 GO terms, add "n/a" to gene_dictionary
 			else:
 				gene_dictionary[gene].append("n/a")
 			
+		
+		# If there isn't a corresponding SPU number of gene_dictionary key, add "n/a" for Tu et al. GO Terms
 		elif len(ECB_SPU_dict[gene]) == 0:
 			gene_dictionary[gene].append("n/a")
 		
-		else:
+		# If there is exactly one SPU_ ID for the given ECB-GENEPAGE number 
+		elif len(ECB_SPU_dict[gene]) == 1:
 			spu = ECB_SPU_dict[gene][0]
+			
+			# If SPU_ ID has Tu et al GO Terms, add these to gene_dictionary
 			if spu in tu_go_dict.keys():
 				gene_dictionary[gene].append(tu_go_dict[spu])
+			
+			# If SPU_ID has no Tu et al. GO Terms, add "n/a" to gene_dictionary
 			else:
-				gene_dictionary[gene].append("no_tu")
+				gene_dictionary[gene].append("n/a")
 
-	# Eliminate redundant items and change format of GO/KO records from list to string
+	# Because there were duplicated ECB-GENEPAGE records in GeneGoTerms.txt and GeneKoTerms.txt, the same GO term may have been added twice to a given ECB-GENEPAGE record
+	# Eliminate redundant items using list(set(GO/KO term list))
+	# Change format of GO/KO records from list to string separating independent terms by comma
 	for value in gene_dictionary.values():
+		
+		# When terms were added, if a ECB-GENEPAGE record had no terms, the string "n/a" was added, so not all GO/KO records are a list 
 		if type(value[5]) is list:
 			value[5] = ",".join(list(set(value[5])))
 
 		if type(value[6]) is list:
 			value[6] = ",".join(list(set(value[6])))
+
+	# Deal with redundant Tu et al. terms here!
+
+# Use bedtools intersect to create file bed file containing the overlap between introgression tracts and protein coding genes 
+def intersect_genes(tract_file, gene_file, outfile):
+	os.system("bedtools intersect -a " + tract_file + " -b " + gene_file + " -wo > " + outfile)
+
+def handle_duplicates_and_reverse_dictionary():
+	# Write code to remove records with duplicate symbols or merge them together into a single record 
+
+	# Population LOC_gene_dictionary
+	for key,value in gene_dictionary.items():
+		LOC_gene_dictionary[value[0]] = [key, value[1], value[2], value[3], value[4], value[5], value[6], value[7]]
 
 def write_gene_dictionary_to_csv():
 	csv_file = open("test.csv","w")
@@ -218,13 +256,9 @@ def write_gene_dictionary_to_csv():
 	writer.writerow(header)
 
 	# Write gene info to csv file
-	for key,value in gene_dictionary.items():
-		data = [value[0], key, value[1], "|".join(value[2]), value[3], value[4], value[5], value[6], value[7]]
+	for key,value in LOC_gene_dictionary.items():
+		data = [key, value[0], value[1], "|".join(value[2]), value[3], value[4], value[5], value[6], value[7]]
 		writer.writerow(data)
-
-# Use bedtools intersect to create file bed file containing the overlap between introgression tracts and protein coding genes 
-def intersect_genes(tract_file, gene_file, outfile):
-	os.system("bedtools intersect -a " + tract_file + " -b " + gene_file + " -wo > " + outfile)
 
 def create_gene_intersection_dict(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
@@ -307,12 +341,15 @@ def main():
 	create_gene_dictionary()
 	create_ECB_SPU_mapping_dict()
 	add_GO_KO_termns_to_gene_dictionary()
+	
+	#intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
+	#intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
+	
+	handle_duplicates_and_reverse_dictionary()
+
 	write_gene_dictionary_to_csv()
-	
-	intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
-	intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
-	
-	create_gene_intersection_dict("gene_overlap.bed")
+
+	#create_gene_intersection_dict("gene_overlap.bed")
 	#create_gene_intersection_dict("exon_overlap.bed")
 
 	#create_gene_intersection_file()
@@ -320,26 +357,26 @@ def main():
 
 	
 	# Identify the problematic duplicates:
-	lst = []
-	for key,value in gene_dictionary.items():
-		lst.append(value[0])
+	#lst = []
+	#for key,value in gene_dictionary.items():
+		#lst.append(value[0])
 	
-	unique = set()
-	duplicates = []
-	for item in lst:
-		if item in unique:
-			duplicates.append(item)
-		else:
-			unique.add(item)
+	#unique = set()
+	#duplicates = []
+	#for item in lst:
+		#if item in unique:
+			#duplicates.append(item)
+		#else:
+			#unique.add(item)
 
-	print(duplicates)
+	#print(duplicates)
 
-	for key,value in gene_dictionary.items():
-		for item in duplicates:
-			if value[0] == item:
-				print(key)
-
-
+	#for key,value in gene_dictionary.items():
+		#for item in duplicates:
+			#if value[0] == item:
+				#print(key)
+				#print(value)
+				#print("\n")
 
 if __name__ == "__main__":
 	main()
