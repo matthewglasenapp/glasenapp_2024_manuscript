@@ -64,3 +64,92 @@ ECB-GENEPAGE-23178220
 ECB-GENEPAGE-23186667
 
 What do I do about the cases where multiple SPU map to one ECB-GENEPAGe record?
+
+	# Identify the problematic duplicates:
+	#lst = []
+	#for key,value in gene_dictionary.items():
+		#lst.append(value[0])
+	
+	#unique = set()
+	#duplicates = []
+	#for item in lst:
+		#if item in unique:
+			#duplicates.append(item)
+		#else:
+			#unique.add(item)
+
+	#print(duplicates)
+
+	#for key,value in gene_dictionary.items():
+		#for item in duplicates:
+			#if value[0] == item:
+				#print(key)
+				#print(value)
+				#print("\n")
+['ift57', 'asah1', 'abcb4', 'znf135l', 'lrp4', 'slc31a1', 'disp1', 'nprl2', 'rbpj', 'slc17a5', 'rrh']
+
+ECB-GENEPAGE-23084169
+['abcb4', 'ATP binding cassette subfamily B member 4', ['Sp-Abcb1', ' ATP-binding cassette, member 1A (multidrug resistance protein 1a), sub-family B (MDR/TAP)', 'LOC115918689', 'SPU_007015', 'SPU_017243'], 'partially curated', 'n/a', 'n/a', 'n/a', 'Metabolism,Metabolism_SecondaryMetabolites,Metabolism_SecondaryMetabolites']
+
+ECB-GENEPAGE-23084175
+['abcb4', 'ATP-binding cassette, sub-family B (MDR/TAP), member 4', ['P-glycoprotein-3', 'Abcb4a', 'SPU_007014'], 'partially curated', 'n/a', 'GO:0005524,GO:0016020,GO:0140359', 'KEGG:spu:756756', 'Metabolism,Metabolism_SecondaryMetabolites,Metabolism_SecondaryMetabolites']
+
+ECB-GENEPAGE-23045269
+['asah1', 'N-acylsphingosine amidohydrolase 1', ['LOC579635', 'N-acylsphingosin admidohydrolase 1', 'Sp-Asah1', 'SPU_001060', 'SPU_013112', 'acid ceramidase'], 'curated', 'n/a', 'GO:0005764,GO:0006631,GO:0017064', 'n/a', 'n/a']
+
+ECB-GENEPAGE-23048462
+['asah1', 'N-acylsphingosine amidohydrolase 1', ['Sp-Asah1_1', ' N-acylsphingosine amidohydrolase 1-1 ', ' N-acylsphingosine amidohydrolase (acid ceramidase) 1-1 ', 'SPU_008640', 'N-acylsphingosine amidohydrolase 1', 'LOC593569'], 'partially curated', 'n/a', 'n/a', 'n/a', 'no_tu']
+
+ECB-GENEPAGE-23106061
+['disp1', 'dispatched RND transporter family member 1', ['Disp-like C', 'Dispatched-like C', 'Sp-DispLC', 'dispatched homolog 1', ' dispatched homolog 1 (Drosophila)-2', 'SPU_020459', 'dispatched RND transporter family member 1', 'Sp-Disp1_2', 'LOC592970'], 'partially curated', 'n/a', 'GO:0007224,GO:0016020', 'n/a', 'no_tu']
+
+ECB-GENEPAGE-23147438
+['disp1', 'dispatched RND transporter family member 1', ['LOC580689', ' Dispatched A ', ' Dispatched 1', 'dispatched (disp) homolog', 'Sp-Disp', 'Dispatched', 'disp', 'SPU_000208', 'protein dispatched homolog 1-like', 'LOC110984953'], 'curated', 'n/a', 'n/a', 'n/a', 'Signaling,Signaling_Hedgehog,Signaling_Hedgehog']
+
+ECB-GENEPAGE-23031763
+['ift57', 'intraflagellar transport 57', ['SPU_024650', 'SPU_009260', 'Sp-Ift57_1', 'LOC590273', 'intraflagellar transport protein 57 homolog', 'LOC110983494'], 'curated', 'n/a', 'n/a', 'n/a', 'n/a']
+
+ECB-GENEPAGE-23031800
+['ift57', 'intraflagellar transport 57', ['Sp-Ift57', ' intraflagellar transport protein 57 ', ' estrogen-related receptor beta like 1 ', 'Esrrbl1', 'intraflagellar transport 57', 'LOC753117'], 'partially curated', 'n/a', 'n/a', 'n/a', 'n/a']
+
+ECB-GENEPAGE-23094178
+['lrp4', 'LDL receptor related protein 4', ['SPU_016376', 'SPU_020325', 'Sp-Lrp6', 'SPU_023044', 'LOC110987701'], 'partially curated', 'n/a', 'n/a', 'n/a', 'n/a']
+
+ECB-GENEPAGE-23095307
+['lrp4', 'LDL receptor related protein 4', ['LOC580322', 'Sp-Lrp4_6', 'SPU_014983', 'low density lipoprotein receptor-related protein 4-like-6', 'Sp-Lrp4', 'SPU_012372', 'low density lipoprotein receptor-related protein 4', 'SPU_016977', 'SPU_018689', 'low-density lipoprotein receptor-related protein 4', 'LOC110975383'], 'curated', 'n/a', 'n/a', 'n/a', 'n/a']
+
+ECB-GENEPAGE-23042296
+['nprl2', 'NPR2 like, GATOR1 complex subunit', ['SPU_026390', 'Sp-Z426', 'zinc finger protein 426'], 'partially curated', 'n/a', 'n/a', 'n/a', 'ZNF,ZNF,ZNF']
+
+ECB-GENEPAGE-23163848
+['nprl2', 'NPR2 like, GATOR1 complex subunit', ['LOC584205', 'Sp-Tusc4', 'SPU_001479', 'tumor suppressor candidate 4', 'GATOR complex protein NPRL2', 'LOC110984888'], 'curated', 'n/a', 'n/a', 'n/a', 'Metabolism,Metabolism_InorganicIon,Metabolism_InorganicIon']
+
+ECB-GENEPAGE-23116804
+['rbpj', 'recombination signal binding protein for immunoglobulin kappa J region', ['LOC575174', 'SPU_020347', 'SPU_028537', 'Sp-SuH_1', 'suppressor of hairless homolog', 'Su(H)', 'RBPJ homolog', 'Sp-Shrls', 'recombining binding protein suppressor of hairless-like', 'LOC110981603'], 'curated', 'n/a', 'n/a', 'n/a', 'n/a']
+
+ECB-GENEPAGE-23165153
+['rbpj', 'recombination signal binding protein for immunoglobulin kappa J region', ['Sp-Shrls', 'SPU_021566', 'h', 'Su', 'Sp-SuH', 'suppressor of hairless homolog', 'Su(H)', 'RBPJ homolog'], 'partially curated', 'n/a', 'n/a', 'n/a', 'TF,TF_Other,TF_Other']
+
+ECB-GENEPAGE-23042345
+['rrh', 'retinal pigment epithelium-derived rhodopsin homolog', ['LOC579038', 'SPU_026388', 'visual pigment-like receptor peropsin', 'LOC110974062'], 'curated', 'n/a', 'n/a', 'n/a', 'no_tu']
+
+ECB-GENEPAGE-23186667
+['rrh', 'retinal pigment epithelium-derived rhodopsin homolog', ['Sp-Opsin3.1', 'SPU_027634', 'Rhodopsin'], 'partially curated', 'n/a', 'n/a', 'n/a', 'Nervous,Nervous_Retinal,Nervous_Retinal']
+
+ECB-GENEPAGE-23130671
+['slc17a5', 'solute carrier family 17 member 5', [' solute carrier family 17 (anion/sugar transporter), member 5 ', 'Sp-Slc17a5_3', 'SPU_026552', 'Solute carrier family 17 member 5', 'solute carrier family 17, member 5', 'LOC593873', 'LOC110987203'], 'partially curated', 'n/a', 'n/a', 'n/a', 'Metabolism,Metabolism_Carbohydrate,Metabolism_Carbohydrate']
+
+ECB-GENEPAGE-23178220
+['slc17a5', 'solute carrier family 17 member 5', ['LOC574944', 'Sp-Slc17a5', 'SPU_002558', 'sialin', 'LOC110987396'], 'curated', 'n/a', 'GO:0016020,GO:0022857', 'n/a', 'Metabolism,Metabolism_Carbohydrate,Metabolism_Carbohydrate']
+
+ECB-GENEPAGE-23140428
+['slc31a1', 'solute carrier family 31 member 1', ['Copper transporter 1', 'ctr1', 'Sp-Slc31a1_1', ' Slc31a1 ', ' probable low affinity copper uptake protein 2', 'SPU_012675', 'Solute carrier family 31 member 1', 'High-affinity copper uptake protein 1', 'LOC593695'], 'partially curated', 'n/a', 'GO:0005375,GO:0006878,GO:0016020', 'KEGG:spu:593695', 'no_tu']
+
+ECB-GENEPAGE-23143904
+['slc31a1', 'solute carrier family 31 member 1', ['LOC580143', 'solute carrier family 31 (copper transporters) member 1 ', 'Sp-Slc31a1', 'SPU_000048', 'high affinity copper uptake protein 1', 'LOC110976333'], 'curated', 'n/a', 'GO:0005375,GO:0006878,GO:0016020', 'KEGG:spu:580143', 'Metabolism,Metabolism_InorganicIon,Metabolism_InorganicIon']
+
+ECB-GENEPAGE-23012205
+['znf135l', 'zinc finger protein 135-like', ['SPU_022955', 'Sp-Z76', 'zinc finger protein 76'], 'partially curated', 'n/a', 'n/a', 'n/a', 'ZNF,ZNF,ZNF']
+
+ECB-GENEPAGE-23085490
+['znf135l', 'zinc finger protein 135-like', ['Sp-Z28', 'SPU_014923', 'zinc finger protein 28'], 'partially curated', 'n/a', 'n/a', 'n/a', 'ZNF,ZNF,ZNF']

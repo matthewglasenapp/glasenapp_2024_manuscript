@@ -247,7 +247,26 @@ def handle_duplicates_and_reverse_dictionary():
 
 	# Population LOC_gene_dictionary
 	for key,value in gene_dictionary.items():
-		LOC_gene_dictionary[value[0]] = [key, value[1], value[2], value[3], value[4], value[5], value[6], value[7]]
+		if value[0] not in LOC_gene_dictionary.keys():
+			LOC_gene_dictionary[value[0]] = [key, value[1], value[2], value[3], value[4], value[5], value[6], value[7]]
+		
+		# If duplicate entry, search for LOC ID
+		else:
+			for item in value[2]:
+				if "LOC" in item:
+					id = item
+					break
+			
+			# Add record to LOC_gene_dictionary, add the previous id/name to the synonyms column
+			if id not in LOC_gene_dictionary.keys():
+				synonyms = value[2]
+				gene_name = value[0]
+				synonyms.insert(0, gene_name)
+				LOC_gene_dictionary[id] = [key, value[1], synonyms, value[3], value[4], value[5], value[6], value[7]]
+
+			# There are four duplicate records that contain no mapping to a LOC ID.
+			#else:
+				#print(key,value)
 
 def write_gene_dictionary_to_csv():
 	csv_file = open("test.csv","w")
@@ -336,29 +355,6 @@ def main():
 
 	create_gene_intersection_file()
 	#create_exon_intersection_file()
-
-	
-	# Identify the problematic duplicates:
-	#lst = []
-	#for key,value in gene_dictionary.items():
-		#lst.append(value[0])
-	
-	#unique = set()
-	#duplicates = []
-	#for item in lst:
-		#if item in unique:
-			#duplicates.append(item)
-		#else:
-			#unique.add(item)
-
-	#print(duplicates)
-
-	#for key,value in gene_dictionary.items():
-		#for item in duplicates:
-			#if value[0] == item:
-				#print(key)
-				#print(value)
-				#print("\n")
 
 if __name__ == "__main__":
 	main()
