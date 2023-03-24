@@ -8,6 +8,8 @@ original_tract_file = "/hb/scratch/mglasena/phylonet_hmm/ten_kb_tracts.bed"
 
 threads = 4
 
+gaps_file = "/hb/scratch/mglasena/phylonet_hmm/100kb_gaps.bed"
+
 bam_file_paths_list = [
 "/hb/groups/pogson_group/dissertation/data/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
 "/hb/groups/pogson_group/dissertation/data/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
@@ -48,7 +50,7 @@ def write_failed_tracts():
 			if min(value) < 5:
 				f.write(key + "\n")
 
-def rewrite_tract_file_with_failed_records_removed():
+def rewrite_tract_file_with_failed_coverage_removed():
 	with open(original_tract_file,"r") as f:
 		tracts = f.read().splitlines()
 
@@ -63,8 +65,30 @@ def rewrite_tract_file_with_failed_records_removed():
 			else:
 				f3.write(tract + "\n")
 
+def intersect_tract_file_with_100kb_gaps():
+	os.system("bedtools intersect -a " + original_tract_file + " -b " + gaps_file + " -wo > gap_overlap.bed")
+
+def rewrite_tract_file_with_failed_gap_removed():
+	with open("gap_overlap.bed", "r") as f:
+		overlaps = f.read().splitlines()
+
+	overlapped_tracts = set()
+	for item in overlaps:
+		tract = item.split("\t")[3]
+		overlapped_tracts.add(tract)
+
+	with open("ten_kb_tracts_pf.bed","r") as f2:
+		tracts = f2.read().splitlines()
+
+	with open("ten_kb_tracts_pfg.bed","a") as f3:
+		for tract in tracts:
+			if tract.split("\t")[3] in overlapped_tracts:
+				continue
+			else:
+				f3.write(tract + "\n")
+
 def main():
-	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
+	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
 
 	mosdepth_output_file_list = get_mosdepth_output_file_list()
 
@@ -73,7 +97,9 @@ def main():
 
 	write_failed_tracts()
 
-	rewrite_tract_file_with_failed_records_removed()
+	rewrite_tract_file_with_failed_coverage_removed()
+
+	intersect_tract_file_with_100kb_gaps()
 
 	print(coverage_dict)
 
