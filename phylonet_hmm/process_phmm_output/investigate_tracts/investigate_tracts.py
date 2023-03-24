@@ -1,6 +1,9 @@
 import os
 import csv 
 
+# Total bases introgressed
+#total_bases_introgress = 
+
 # Introgression tract file in bed format
 tract_file = "ten_kb_tracts.bed"
 
@@ -338,13 +341,36 @@ def create_gene_intersection_file():
 	
 	csv_file.close()
 
+def get_exon_overlap():
+	overlapping_bases = []
+
+	with open("exon_overlap.bed","r") as f:
+		inputs = f.read().splitlines()
+
+	for overlap in inputs:
+		overlapping_bases.append(int(overlap.split("\t")[14]))
+
+	return sum(overlapping_bases)
+
+def get_gene_overlap():
+	overlapping_bases = []
+
+	with open("gene_overlap.bed","r") as f:
+		inputs = f.read().splitlines()
+
+	for overlap in inputs:
+		overlapping_bases.append(int(overlap.split("\t")[14]))
+
+	return sum(overlapping_bases)
+
+
 def main():
 	create_gene_dictionary()
 	create_ECB_SPU_mapping_dict()
 	add_GO_KO_termns_to_gene_dictionary()
 	
 	intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
-	#intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
+	intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
 	
 	handle_duplicates_and_reverse_dictionary()
 
@@ -356,6 +382,15 @@ def main():
 	create_gene_intersection_file()
 	#create_exon_intersection_file()
 
+	overlapping_coding_bases = get_exon_overlap()
+	overlapping_genic_bases = get_gene_overlap()
+	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
+	#overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases 
+
+	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
+	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
+	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
+	#print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
+
 if __name__ == "__main__":
 	main()
-
