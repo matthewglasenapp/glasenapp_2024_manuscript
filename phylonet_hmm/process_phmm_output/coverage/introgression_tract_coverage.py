@@ -2,7 +2,10 @@ import os
 import gzip
 from joblib import Parallel, delayed
 
-regions_file = "/hb/scratch/mglasena/phylonet_hmm/ten_kb_tracts.bed"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/"
+
+original_tract_file = "/hb/scratch/mglasena/phylonet_hmm/ten_kb_tracts.bed"
+
 threads = 4
 
 bam_file_paths_list = [
@@ -16,7 +19,7 @@ coverage_dict = dict()
 
 def run_mosdepth(bam_file):
 	prefix = bam_file.split("/")[-1].split("_dedup")[0]
-	mosdepth = "mosdepth --by {} --no-per-base --thresholds 1,10,20 -t {} --fast-mode {} {}".format(regions_file, threads, prefix, bam_file)
+	mosdepth = "mosdepth --by {} --no-per-base --thresholds 1,10,20 -t {} --fast-mode {} {}".format(original_tract_file, threads, prefix, bam_file)
 	os.system(mosdepth)
 
 def get_mosdepth_output_file_list():
@@ -45,8 +48,23 @@ def write_failed_tracts():
 			if min(value) < 5:
 				f.write(key + "\n")
 
+def rewrite_tract_file_with_failed_records_removed():
+	with open(original_tract_file,"r") as f:
+		tracts = f.read().splitlines()
+
+	with open("failed_coverage_tracts","r") as f2:
+		failed_tracts = f2.read().splitlines()
+
+	with open("ten_kb_tracts_pf.bed","a") as f3:
+		for tract in tracts:
+			if tract.split("\t")[3] in failed_tracts:
+					print("Failed tract!")
+					continue
+			else:
+				f3.write(tract + "\n")
+
 def main():
-	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
+	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
 
 	mosdepth_output_file_list = get_mosdepth_output_file_list()
 
@@ -54,6 +72,10 @@ def main():
 		parse_mosdepth(file)
 
 	write_failed_tracts()
+
+	rewrite_tract_file_with_failed_records_removed()
+
+	print(coverage_dict)
 
 if __name__ == "__main__":
 	main()
