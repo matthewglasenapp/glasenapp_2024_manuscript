@@ -47,7 +47,7 @@ def parse_mosdepth(mosdepth_region_file):
 def write_failed_tracts():
 	with open("failed_coverage_tracts","a") as f:
 		for key,value in coverage_dict.items():
-			if min(value) < 5:
+			if min(value) < 5 or max(value) >= 100:
 				f.write(key + "\n")
 
 def rewrite_tract_file_with_failed_coverage_removed():
