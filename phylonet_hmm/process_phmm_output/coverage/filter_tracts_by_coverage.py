@@ -1,6 +1,7 @@
 import os
 import gzip
 from joblib import Parallel, delayed
+from statistics import mean
 
 root_dir = "/hb/scratch/mglasena/phylonet_hmm/"
 
@@ -44,11 +45,28 @@ def parse_mosdepth(mosdepth_region_file):
 		else:
 			coverage_dict[tract_name].append(coverage)
 
-def write_failed_tracts():
+def write_failed_tracts_and_report_mean_coverage_depth():
 	with open("failed_coverage_tracts","a") as f:
 		for key,value in coverage_dict.items():
 			if min(value) < 5 or max(value) >= 100:
 				f.write(key + "\n")
+				del coverage_dict[key]
+
+	Sfra = []
+	Sdro = []
+	Spal = []
+	Hpul = []
+
+	for key,value in coverage_dict.items():
+		Sdro.append(value[0])
+		Sfra.append(value[1])
+		Spal.append(value[2])
+		Hpul.append(value[3])
+
+	print("Sfra mean coverage of introgressed tracts: {}".format(mean(Sfra)))
+	print("Sdro mean coverage of introgressed tracts: {}".format(mean(Sdro)))
+	print("Spal mean coverage of introgressed tracts: {}".format(mean(Spal)))
+	print("Hpul mean coverage of introgressed tracts: {}".format(mean(Hpul)))
 
 def rewrite_tract_file_with_failed_coverage_removed():
 	with open(original_tract_file,"r") as f:
@@ -90,18 +108,21 @@ def rewrite_tract_file_with_failed_gap_removed():
 def main():
 	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
 
-	mosdepth_output_file_list = get_mosdepth_output_file_list()
+	mosdepth_output_file_list = sorted(get_mosdepth_output_file_list())
 
-	for file in mosdepth_output_file_list:
-		parse_mosdepth(file)
+	print(mosdepth_output_file_list)
 
-	write_failed_tracts()
 
-	rewrite_tract_file_with_failed_coverage_removed()
+	#for file in mosdepth_output_file_list:
+		#parse_mosdepth(file)
 
-	intersect_tract_file_with_100kb_gaps()
+	#write_failed_tracts_and_report_mean_coverage_depth()
 
-	print(coverage_dict)
+	#rewrite_tract_file_with_failed_coverage_removed()
+
+	#intersect_tract_file_with_100kb_gaps()
+
+	#print(coverage_dict)
 
 if __name__ == "__main__":
 	main()
