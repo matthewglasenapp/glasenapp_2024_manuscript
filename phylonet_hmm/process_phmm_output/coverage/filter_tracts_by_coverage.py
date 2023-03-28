@@ -106,23 +106,23 @@ def rewrite_tract_file_with_failed_gap_removed():
 				f3.write(tract + "\n")
 
 def main():
-	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
+	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
 
 	mosdepth_output_file_list = sorted(get_mosdepth_output_file_list())
 
 	print(mosdepth_output_file_list)
 
 
-	#for file in mosdepth_output_file_list:
-		#parse_mosdepth(file)
+	for file in mosdepth_output_file_list:
+		parse_mosdepth(file)
 
-	#write_failed_tracts_and_report_mean_coverage_depth()
+	write_failed_tracts_and_report_mean_coverage_depth()
 
-	#rewrite_tract_file_with_failed_coverage_removed()
+	rewrite_tract_file_with_failed_coverage_removed()
 
-	#intersect_tract_file_with_100kb_gaps()
+	intersect_tract_file_with_100kb_gaps()
 
-	#print(coverage_dict)
+	print(coverage_dict)
 
 if __name__ == "__main__":
 	main()
