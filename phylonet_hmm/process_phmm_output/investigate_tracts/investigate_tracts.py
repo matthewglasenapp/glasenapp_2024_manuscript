@@ -2,7 +2,7 @@ import os
 import csv 
 
 # Total bases introgressed
-#total_bases_introgress = 
+total_bases_introgressed = 10869708
 
 # Introgression tract file in bed format
 tract_file = "ten_kb_tracts.bed"
@@ -407,12 +407,15 @@ def main():
 	overlapping_coding_bases = get_exon_overlap()
 	overlapping_genic_bases = get_gene_overlap()
 	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
-	#overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases 
+	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
 
 	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
 	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
 	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
-	#print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
+	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
+
+	print("Total introgressed bases: {}".format(total_bases_introgressed))
+	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
 
 if __name__ == "__main__":
 	main()
