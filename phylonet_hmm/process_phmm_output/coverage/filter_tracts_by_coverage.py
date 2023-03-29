@@ -20,6 +20,9 @@ bam_file_paths_list = [
 
 coverage_dict = dict()
 
+def intersect_tract_file_with_100kb_gaps():
+	os.system("bedtools intersect -a " + original_tract_file + " -b " + gaps_file + " -wo > gap_overlap.bed")
+
 def run_mosdepth(bam_file):
 	prefix = bam_file.split("/")[-1].split("_dedup")[0]
 	mosdepth = "mosdepth --by {} --no-per-base --thresholds 1,10,20 -t {} --fast-mode {} {}".format(original_tract_file, threads, prefix, bam_file)
@@ -32,7 +35,9 @@ def get_mosdepth_output_file_list():
 	os.system("rm mosdepth_output_files")
 	return mosdepth_output_file_list
 
+# Population coverage_dict in the format of {tract_name: coverage_species1, coverage_species2, coverage_species3, coverage_species4}
 def parse_mosdepth(mosdepth_region_file):
+	print(mosdepth_region_file)
 	with gzip.open(mosdepth_region_file,"rt") as f:
 		inputs = f.read().splitlines()
 	
@@ -45,15 +50,16 @@ def parse_mosdepth(mosdepth_region_file):
 		else:
 			coverage_dict[tract_name].append(coverage)
 
+# Identify tracts where one sample has lower than 5x depth or > 100x depth and remove them from coverage_dict
 def write_failed_tracts_and_report_mean_coverage_depth():
 	with open("failed_coverage_tracts","a") as f:
-		for key,value in coverage_dict.items():
-			if min(value) < 5 or max(value) >= 100:
+		for key in list(coverage_dict):
+			if min(coverage_dict[key]) < 5 or max(coverage_dict[key]) >= 100:
 				f.write(key + "\n")
 				del coverage_dict[key]
 
-	Sfra = []
 	Sdro = []
+	Sfra = []
 	Spal = []
 	Hpul = []
 
@@ -63,30 +69,12 @@ def write_failed_tracts_and_report_mean_coverage_depth():
 		Spal.append(value[2])
 		Hpul.append(value[3])
 
-	print("Sfra mean coverage of introgressed tracts: {}".format(mean(Sfra)))
 	print("Sdro mean coverage of introgressed tracts: {}".format(mean(Sdro)))
+	print("Sfra mean coverage of introgressed tracts: {}".format(mean(Sfra)))
 	print("Spal mean coverage of introgressed tracts: {}".format(mean(Spal)))
 	print("Hpul mean coverage of introgressed tracts: {}".format(mean(Hpul)))
 
-def rewrite_tract_file_with_failed_coverage_removed():
-	with open(original_tract_file,"r") as f:
-		tracts = f.read().splitlines()
-
-	with open("failed_coverage_tracts","r") as f2:
-		failed_tracts = f2.read().splitlines()
-
-	with open("ten_kb_tracts_pf.bed","a") as f3:
-		for tract in tracts:
-			if tract.split("\t")[3] in failed_tracts:
-					print("Failed tract!")
-					continue
-			else:
-				f3.write(tract + "\n")
-
-def intersect_tract_file_with_100kb_gaps():
-	os.system("bedtools intersect -a " + original_tract_file + " -b " + gaps_file + " -wo > gap_overlap.bed")
-
-def rewrite_tract_file_with_failed_gap_removed():
+def rewrite_tract_file_with_failed_coverage_gap_removed():
 	with open("gap_overlap.bed", "r") as f:
 		overlaps = f.read().splitlines()
 
@@ -95,34 +83,32 @@ def rewrite_tract_file_with_failed_gap_removed():
 		tract = item.split("\t")[3]
 		overlapped_tracts.add(tract)
 
-	with open("ten_kb_tracts_pf.bed","r") as f2:
+	with open(original_tract_file,"r") as f2:
 		tracts = f2.read().splitlines()
 
-	with open("ten_kb_tracts_pfg.bed","a") as f3:
+	with open("failed_coverage_tracts","r") as f3:
+		failed_tracts = f3.read().splitlines()
+
+	with open("ten_kb_tracts_pf.bed","a") as f4:
 		for tract in tracts:
-			if tract.split("\t")[3] in overlapped_tracts:
-				continue
+			if tract.split("\t")[3] in failed_tracts or tract.split("\t")[3] in overlapped_tracts:
+					continue
 			else:
-				f3.write(tract + "\n")
+				f4.write(tract + "\n")
 
 def main():
-	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
+	intersect_tract_file_with_100kb_gaps()
+
+	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)(bam_file) for bam_file in bam_file_paths_list)
 
 	mosdepth_output_file_list = sorted(get_mosdepth_output_file_list())
-
-	print(mosdepth_output_file_list)
-
 
 	for file in mosdepth_output_file_list:
 		parse_mosdepth(file)
 
 	write_failed_tracts_and_report_mean_coverage_depth()
 
-	rewrite_tract_file_with_failed_coverage_removed()
-
-	intersect_tract_file_with_100kb_gaps()
-
-	print(coverage_dict)
+	rewrite_tract_file_with_failed_coverage_gap_removed()
 
 if __name__ == "__main__":
 	main()
