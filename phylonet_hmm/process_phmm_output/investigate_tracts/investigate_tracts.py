@@ -278,7 +278,7 @@ def handle_duplicates_and_reverse_dictionary():
 				#print(key,value)
 
 def write_gene_dictionary_to_csv():
-	csv_file = open("test.csv","w")
+	csv_file = open("all_genes.csv","w")
 	writer = csv.writer(csv_file)	
 	header = ["symbol", "echinobase_gene_id", "name", "synonyms", "curation status", "info", "ECB GO Terms", "ECB KO Terms", "Tu et al. GO Terms"]
 	writer.writerow(header)
