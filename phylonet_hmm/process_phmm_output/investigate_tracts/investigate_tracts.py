@@ -7,6 +7,9 @@ import csv
 # Introgression tract file in bed format
 tract_file = "ten_kb_tracts.bed"
 
+# Coverage depth of each tract for each species 
+tract_coverage_file = "tract_coverage.tsv"
+
 # Bed file of all S. purpuratus protein coding genes 
 gene_list_file = "protein_coding_genes.bed"
 
@@ -41,6 +44,9 @@ LOC_gene_dictionary = dict()
 
 # Dictionary for genes overlapping with an introgression tract {LOC_ID: data}
 gene_intersection_dict = dict()
+
+# Dictionary of the average coverage depths of each introgression tract for each species
+tract_coverage_depth_dict = dict()
 
 # Create gene dictionary from GenePageGeneralInfo_AllGenes.txt
 def create_gene_dictionary():
@@ -282,6 +288,16 @@ def write_gene_dictionary_to_csv():
 		data = [key, value[0], value[1], "|".join(value[2]), value[3], value[4], value[5], value[6], value[7]]
 		writer.writerow(data)
 
+def make_coverage_depths_dict():
+	coverage_depths = open(tract_coverage_file,"r").read().splitlines()
+	for record in coverage_depths:
+		tract_name = record.split("\t")[0].replace("_","-")
+		dro = record.split("\t")[1]
+		fra = record.split("\t")[2]
+		pal = record.split("\t")[3]
+		pul = record.split("\t")[4]
+		tract_coverage_depth_dict[tract_name] = [dro,fra,pal,pul]
+
 def create_gene_intersection_dict(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
 
@@ -290,6 +306,10 @@ def create_gene_intersection_dict(overlap_file):
 		tract_id = record[3].replace("_","-")
 		#LOC ID
 		gene_id = record[7].split("-",1)[1]
+		dro_cov = tract_coverage_depth_dict[tract_id][0]
+		fra_cov = tract_coverage_depth_dict[tract_id][1]
+		pal_cov = tract_coverage_depth_dict[tract_id][2]
+		pul_cov = tract_coverage_depth_dict[tract_id][3]
 
 		gene_name = "missing"
 		
@@ -327,16 +347,16 @@ def create_gene_intersection_dict(overlap_file):
 		percent_introgressed = (int(bp_overlap) / gene_length)*100
 
 		# Populate gene_intersection_dict with all of the assigned variables
-		gene_intersection_dict[gene_id] = [tract_id, gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
+		gene_intersection_dict[gene_id] = [tract_id, dro_cov, fra_cov, pal_cov, pul_cov, gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
 
 def create_gene_intersection_file():
 	csv_file = open("intersect.csv","w")
 	writer = csv.writer(csv_file)	
-	header = ["introgression_tract", "Overlapping Gene", "Gene Name", "Gene Length", "Overlapping Bases", "Percent Introgressed", "Gene Coordinates", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Gene Info", "Echinobase GO", "Echinobase KO", "Tu GO"]
+	header = ["introgression_tract", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Gene", "Gene Name", "Gene Length", "Overlapping Bases", "Percent Introgressed", "Gene Coordinates", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Gene Info", "Echinobase GO", "Echinobase KO", "Tu GO"]
 	writer.writerow(header)
 	
 	for key,value in gene_intersection_dict.items():
-		data = [value[0], key, value[1], value[2], value[3], value[4], value[5], value[6], "|".join(value[7]), value[8], value[9], value[10], value[11], value[12]]
+		data = [value[0], value[1], value[2], value[3], value[4], key, value[5], value[6], value[7], value[8], value[9], value[10], "|".join(value[11]), value[12], value[13], value[14], value[15], value[16]]
 		writer.writerow(data)
 	
 	csv_file.close()
@@ -375,6 +395,8 @@ def main():
 	handle_duplicates_and_reverse_dictionary()
 
 	write_gene_dictionary_to_csv()
+
+	make_coverage_depths_dict()
 
 	create_gene_intersection_dict("gene_overlap.bed")
 	#create_gene_intersection_dict("exon_overlap.bed")
