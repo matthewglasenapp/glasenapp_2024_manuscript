@@ -19,10 +19,10 @@ psg_list = [n for n in psg_list[4:1012]]
 
 for gene in psg_list:
 	for record in introgressed_genes_list:
-		if gene[0] in record[7]:
+		if gene[0] in record or gene[1] in record or gene[2] in record:
 			print(gene)
-			print(record[1])
-			print(record[2])
+			print(record[5])
+			print(record[6])
 			print(record)
 			print("Positively Selected Gene #{}".format(psg_list.index(gene)))
 			print(" ")
