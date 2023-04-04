@@ -306,6 +306,7 @@ def create_gene_intersection_dict(overlap_file):
 		tract_id = record[3].replace("_","-")
 		#LOC ID
 		gene_id = record[7].split("-",1)[1]
+
 		dro_cov = tract_coverage_depth_dict[tract_id][0]
 		fra_cov = tract_coverage_depth_dict[tract_id][1]
 		pal_cov = tract_coverage_depth_dict[tract_id][2]
