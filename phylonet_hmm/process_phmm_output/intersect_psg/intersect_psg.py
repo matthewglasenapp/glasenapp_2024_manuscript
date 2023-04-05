@@ -20,9 +20,6 @@ def find_psg_overlap():
 
 	for gene in psg_list:
 		for record in introgressed_genes_list:
-			print(gene[0])
-			print(gene[1])
-			print(record)
 			if gene[0] in record or gene[1] in record or gene[2] in record:
 				print(gene)
 				print(record[5])

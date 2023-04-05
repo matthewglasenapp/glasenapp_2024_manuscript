@@ -2,7 +2,8 @@ import os
 import csv 
 
 # Total bases introgressed
-total_bases_introgressed = 10869708
+#total_bases_introgressed = 10869708
+total_bases_introgressed = 80697074
 
 # Introgression tract file in bed format
 tract_file = "ten_kb_tracts.bed"
