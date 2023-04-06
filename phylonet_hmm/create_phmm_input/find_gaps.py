@@ -27,6 +27,13 @@ def find_gaps(scaffold_coordinate_file):
 	
 	i = 0
 	
+	first_base = 1
+	first_coordinate = coordinates[0]
+	gap_size = int(first_coordinate) - first_base
+	if gap_size >= gap_threshold:
+		gap = "{}:{}-{}".format(scaffold_name, first_base, first_coordinate)
+		gap_lst.append(gap)
+
 	while i < len(coordinates) - 1:
 		position_1 = coordinates[i]
 		position_2 = coordinates[i+1]
@@ -34,7 +41,7 @@ def find_gaps(scaffold_coordinate_file):
 		if gap_size >= gap_threshold:
 			gap = "{}:{}-{}".format(scaffold_name, position_1, position_2)
 			gap_lst.append(gap)
-		i =i+1
+		i = i+1
 
 	for item in gap_lst:
 		gap_dict[scaffold_name].append(item)
