@@ -280,12 +280,12 @@ def write_tract_dist_to_csv(file_name, tract_dist):
 
 # Intersect introgression tract file with bed file containing positions of 100kb gaps 
 def intersect_tract_file_with_100kb_gaps():
-	os.system("bedtools intersect -a ten_kb_tracts.bed -b " + gaps_file + " -wo > gap_overlap.bed")
+	os.system("bedtools intersect -a tracts.bed -b " + gaps_file + " -wo > gap_overlap.bed")
 
 # Use mosdepth to get the mean coverage depth of each introgression tract for each species 
 def run_mosdepth(bam_file):
 	prefix = bam_file.split("/")[-1].split("_dedup")[0]
-	mosdepth = "mosdepth --by ten_kb_tracts.bed --no-per-base --thresholds 1,10,20 -t {} --fast-mode {} {}".format(threads, prefix, bam_file)
+	mosdepth = "mosdepth --by tracts.bed --no-per-base --thresholds 1,10,20 -t {} --fast-mode {} {}".format(threads, prefix, bam_file)
 	os.system(mosdepth)
 
 # Get list of mosdepth output file paths in alphabetic order 
@@ -330,10 +330,10 @@ def filter_coverage_dict():
 		else:
 			filtered_coverage_dict[key] = coverage_dict[key]
 
-	with open("ten_kb_tracts.bed","r") as f2:
+	with open("tracts.bed","r") as f2:
 		tracts = f2.read().splitlines()
 
-	with open("ten_kb_tracts_pf.bed","a") as f3:
+	with open("tracts_pf.bed","a") as f3:
 		for tract in tracts:
 			if tract.split("\t")[3] in filtered_coverage_dict:
 				f3.write(tract + "\n")
