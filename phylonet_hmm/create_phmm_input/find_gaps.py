@@ -1,6 +1,6 @@
 import os
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_all_sites"
 
 gap_dict = dict()
 
@@ -26,7 +26,6 @@ def find_gaps(scaffold_coordinate_file):
 	gap_len_lst = []
 	
 	i = 0
-	
 	first_base = 1
 	first_coordinate = coordinates[0]
 	gap_size = int(first_coordinate) - first_base
@@ -35,7 +34,7 @@ def find_gaps(scaffold_coordinate_file):
 		gap_lst.append(gap)
 
 	while i < len(coordinates) - 1:
-		position_1 = coordinates[i]
+		position_1 = str(int(coordinates[i]) - 1)
 		position_2 = coordinates[i+1]
 		gap_size = int(position_2) - int(position_1)
 		if gap_size >= gap_threshold:
@@ -56,7 +55,7 @@ def get_gap_stats():
 	Mb_gap_lst = [item for item in gap_lst if item >= 1000000]
 
 	print("There were {} gaps greater than 100kb in length".format(len(gap_lst)))
-	print("The largest gap was {}kb.".format(max(gap_lst)))
+	print("The largest gap was {}.".format(max(gap_lst)))
 	print("There were {} gaps greater than 1Mb in length".format(len(Mb_gap_lst)))
 
 	with open("gaps_by_scaffold.tsv","a") as f:
