@@ -138,7 +138,7 @@ def write_tracts_to_bed(file_name, tract_list):
 			start = str(tract).split(":")[1].split("'")[0]
 			stop = str(tract[1]).split(":")[1].split("'")[0]
 			variable_sites = str(tract[3])
-			bed_file.write(scaffold + "\t" + start + "\t" + stop + "\t" + scaffold + ":" + start + "_" + stop)
+			bed_file.write(scaffold + "\t" + start + "\t" + stop + "\t" + scaffold + ":" + start + "_" + stop + "\n")
 
 def write_sites_by_tract(tract_list):
 	with open("SNV_sites_by_tract.tsv","w") as f:
