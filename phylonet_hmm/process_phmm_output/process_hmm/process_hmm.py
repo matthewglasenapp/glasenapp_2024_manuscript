@@ -334,7 +334,28 @@ def write_scaffold_dict_to_csv():
 		writer.writerow(data)
 	csv_file.close()
 
+def write_tract_length_dist():
+	tracts = open("tracts_pf.bed").read().splitlines()
+	tract_length_dist_all = [int(tract.split("\t")[2]) - int(tract.split("\t")[1]) for tract in tracts]
+	tract_length_dist_10kb = [int(tract.split("\t")[2]) - int(tract.split("\t")[1]) for tract in tracts if int(tract.split("\t")[2]) - int(tract.split("\t")[1]) >= 10000]
+	
+	csv_file_all_tracts = open("tract_length_dist","w")
+	writer = csv.writer(csv_file_all_tracts)
+	writer.writerow(tract_length_dist_all)
+	csv_file_all_tracts.close()
 
+	csv_file_ten_kb_tracts = open("tract_length_dist_10kb","w")
+	writer = csv.writer(csv_file_ten_kb_tracts)
+	writer.writerow(tract_length_dist_10kb)
+	csv_file_ten_kb_tracts.close()
+
+def write_ten_kb_tracts():
+	tracts = open("tracts_pf.bed").read().splitlines()
+	
+	with open("ten_kb_tracts.bed", "w") as f2:
+		for tract in tracts:
+			if int(tract.split("\t")[2]) - int(tract.split("\t")[1]) >= 10000:
+				f2.write(tract + "\n")
 def main():
 	# Get a list of lists of [phylonet_hmm output file, scaffold coordinate file]
 	files_by_scaffold_list = get_file_paths_pairs_list()
@@ -369,6 +390,9 @@ def main():
 	get_stats_on_tracts("tracts_pf.bed")
 	organize_tracts_by_scaffold("tracts_pf.bed")
 	write_scaffold_dict_to_csv()
+
+	write_tract_length_dist()
+	write_ten_kb_tracts()
 
 if __name__ == "__main__":
         main()
