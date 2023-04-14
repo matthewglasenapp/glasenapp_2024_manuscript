@@ -339,12 +339,12 @@ def write_tract_length_dist():
 	tract_length_dist_all = [int(tract.split("\t")[2]) - int(tract.split("\t")[1]) for tract in tracts]
 	tract_length_dist_10kb = [int(tract.split("\t")[2]) - int(tract.split("\t")[1]) for tract in tracts if int(tract.split("\t")[2]) - int(tract.split("\t")[1]) >= 10000]
 	
-	csv_file_all_tracts = open("tract_length_dist","w")
+	csv_file_all_tracts = open("tract_length_dist.csv","w")
 	writer = csv.writer(csv_file_all_tracts)
 	writer.writerow(tract_length_dist_all)
 	csv_file_all_tracts.close()
 
-	csv_file_ten_kb_tracts = open("tract_length_dist_10kb","w")
+	csv_file_ten_kb_tracts = open("tract_length_dist_10kb.csv","w")
 	writer = csv.writer(csv_file_ten_kb_tracts)
 	writer.writerow(tract_length_dist_10kb)
 	csv_file_ten_kb_tracts.close()
