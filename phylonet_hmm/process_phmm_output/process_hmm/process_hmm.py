@@ -132,6 +132,9 @@ def find_tracts_scaffold(json_file_path, coordinate_file_path):
 
 # Write tract_list in format chr start stop
 def write_tracts_to_bed(file_name, tract_list):
+	total_number_tracts = len(tract_list)
+	print("{} introgression tracts found and written to tracts.bed".format(total_number_tracts))
+	print("\n")
 	with open(file_name,"w") as bed_file:
 		for tract in tract_list:
 			scaffold = str(tract).split(":")[0].split("'")[1]
@@ -156,6 +159,9 @@ def intersect_tract_file_with_100kb_gaps(tract_file):
 # Tracts overlapping with 100kb gaps
 def filter_tracts_for_gaps(tract_file):
 	gap_overlaps = open("gap_overlap.bed", "r").read().splitlines()
+	number_gap_overlapped_tracts = len(gap_overlaps)
+	print("{} introgression tract(s) overlapped with a 100 kb gap".format(number_gap_overlapped_tracts))
+	print("\n")
 
 	gap_overlapped_tracts = dict()
 	for item in gap_overlaps:
@@ -164,15 +170,23 @@ def filter_tracts_for_gaps(tract_file):
 		tract_stop = item.split("\t")[2]
 		gap_start = item.split("\t")[5]
 		gap_stop = item.split("\t")[6]
-		gap_overlapped_tracts[tract] = [tract_start, tract_stop, gap_start, gap_stop]
+		gap_name = item.split("\t")[7]
+		gap_overlapped_tracts[tract] = [tract_start, tract_stop, gap_start, gap_stop, gap_name]
 		
 	tracts = open(tract_file,"r").read().splitlines()
+	
+	tracts_written_to_bed = 0 
+	tracts_adjusted = 0
+	tracts_filtered = 0
+	tracts_added = 0
 	with open("tracts_gap_filter.bed","w") as f2:
 		for line in tracts:
 			tract = line.split("\t")[3]
 			if tract not in gap_overlapped_tracts:
 				f2.write(line + "\n")
+				tracts_written_to_bed += 1
 			else:
+				print("The tract {} overlapped with the 100 kb gap {}".format(tract, gap_overlapped_tracts[tract][4]))
 				scaffold = tract.split(":")[0]
 				tract_start = gap_overlapped_tracts[tract][0]
 				tract_stop = gap_overlapped_tracts[tract][1]
@@ -181,27 +195,60 @@ def filter_tracts_for_gaps(tract_file):
 
 				new_tract = False
 				new_tract_2 = False
-				if gap_start > tract_start and gap_start < tract_stop:
+
+				if gap_start > tract_start and gap_stop < tract_stop:
 					new_tract = [tract_start, gap_start]
 					new_tract_2 = [gap_stop, tract_stop]
+					print("The gap {} splits the tract {} in two.".format(gap_overlapped_tracts[tract][4], tract))
+					print("Splitting tract {} into two tracts to remove the gap {}.".format(tract, gap_overlapped_tracts[tract][4]))
+					print("The new tracts are {} and {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1], scaffold + ":" + new_tract_2[0] + "_" + new_tract_2[1]))
+					print("\n")
+					tracts_adjusted += 1
+					tracts_added += 1
 
 				elif gap_start > tract_start and gap_stop >= tract_stop:
 					new_tract = [tract_start, gap_start]
+					print("The gap {} overlaps with the end of the tract {}".format(gap_overlapped_tracts[tract][4], tract))
+					print("Trimming the end of tract {} from {} to {}".format(tract, tract_stop, gap_start))
+					print("The new tract is {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1]))
+					print("\n")
+					tracts_adjusted += 1
 
-				elif gap_start <= tract_start and gap_stop > tract_stop:
+				elif gap_start <= tract_start and gap_stop < tract_stop:
 					new_tract = [gap_stop, tract_stop]
+					print("The gap {} overlaps with the beginning of the tract {}".format(gap_overlapped_tracts[tract][4], tract))
+					print("Trimming the beggining of tract{} from {} to {}".format(tract, tract_start, gap_stop))
+					print("The new tract is {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1]))
+					print("\n")
+					tracts_adjusted += 1
 
 				elif gap_start < tract_start and gap_stop > tract_stop:
-					continue
+					print("The gap {} spans the entire tract {}".format(tract, gap_overlapped_tracts[tract][4]))
+					print("Filtering {} from tracts".format(tract))
+					print("\n")
+					tracts_filtered += 1
 
 				elif gap_start == tract_start and gap_stop == tract_stop:
-					continue
+					print("The gap {} spans the entire tract {}".format(tract, gap_overlapped_tracts[tract][4]))
+					print("Filtering {} from tracts".format(tract))
+					print("\n")
+					tracts_filtered += 1
 
 				if new_tract:
 					f2.write(scaffold + "\t" + new_tract[0] + "\t" + new_tract[1] + "\t" + scaffold + ":" + new_tract[0] + "_" + new_tract[1] + "\n")
+					tracts_written_to_bed += 1
 
 				if new_tract_2:
 					f2.write(scaffold + "\t" + new_tract_2[0] + "\t" + new_tract_2[1] + "\t" + scaffold + ":" + new_tract_2[0] + "_" + new_tract_2[1] + "\n")
+					tracts_written_to_bed += 1
+
+	print("Tracts adjusted: {}".format(tracts_adjusted))
+	print("Tracts filtered: {}".format(tracts_filtered))
+	print("Tracts added: {}".format(tracts_added))
+	print("Net change in tracts: {}".format(tracts_added - tracts_filtered))
+	print("\n")
+	print("{} tracts written to tracts_gap_filter.bed".format(tracts_written_to_bed))
+	print("\n")
 
 # Use mosdepth to get the mean coverage depth of each introgression tract for each species 
 def run_mosdepth(tract_file, bam_file):
@@ -233,10 +280,16 @@ def parse_mosdepth(mosdepth_region_file):
 
 # Filter coverage_dict for tracts where one sample has lower than 5x mean depth or higher than 100x mean depth
 def filter_tracts_by_depth():
+	tracts_filtered = 0
+	tracts_pass_filter = 0 
 	tracts = open("tracts_gap_filter.bed","r").read().splitlines()
 
 	for key in list(coverage_dict):
 		if min(coverage_dict[key]) < 5 or max(coverage_dict[key]) >= 100:
+			print("Tract {} filtered".format(key))
+			print(coverage_dict[key])
+			print("\n")
+			tracts_filtered += 1
 			continue
 		else:
 			filtered_coverage_dict[key] = coverage_dict[key]
@@ -244,6 +297,7 @@ def filter_tracts_by_depth():
 	with open("tracts_pf.bed","w") as f3:
 		for tract in tracts:
 			if tract.split("\t")[3] in filtered_coverage_dict:
+				tracts_pass_filter += 1
 				f3.write(tract + "\n")
 
 	with open("tract_coverage.tsv","w") as f4:
@@ -258,10 +312,16 @@ def filter_tracts_by_depth():
 		Spal.append(value[2])
 		Hpul.append(value[3])
 
+	print("{} introgression tracts were filtered due to high or low coverage depth".format(tracts_filtered))
+	print("{} introgression tracts passed coverage depth filters and were written to tracts_pf.bed".format(tracts_pass_filter))
+	print("Tracts passing filter and their coverage depth metrics were written to tract_coverage.tsv.")
+	print("\n")
+
 	print("Sdro mean coverage of introgressed tracts: {}".format(mean(Sdro)))
 	print("Sfra mean coverage of introgressed tracts: {}".format(mean(Sfra)))
 	print("Spal mean coverage of introgressed tracts: {}".format(mean(Spal)))
 	print("Hpul mean coverage of introgressed tracts: {}".format(mean(Hpul)))
+	print("\n")
 
 def get_stats_on_tracts(tract_file):
 	tracts = open(tract_file,"r").read().splitlines()
@@ -275,7 +335,7 @@ def get_stats_on_tracts(tract_file):
 
 	# Combined length of all introgression tracts 
 	total_length_introgression_tracts = sum(length_dist)
-	print("Combined length of the 10kb introgression tracts: {}".format(total_length_introgression_tracts))
+	print("Combined length of the introgression tracts: {}".format(total_length_introgression_tracts))
 
 	# Calculate mean, median and stdev of tract lengths 
 	print("Mean introgression tract length: {}".format(statistics.mean(length_dist)))
@@ -301,24 +361,22 @@ def organize_tracts_by_scaffold(tract_file):
 	for scaffold in scaffold_list:
 		scaffold, length = scaffold.split("\t")
 		scaffold_dict[scaffold] = [int(length)]
-
-	for scaffold in scaffold_list:
-		scaffold = scaffold.split("\t")[0]
 		first_coordinate = int(open(phylonet_hmm_alignment_dir + scaffold + "/" + "coordinates","r").read().splitlines()[0].split(":")[1]) - 1
+		# Do I need to subtrat by 1 here?
 		last_coordinate = int(open(phylonet_hmm_alignment_dir + scaffold + "/" + "coordinates","r").read().splitlines()[-1].split(":")[1])
 		total_scaffold_alignment_length = last_coordinate - first_coordinate
 		scaffold_dict[scaffold].append(total_scaffold_alignment_length)
 
-	for scaffold_alignment_file in os.listdir(all_sites_dir):
-		number_sites_all_sites = len(open(all_sites_dir + scaffold_alignment_file + "/" + "coordinates","r").read().splitlines())
-		scaffold_dict[scaffold_alignment_file].append(number_sites_all_sites)
+	for scaffold in os.listdir(all_sites_dir):
+		number_sites_all_sites = len(open(all_sites_dir + scaffold + "/" + "coordinates","r").read().splitlines())
+		scaffold_dict[scaffold].append(number_sites_all_sites)
 
-	for probability_file in os.listdir(probability_file_dir):
-		scaffold = probability_file.split(".json")[0]
-		number_sites = len(json.load(open(probability_file_dir + probability_file,"r")))
-		number_sites_above_threshold = len([probability for probability in json.load(open(probability_file_dir + probability_file,"r")) if probability >= 0.9])
-		scaffold_dict[scaffold].append(number_sites)
-		scaffold_dict[scaffold].append(number_sites_above_threshold)
+	for scaffold in os.listdir(probability_file_dir):
+		scaffold_name = scaffold.split(".json")[0]
+		number_sites = len(json.load(open(probability_file_dir + scaffold,"r")))
+		number_sites_above_threshold = len([probability for probability in json.load(open(probability_file_dir + scaffold,"r")) if probability >= 0.9])
+		scaffold_dict[scaffold_name].append(number_sites)
+		scaffold_dict[scaffold_name].append(number_sites_above_threshold)
 	
 	# Initiate counters for number tracts and number ten_kb_tracts
 	for scaffold in scaffold_dict:
