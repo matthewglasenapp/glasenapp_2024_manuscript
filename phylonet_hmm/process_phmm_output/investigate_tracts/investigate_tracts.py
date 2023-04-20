@@ -2,11 +2,15 @@ import os
 import csv 
 
 # Total bases introgressed
-#total_bases_introgressed = 4492491
-total_bases_introgressed = 10869708
+#prob_90
+total_bases_introgressed = 7903066
+#prob_80
+#total_bases_introgressed = 35708711
+#prob_75
+#total_bases_introgressed = 50712387
 
 # Introgression tract file in bed format
-tract_file = "ten_kb_tracts.bed"
+tract_file = "tracts.bed"
 
 # Coverage depth of each tract for each species 
 tract_coverage_file = "tract_coverage.tsv"
@@ -363,6 +367,15 @@ def create_gene_intersection_file():
 	
 	csv_file.close()
 
+def write_introgressed_genes_to_bed():
+	with open("introgressed_genes.bed","w") as f:
+		for key,value in gene_intersection_dict.items():
+			if value[8] == 100:
+				scaffold = value[9].split(":")[0]
+				start = value[9].split(":")[1].split("-")[0]
+				stop = value[9].split(":")[1].split("-")[1]
+				f.write(scaffold + "\t" + start + "\t" + stop + "\t" + key + "\t" + value[5] + "\n")
+
 def get_exon_overlap():
 	overlapping_bases = []
 
@@ -418,6 +431,8 @@ def main():
 
 	print("Total introgressed bases: {}".format(total_bases_introgressed))
 	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
+
+	write_introgressed_genes_to_bed()
 
 if __name__ == "__main__":
 	main()

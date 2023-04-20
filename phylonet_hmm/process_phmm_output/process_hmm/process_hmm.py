@@ -278,6 +278,12 @@ def parse_mosdepth(mosdepth_region_file):
 		else:
 			coverage_dict[tract_name].append(coverage)
 
+def clean_up_mosdepth_output():
+	os.system("rm *.dist.txt")
+	os.system("rm *.summary.txt")
+	os.system("rm *.gz")
+	os.system("rm *.csi")
+
 # Filter coverage_dict for tracts where one sample has lower than 5x mean depth or higher than 100x mean depth
 def filter_tracts_by_depth():
 	tracts_filtered = 0
@@ -322,6 +328,7 @@ def filter_tracts_by_depth():
 	print("Spal mean coverage of introgressed tracts: {}".format(mean(Spal)))
 	print("Hpul mean coverage of introgressed tracts: {}".format(mean(Hpul)))
 	print("\n")
+
 
 def get_stats_on_tracts(tract_file):
 	tracts = open(tract_file,"r").read().splitlines()
@@ -453,7 +460,11 @@ def main():
 	for file in mosdepth_output_file_list:
 		parse_mosdepth(file)
 
+	clean_up_mosdepth_output()
+
 	filter_tracts_by_depth()
+
+	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("tracts_pf.bed", bam_file) for bam_file in bam_file_paths_list)
 
 	get_stats_on_tracts("tracts_pf.bed")
 	organize_tracts_by_scaffold("tracts_pf.bed")
