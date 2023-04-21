@@ -13,6 +13,9 @@ import gzip
 # Number of threads to use for coverage depth analysis with mosdepth
 threads = 4
 
+# Directory for output
+output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/"
+
 # Directory where vcf2phylip was run
 original_vcf2phylip_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
 
@@ -32,7 +35,7 @@ phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffo
 scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.tsv"
 
 # File containing 100 kb gaps in the nexus alignments 
-gaps_file = "/hb/scratch/mglasena/phylonet_hmm/100kb_gaps.bed"
+gaps_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/100kb_gaps.bed"
 
 # Reference alignment BAM files for assessing coverage dpeth
 bam_file_paths_list = [
@@ -60,7 +63,7 @@ posterior_probability_threshold = 90
 def get_file_paths_pairs_list():
 	
 	# Create file of paths of global coordinate files for each scaffold. Save this file as "coorindate_file list" 
-	os.system('find ' + original_vcf2phylip_dir + ' -name "coordinates" -type f > coordinate_file_list')
+	os.system('find ' + phylonet_hmm_alignment_dir + ' -name "coordinates" -type f > coordinate_file_list')
 		
 	# Create file of paths of rawOutput.json files for each scaffold produced by phylonet_hmm. We only want the rawOutput.json file from the "bestrun" folder. Save this file as output_file_list in hmm directory
 	os.system('find ' + probability_file_dir + ' -type f > output_file_list')
@@ -95,12 +98,10 @@ def find_tracts_scaffold(json_file_path, coordinate_file_path):
 		if introgression_probabilities[i] >= posterior_probability_threshold:
 			start = i
 			stop = i
-			variable_site_counter = 0
 			while introgression_probabilities[i] >= posterior_probability_threshold and i < (len(introgression_probabilities)-1):
-				variable_site_counter += 1
 				stop = i
 				i = i+1
-			index_tract_list.append([start, stop, variable_site_counter])
+			index_tract_list.append([start, stop])
 		i=i+1
 	
 	# Append each introgression tract from index_tract_list to coordinate_tract_list in format of [start_coordinate, stop_coordinate, length in base pairs] 
@@ -108,7 +109,6 @@ def find_tracts_scaffold(json_file_path, coordinate_file_path):
 		# Format chr:coordinate. These coordinates are from the vcf file which is 1-based. Need to convert to zero-based
 		start = coordinates[tract[0]]
 		stop = coordinates[tract[1]]
-		variable_sites = tract[2]
 
 		chrm = start.split(":")[0]
 
@@ -123,7 +123,7 @@ def find_tracts_scaffold(json_file_path, coordinate_file_path):
 		length = stop_coordinate - start_coordinate 
 		
 		if length > 1:
-			coordinate_tract_list.append([start, stop, length, variable_sites])
+			coordinate_tract_list.append([start, stop, length])
 	
 	# Sort coordinate_tract_list by index 2 of each list (length in bp) in order of highest to lowest 
 	coordinate_tract_list.sort(reverse=True, key=itemgetter(2))
@@ -140,17 +140,7 @@ def write_tracts_to_bed(file_name, tract_list):
 			scaffold = str(tract).split(":")[0].split("'")[1]
 			start = str(tract).split(":")[1].split("'")[0]
 			stop = str(tract[1]).split(":")[1].split("'")[0]
-			variable_sites = str(tract[3])
 			bed_file.write(scaffold + "\t" + start + "\t" + stop + "\t" + scaffold + ":" + start + "_" + stop + "\n")
-
-def write_sites_by_tract(tract_list):
-	with open("SNV_sites_by_tract.tsv","w") as f:
-		for tract in tract_list:
-			scaffold = str(tract).split(":")[0].split("'")[1]
-			start = str(tract).split(":")[1].split("'")[0]
-			stop = str(tract[1]).split(":")[1].split("'")[0]
-			variable_sites = str(tract[3])
-			f.write(scaffold + "\t" + start + "\t" + stop + "\t" + scaffold + ":" + start + "_" + stop + "\t" + variable_sites + "\n")
 
 # Intersect introgression tract file with bed file containing positions of 100kb gaps 
 def intersect_tract_file_with_100kb_gaps(tract_file):
@@ -250,6 +240,9 @@ def filter_tracts_for_gaps(tract_file):
 	print("{} tracts written to tracts_gap_filter.bed".format(tracts_written_to_bed))
 	print("\n")
 
+def get_sites_by_tract(tract_list):
+	pass
+
 # Use mosdepth to get the mean coverage depth of each introgression tract for each species 
 def run_mosdepth(tract_file, bam_file):
 	prefix = bam_file.split("/")[-1].split("_dedup")[0]
@@ -258,7 +251,7 @@ def run_mosdepth(tract_file, bam_file):
 
 # Get list of mosdepth output file paths in alphabetic order 
 def get_mosdepth_output_file_list():
-	find_files = "find /hb/scratch/mglasena/phylonet_hmm/ -type f -name '*.regions*' | grep -v 'csi' > mosdepth_output_files"
+	find_files = "find {} -type f -name '*.regions*' | grep -v 'csi' > mosdepth_output_files".format(output_dir)
 	os.system(find_files)
 	mosdepth_output_file_list = open("mosdepth_output_files","r").read().splitlines()
 	os.system("rm mosdepth_output_files")
@@ -328,7 +321,6 @@ def filter_tracts_by_depth():
 	print("Spal mean coverage of introgressed tracts: {}".format(mean(Spal)))
 	print("Hpul mean coverage of introgressed tracts: {}".format(mean(Hpul)))
 	print("\n")
-
 
 def get_stats_on_tracts(tract_file):
 	tracts = open(tract_file,"r").read().splitlines()
@@ -431,6 +423,8 @@ def write_ten_kb_tracts():
 			if int(tract.split("\t")[2]) - int(tract.split("\t")[1]) >= 10000:
 				f2.write(tract + "\n")
 def main():
+	os.chdir(output_dir)
+
 	# Get a list of lists of [phylonet_hmm output file, scaffold coordinate file]
 	files_by_scaffold_list = get_file_paths_pairs_list()
 
@@ -447,7 +441,6 @@ def main():
 	flattened_combined_results.sort(reverse=True, key=itemgetter(2))
 
 	write_tracts_to_bed("tracts.bed", flattened_combined_results)
-	write_sites_by_tract(flattened_combined_results)
 
 	intersect_tract_file_with_100kb_gaps("tracts.bed")
 

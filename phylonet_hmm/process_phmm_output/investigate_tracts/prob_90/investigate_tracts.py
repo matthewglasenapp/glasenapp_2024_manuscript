@@ -367,15 +367,6 @@ def create_gene_intersection_file():
 	
 	csv_file.close()
 
-def write_introgressed_genes_to_bed():
-	with open("introgressed_genes.bed","w") as f:
-		for key,value in gene_intersection_dict.items():
-			if value[8] == 100:
-				scaffold = value[9].split(":")[0]
-				start = value[9].split(":")[1].split("-")[0]
-				stop = value[9].split(":")[1].split("-")[1]
-				f.write(scaffold + "\t" + start + "\t" + stop + "\t" + key + "\t" + value[5] + "\n")
-
 def get_exon_overlap():
 	overlapping_bases = []
 
@@ -398,6 +389,14 @@ def get_gene_overlap():
 
 	return sum(overlapping_bases)
 
+def write_introgressed_genes_to_bed():
+	with open("introgressed_genes.bed","w") as f:
+		for key,value in gene_intersection_dict.items():
+			if value[8] == 100:
+				scaffold = value[9].split(":")[0]
+				start = value[9].split(":")[1].split("-")[0]
+				stop = value[9].split(":")[1].split("-")[1]
+				f.write(scaffold + "\t" + str(start) + "\t" + str(stop) + "\t" + key + "\n")
 
 def main():
 	create_gene_dictionary()
