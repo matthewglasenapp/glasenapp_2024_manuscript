@@ -5,7 +5,7 @@ from joblib import Parallel, delayed
 
 process_hmm_output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/"
 working_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/"
-phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments"
+phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
 
 # Reference alignment BAM files for assessing coverage dpeth
 bam_file_paths_list = [
@@ -274,6 +274,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 
 # Use bedtools intersect to create file bed file containing the overlap between introgression tracts and protein coding genes 
 def intersect_genes(tract_file, gene_file, outfile):
+	print("Intersecting {} with {}. Writing results to {}".format(tract_file, gene_file, outfile))
 	os.system("bedtools intersect -a " + tract_file + " -b " + gene_file + " -wo > " + outfile)
 
 def handle_duplicates_and_reverse_dictionary():
@@ -315,6 +316,7 @@ def write_gene_dictionary_to_csv():
 
 def make_coverage_depths_dict():
 	coverage_depths = open(tract_coverage_file,"r").read().splitlines()
+	print("Adding {} records to tract_coverage_depth_dict".format(len(coverage_depths)))
 	for record in coverage_depths:
 		tract_name = record.split("\t")[0].replace("_","-")
 		dro = record.split("\t")[1]
@@ -324,6 +326,7 @@ def make_coverage_depths_dict():
 		tract_coverage_depth_dict[tract_name] = [dro,fra,pal,pul]
 
 def get_coordinate_file_paths():
+	print("Indexing scaffold coordinate files from {}".format(phylonet_hmm_alignment_dir))
 	find_files = "find {} -type f -name '*coordinates*' > coordinate_files".format(phylonet_hmm_alignment_dir)
 	os.system(find_files)
 	coordinate_file_list = open("coordinate_files","r").read().splitlines()
@@ -334,9 +337,14 @@ def create_coordinate_dict(coordinate_file_list):
 	for coordinate_file in coordinate_file_list:
 		scaffold = open(coordinate_file,"r").readline().split(":")[0]
 		coordinate_by_scaffold_dict[scaffold] = [item.split(":")[1] for item in open(coordinate_file,"r").read().splitlines()]
+	print("coordinate_by_scaffold_dict")
+	for key,value in coordinate_by_scaffold_dict.items():
+		print(key + "\t" + str(len(value)) + "\n")
 
 def create_gene_intersection_dict(overlap_file):
+	value_error_counter = 0 
 	overlaps = open(overlap_file,"r").read().splitlines()
+	print("Number of records in overlap file: {}".format(len(overlaps)))
 
 	for record in overlaps:
 		record = record.split("\t")
@@ -365,6 +373,7 @@ def create_gene_intersection_dict(overlap_file):
 			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(stop)) - int(coordinate_by_scaffold_dict[scaffold].index(start)) + 1
 		except ValueError:
 			SNV_sites = 0
+			value_error_counter += 1
 		
 		if gene_id in LOC_gene_dictionary.keys():
 			gene_ecb_id = LOC_gene_dictionary[gene_id][0]
@@ -376,8 +385,6 @@ def create_gene_intersection_dict(overlap_file):
 			gene_ECB_KO = LOC_gene_dictionary[gene_id][6]
 			gene_tu_GO = LOC_gene_dictionary[gene_id][7]
 
-
-		
 		# If gene_id isn't in LOC_gene_dictionary.keys(), check to see if it is the synonyms of another record
 		else:
 			# I verified that this doesn't lead to finding multiple records and overwriting. 
@@ -399,6 +406,9 @@ def create_gene_intersection_dict(overlap_file):
 
 		# Populate gene_intersection_dict with all of the assigned variables
 		gene_intersection_dict[gene_id] = [tract_id, SNV_sites, dro_cov, fra_cov, pal_cov, pul_cov, gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
+
+	print("Number of ValueErrors: {}".format(value_error_counter))
+	print("Length of gene_intersection_dict: {}".format(len(gene_intersection_dict)))
 
 def write_introgressed_genes_to_bed():
 	with open("introgressed_genes.bed","w") as f:
@@ -442,7 +452,7 @@ def update_gene_intersection_dict():
 
 	with open("fully_introgressed_genes_coverage.tsv","w") as f:
 		for key,value in introgressed_gene_coverage_dict.items():
-			if gene_intersection_dict[key][12] == 100:
+			if gene_intersection_dict[key][13] == 100:
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
 def create_gene_intersection_file():
