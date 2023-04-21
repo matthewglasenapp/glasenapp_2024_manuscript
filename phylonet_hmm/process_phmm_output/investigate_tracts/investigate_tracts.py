@@ -348,64 +348,69 @@ def create_gene_intersection_dict(overlap_file):
 
 	for record in overlaps:
 		record = record.split("\t")
-		tract_id = record[3].replace("_","-")
 		#LOC ID
 		gene_id = record[7].split("-",1)[1]
 
-		dro_cov = tract_coverage_depth_dict[tract_id][0]
-		fra_cov = tract_coverage_depth_dict[tract_id][1]
-		pal_cov = tract_coverage_depth_dict[tract_id][2]
-		pul_cov = tract_coverage_depth_dict[tract_id][3]
+		if gene_id in gene_intersection_dict:
+			additional_tract = record[3].replace("_","-")
+			bp_overlap = int(record[14])
+			gene_intersection_dict[gene_id][5].append(additional_tract)
+			gene_intersection_dict[gene_id][2] += bp_overlap
+			gene_intersection_dict[gene_id][3] = gene_intersection_dict[gene_id][2] / gene_intersection_dict[gene_id][2] * 100
 
-		gene_name = "missing"
-		
-		# Edge case for REJ8 and Coel1, which are rej8 and coel1 in the dictionary
-		if gene_id.lower() in LOC_gene_dictionary.keys():
-			gene_id = gene_id.lower()
-
-		# Get SNV sites
-		#SNV_sites = 0
-		scaffold = tract_id.split(":")[0].replace("-","_")
-		start = str(int(tract_id.split(":")[1].split("-")[0]) - 1)
-		stop = str(tract_id.split(":")[1].split("-")[1])
-		
-		try:
-			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(stop)) - int(coordinate_by_scaffold_dict[scaffold].index(start)) + 1
-		except ValueError:
-			SNV_sites = 0
-			value_error_counter += 1
-		
-		if gene_id in LOC_gene_dictionary.keys():
-			gene_ecb_id = LOC_gene_dictionary[gene_id][0]
-			gene_name = LOC_gene_dictionary[gene_id][1]
-			gene_synonyms = LOC_gene_dictionary[gene_id][2]
-			gene_curation_status = LOC_gene_dictionary[gene_id][3]
-			gene_info = LOC_gene_dictionary[gene_id][4]
-			gene_ECB_GO = LOC_gene_dictionary[gene_id][5]
-			gene_ECB_KO = LOC_gene_dictionary[gene_id][6]
-			gene_tu_GO = LOC_gene_dictionary[gene_id][7]
-
-		# If gene_id isn't in LOC_gene_dictionary.keys(), check to see if it is the synonyms of another record
 		else:
-			# I verified that this doesn't lead to finding multiple records and overwriting. 
-			for key,value in LOC_gene_dictionary.items():
-				if gene_id in value[2]:
-					gene_ecb_id = value[0]
-					gene_name = value[1]
-					gene_synonyms = value[2]
-					gene_curation_status = value[3]
-					gene_info = value[4]
-					gene_ECB_GO = value[5]
-					gene_ECB_KO = value[6]
-					gene_tu_GO = value[7]
-		
-		gene_coordinates = str(record[4]) + ":" + str(record[5]) + "-" + str(record[6])
-		gene_length = int(record[6]) - int(record[5])
-		bp_overlap = record[14]
-		percent_introgressed = (int(bp_overlap) / gene_length)*100
 
-		# Populate gene_intersection_dict with all of the assigned variables
-		gene_intersection_dict[gene_id] = [tract_id, SNV_sites, dro_cov, fra_cov, pal_cov, pul_cov, gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
+			tract_id = [record[3].replace("_","-")]
+
+			gene_name = "missing"
+			
+			# Edge case for REJ8 and Coel1, which are rej8 and coel1 in the dictionary
+			if gene_id.lower() in LOC_gene_dictionary.keys():
+				gene_id = gene_id.lower()
+
+			# Get SNV sites
+			#SNV_sites = 0
+			scaffold = tract_id.split(":")[0].replace("-","_")
+			start = str(int(tract_id.split(":")[1].split("-")[0]) - 1)
+			stop = str(tract_id.split(":")[1].split("-")[1])
+			
+			try:
+				SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(stop)) - int(coordinate_by_scaffold_dict[scaffold].index(start)) + 1
+			except ValueError:
+				SNV_sites = 0
+				value_error_counter += 1
+			
+			if gene_id in LOC_gene_dictionary.keys():
+				gene_ecb_id = LOC_gene_dictionary[gene_id][0]
+				gene_name = LOC_gene_dictionary[gene_id][1]
+				gene_synonyms = LOC_gene_dictionary[gene_id][2]
+				gene_curation_status = LOC_gene_dictionary[gene_id][3]
+				gene_info = LOC_gene_dictionary[gene_id][4]
+				gene_ECB_GO = LOC_gene_dictionary[gene_id][5]
+				gene_ECB_KO = LOC_gene_dictionary[gene_id][6]
+				gene_tu_GO = LOC_gene_dictionary[gene_id][7]
+
+			# If gene_id isn't in LOC_gene_dictionary.keys(), check to see if it is the synonyms of another record
+			else:
+				# I verified that this doesn't lead to finding multiple records and overwriting. 
+				for key,value in LOC_gene_dictionary.items():
+					if gene_id in value[2]:
+						gene_ecb_id = value[0]
+						gene_name = value[1]
+						gene_synonyms = value[2]
+						gene_curation_status = value[3]
+						gene_info = value[4]
+						gene_ECB_GO = value[5]
+						gene_ECB_KO = value[6]
+						gene_tu_GO = value[7]
+			
+			gene_coordinates = str(record[4]) + ":" + str(record[5]) + "-" + str(record[6])
+			gene_length = int(record[6]) - int(record[5])
+			bp_overlap = record[14]
+			percent_introgressed = (int(bp_overlap) / gene_length)*100
+
+			# Populate gene_intersection_dict with all of the assigned variables
+			gene_intersection_dict[gene_id] = [gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, tract_id, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
 
 	print("Number of ValueErrors: {}".format(value_error_counter))
 	print("Length of gene_intersection_dict: {}".format(len(gene_intersection_dict)))
@@ -413,9 +418,9 @@ def create_gene_intersection_dict(overlap_file):
 def write_introgressed_genes_to_bed():
 	with open("introgressed_genes.bed","w") as f:
 		for key,value in gene_intersection_dict.items():
-				scaffold = value[10].split(":")[0]
-				start = value[10].split(":")[1].split("-")[0]
-				stop = value[10].split(":")[1].split("-")[1]
+				scaffold = value[4].split(":")[0]
+				start = value[4].split(":")[1].split("-")[0]
+				stop = value[4].split(":")[1].split("-")[1]
 				f.write(scaffold + "\t" + str(start) + "\t" + str(stop) + "\t" + key + "\n")
 
 def run_mosdepth(tract_file, bam_file):
@@ -448,21 +453,21 @@ def parse_mosdepth(mosdepth_region_file):
 def update_gene_intersection_dict():
 	for key,value in gene_intersection_dict.items():
 		values = value
-		gene_intersection_dict[key] = [values[0], values[1], values[2], values[3], values[4], values[5], values[6], introgressed_gene_coverage_dict[key][0], introgressed_gene_coverage_dict[key][1], introgressed_gene_coverage_dict[key][2], introgressed_gene_coverage_dict[key][3], values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14], values[15], values[16], value[17]]
+		gene_intersection_dict[key] = [values[0], values[1], values[2], values[3], values[4], introgressed_gene_coverage_dict[key][0], introgressed_gene_coverage_dict[key][1], introgressed_gene_coverage_dict[key][2], introgressed_gene_coverage_dict[key][3], values[5], values[6], values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14], values[15], values[16], value[16]]
 
 	with open("fully_introgressed_genes_coverage.tsv","w") as f:
 		for key,value in introgressed_gene_coverage_dict.items():
-			if gene_intersection_dict[key][13] == 100:
+			if gene_intersection_dict[key][12] == 100:
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
 def create_gene_intersection_file():
 	csv_file = open("intersect.csv","w")
 	writer = csv.writer(csv_file)	
-	header = ["introgression_tract", "SNV", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Gene", "Gene Name", "Sdro", "Sfra", "Spal", "Hpul", "Gene Length", "Overlapping Bases", "Percent Introgressed", "Gene Coordinates", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Gene Info", "Echinobase GO", "Echinobase KO", "Tu GO"]
+	header = ["NCBI Gene ID", "Name", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Introgression Tract(s)", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Info", "Echinobase GO", "Echinobase KO", "Tu GO"]
 	writer.writerow(header)
 	
 	for key,value in gene_intersection_dict.items():
-		data = [value[0], value[1], value[2], value[3], value[4], value[5], key, value[6], value[7], value[8], value[9], value[10], value[11], value[12], value[13], value[14], value[15], "|".join(value[16]), value[17], value[18], value[19], value[20], value[21]]
+		data = [key, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7], value[8], ",".join(value[9]), "|".join(value[10]), value[11], value[12], value[13], value[14], value[15], value[16]]
 		writer.writerow(data)
 	
 	csv_file.close()
