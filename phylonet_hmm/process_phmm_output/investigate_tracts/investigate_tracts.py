@@ -337,12 +337,8 @@ def create_coordinate_dict(coordinate_file_list):
 	for coordinate_file in coordinate_file_list:
 		scaffold = open(coordinate_file,"r").readline().split(":")[0]
 		coordinate_by_scaffold_dict[scaffold] = [item.split(":")[1] for item in open(coordinate_file,"r").read().splitlines()]
-	print("coordinate_by_scaffold_dict")
-	for key,value in coordinate_by_scaffold_dict.items():
-		print(key + "\t" + str(len(value)) + "\n")
 
 def create_gene_intersection_dict(overlap_file):
-	value_error_counter = 0 
 	overlaps = open(overlap_file,"r").read().splitlines()
 	print("Number of records in overlap file: {}".format(len(overlaps)))
 
@@ -356,10 +352,9 @@ def create_gene_intersection_dict(overlap_file):
 			bp_overlap = int(record[14])
 			gene_intersection_dict[gene_id][5].append(additional_tract)
 			gene_intersection_dict[gene_id][2] += bp_overlap
-			gene_intersection_dict[gene_id][3] = gene_intersection_dict[gene_id][2] / gene_intersection_dict[gene_id][2] * 100
+			gene_intersection_dict[gene_id][3] = gene_intersection_dict[gene_id][2] / gene_intersection_dict[gene_id][1] * 100
 
 		else:
-
 			tract_id = [record[3].replace("_","-")]
 
 			gene_name = "missing"
@@ -367,18 +362,6 @@ def create_gene_intersection_dict(overlap_file):
 			# Edge case for REJ8 and Coel1, which are rej8 and coel1 in the dictionary
 			if gene_id.lower() in LOC_gene_dictionary.keys():
 				gene_id = gene_id.lower()
-
-			# Get SNV sites
-			#SNV_sites = 0
-			scaffold = tract_id.split(":")[0].replace("-","_")
-			start = str(int(tract_id.split(":")[1].split("-")[0]) - 1)
-			stop = str(tract_id.split(":")[1].split("-")[1])
-			
-			try:
-				SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(stop)) - int(coordinate_by_scaffold_dict[scaffold].index(start)) + 1
-			except ValueError:
-				SNV_sites = 0
-				value_error_counter += 1
 			
 			if gene_id in LOC_gene_dictionary.keys():
 				gene_ecb_id = LOC_gene_dictionary[gene_id][0]
@@ -406,13 +389,12 @@ def create_gene_intersection_dict(overlap_file):
 			
 			gene_coordinates = str(record[4]) + ":" + str(record[5]) + "-" + str(record[6])
 			gene_length = int(record[6]) - int(record[5])
-			bp_overlap = record[14]
-			percent_introgressed = (int(bp_overlap) / gene_length)*100
+			bp_overlap = int(record[14])
+			percent_introgressed = bp_overlap / gene_length * 100
 
 			# Populate gene_intersection_dict with all of the assigned variables
 			gene_intersection_dict[gene_id] = [gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, tract_id, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
 
-	print("Number of ValueErrors: {}".format(value_error_counter))
 	print("Length of gene_intersection_dict: {}".format(len(gene_intersection_dict)))
 
 def write_introgressed_genes_to_bed():
@@ -453,7 +435,7 @@ def parse_mosdepth(mosdepth_region_file):
 def update_gene_intersection_dict():
 	for key,value in gene_intersection_dict.items():
 		values = value
-		gene_intersection_dict[key] = [values[0], values[1], values[2], values[3], values[4], introgressed_gene_coverage_dict[key][0], introgressed_gene_coverage_dict[key][1], introgressed_gene_coverage_dict[key][2], introgressed_gene_coverage_dict[key][3], values[5], values[6], values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14], values[15], values[16], value[16]]
+		gene_intersection_dict[key] = [values[0], values[1], values[2], values[3], values[4], introgressed_gene_coverage_dict[key][0], introgressed_gene_coverage_dict[key][1], introgressed_gene_coverage_dict[key][2], introgressed_gene_coverage_dict[key][3], values[5], values[6], values[7], values[8], values[9], values[10], values[11], values[12]]
 
 	with open("fully_introgressed_genes_coverage.tsv","w") as f:
 		for key,value in introgressed_gene_coverage_dict.items():
@@ -467,7 +449,7 @@ def create_gene_intersection_file():
 	writer.writerow(header)
 	
 	for key,value in gene_intersection_dict.items():
-		data = [key, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7], value[8], ",".join(value[9]), "|".join(value[10]), value[11], value[12], value[13], value[14], value[15], value[16]]
+		data = [key, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7], value[8], ",".join(value[9]), value[10], "|".join(value[11]), value[12], value[13], value[14], value[15], value[16]]
 		writer.writerow(data)
 	
 	csv_file.close()
