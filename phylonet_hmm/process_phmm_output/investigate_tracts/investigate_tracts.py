@@ -439,7 +439,7 @@ def update_gene_intersection_dict():
 
 	with open("fully_introgressed_genes_coverage.tsv","w") as f:
 		for key,value in introgressed_gene_coverage_dict.items():
-			if gene_intersection_dict[key][12] == 100:
+			if gene_intersection_dict[key][3] == 100:
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
 def create_gene_intersection_file():
