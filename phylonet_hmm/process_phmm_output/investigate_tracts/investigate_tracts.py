@@ -542,36 +542,39 @@ def main():
 	create_coordinate_dict(coordinate_files)
 
 	create_gene_intersection_dict("gene_overlap.bed")
+
+	print(tract_coverage_depth_dict)
+
 	#create_gene_intersection_dict("exon_overlap.bed")
 
-	create_tract_info_file("gene_overlap.bed")
+	#create_tract_info_file("gene_overlap.bed")
 
-	write_introgressed_genes_to_bed()
+	#write_introgressed_genes_to_bed()
 
 	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("introgressed_genes.bed", bam_file) for bam_file in bam_file_paths_list)
 
-	mosdepth_output_file_list = get_mosdepth_output_file_list()
+	#mosdepth_output_file_list = get_mosdepth_output_file_list()
 
-	for file in mosdepth_output_file_list:
-		parse_mosdepth(file)
+	#for file in mosdepth_output_file_list:
+		#parse_mosdepth(file)
 
-	update_gene_intersection_dict()
+	#update_gene_intersection_dict()
 
-	create_gene_intersection_file()
+	#create_gene_intersection_file()
 	#create_exon_intersection_file()
 
-	overlapping_coding_bases = get_exon_overlap()
-	overlapping_genic_bases = get_gene_overlap()
-	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
-	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
+	#overlapping_coding_bases = get_exon_overlap()
+	#overlapping_genic_bases = get_gene_overlap()
+	#overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
+	#overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
 
-	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
-	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
-	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
-	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
+	#print("Overlapping genic bases: {}".format(overlapping_genic_bases))
+	#print("Overlapping coding bases: {}".format(overlapping_coding_bases))
+	#print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
+	#print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
 
-	print("Total introgressed bases: {}".format(total_bases_introgressed))
-	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
+	#print("Total introgressed bases: {}".format(total_bases_introgressed))
+	#print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
 
 if __name__ == "__main__":
 	main()
