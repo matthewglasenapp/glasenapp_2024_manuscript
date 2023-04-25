@@ -73,6 +73,8 @@ tract_coverage_depth_dict = dict()
 
 coordinate_by_scaffold_dict = dict()
 
+tract_intersection_dict = dict()
+
 # Create gene dictionary from GenePageGeneralInfo_AllGenes.txt
 def create_gene_dictionary():
 	inputs = open(gene_info_file,"r").read().splitlines()
@@ -400,21 +402,54 @@ def create_gene_intersection_dict(overlap_file):
 def create_tract_info_file(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
 	value_error_counter = 0 
+	
 	for key,value in tract_coverage_depth_dict.items():
 		scaffold = key.split(":")[0].replace("-","_")
-		start = str(int(key.split(":")[1].split("-")[0]) - 1)
+		start = str(int(key.split(":")[1].split("-")[0]) + 1)
 		stop = str(key.split(":")[1].split("-")[1])
 			
-		try:
+		if start in coordinate_by_scaffold_dict[scaffold] and stop in coordinate_by_scaffold_dict[scaffold]:
 			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(stop)) - int(coordinate_by_scaffold_dict[scaffold].index(start)) + 1
-		except ValueError:
-			SNV_sites = 0
-			value_error_counter += 1
+		
+		else:
+			print(key)
+			print(start)
+			print(stop)
+			
+			if start in coordinate_by_scaffold_dict[scaffold]:
+				start_pos = int(start)
+				print("Start in coordinate_by_scaffold_dict: {}".format(start_pos))
+			else:
+				print("Finding new Start")
+				start_pos = 0
+				i = 0
+				while start_pos < int(start):
+					start_pos = int(coordinate_by_scaffold_dict[scaffold][i])
+					i += 1
+
+				start_pos = int(coordinate_by_scaffold_dict[scaffold][i+1])
+			
+				print("New Start: {}".format(start_pos))
+
+			if stop in coordinate_by_scaffold_dict[scaffold]:
+				print("Stop in coordinate_by_scaffold_dict: {}".format(stop_pos))
+				stop_pos = int(stop)
+			else:
+				print("Finding New Stop")
+				stop_pos = int(coordinate_by_scaffold_dict[scaffold][-1])
+				i = len(coordinate_by_scaffold_dict[scaffold]) - 1
+				while stop_pos > int(stop):
+					i -= 1
+					stop_pos = int(coordinate_by_scaffold_dict[scaffold][i])
+			
+				stop_pos = int(coordinate_by_scaffold_dict[scaffold][i-1])
+
+				print("New Stop: {}".format(stop_pos))
+			
+			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(str(stop_pos))) - int(coordinate_by_scaffold_dict[scaffold].index(str(start_pos))) + 1
 
 		tract_coverage_depth_dict[key].append(SNV_sites)
-
-	tract_intersection_dict = dict()
-	
+		
 	for overlap in overlaps:
 		tract_id = overlap.split("\t")[3].replace("_","-")
 		gene_id = overlap.split("\t")[7]
@@ -423,14 +458,11 @@ def create_tract_info_file(overlap_file):
 		else:
 			tract_intersection_dict[tract_id] = [gene_id]
 
-	print(len(sorted(list(tract_coverage_depth_dict))))
-	print(len(sorted(list(tract_intersection_dict))))
-
 	for key,value in tract_coverage_depth_dict.items():
-		try:
+		if key in tract_intersection_dict:
 			tract_coverage_depth_dict[key].append(tract_intersection_dict[key])
-		except KeyError:
-			print(key)
+		else:
+			tract_coverage_depth_dict[key].append(["n/a"])
 
 	csv_file = open("tract_info.csv","w")
 	writer = csv.writer(csv_file)	
@@ -543,38 +575,36 @@ def main():
 
 	create_gene_intersection_dict("gene_overlap.bed")
 
-	print(tract_coverage_depth_dict)
-
 	#create_gene_intersection_dict("exon_overlap.bed")
 
-	#create_tract_info_file("gene_overlap.bed")
+	create_tract_info_file("gene_overlap.bed")
 
-	#write_introgressed_genes_to_bed()
+	write_introgressed_genes_to_bed()
 
 	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("introgressed_genes.bed", bam_file) for bam_file in bam_file_paths_list)
 
-	#mosdepth_output_file_list = get_mosdepth_output_file_list()
+	mosdepth_output_file_list = get_mosdepth_output_file_list()
 
-	#for file in mosdepth_output_file_list:
-		#parse_mosdepth(file)
+	for file in mosdepth_output_file_list:
+		parse_mosdepth(file)
 
-	#update_gene_intersection_dict()
+	update_gene_intersection_dict()
 
-	#create_gene_intersection_file()
+	create_gene_intersection_file()
 	#create_exon_intersection_file()
 
-	#overlapping_coding_bases = get_exon_overlap()
-	#overlapping_genic_bases = get_gene_overlap()
-	#overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
-	#overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
+	overlapping_coding_bases = get_exon_overlap()
+	overlapping_genic_bases = get_gene_overlap()
+	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
+	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
 
-	#print("Overlapping genic bases: {}".format(overlapping_genic_bases))
-	#print("Overlapping coding bases: {}".format(overlapping_coding_bases))
-	#print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
-	#print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
+	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
+	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
+	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
+	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
 
-	#print("Total introgressed bases: {}".format(total_bases_introgressed))
-	#print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
+	print("Total introgressed bases: {}".format(total_bases_introgressed))
+	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
 
 if __name__ == "__main__":
 	main()
