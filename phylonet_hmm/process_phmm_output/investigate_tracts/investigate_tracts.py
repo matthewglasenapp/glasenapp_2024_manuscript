@@ -423,11 +423,14 @@ def create_tract_info_file(overlap_file):
 		else:
 			tract_intersection_dict[tract_id] = [gene_id]
 
-	print(sorted(list(tract_coverage_depth_dict))[0])
-	print(lsorted(ist(tract_intersection_dict))[0])
+	print(len(sorted(list(tract_coverage_depth_dict))))
+	print(len(sorted(list(tract_intersection_dict))))
 
 	for key,value in tract_coverage_depth_dict.items():
-		tract_coverage_depth_dict[key].append(tract_intersection_dict[key])
+		try:
+			tract_coverage_depth_dict[key].append(tract_intersection_dict[key])
+		except KeyError:
+			print(key)
 
 	csv_file = open("tract_info.csv","w")
 	writer = csv.writer(csv_file)	
