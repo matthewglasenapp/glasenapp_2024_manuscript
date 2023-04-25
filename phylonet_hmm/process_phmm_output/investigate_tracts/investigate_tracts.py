@@ -397,6 +397,47 @@ def create_gene_intersection_dict(overlap_file):
 
 	print("Length of gene_intersection_dict: {}".format(len(gene_intersection_dict)))
 
+def create_tract_info_file(overlap_file):
+	overlaps = open(overlap_file,"r").read().splitlines()
+	value_error_counter = 0 
+	for key,value in tract_coverage_depth_dict.items():
+		scaffold = key.split(":")[0].replace("-","_")
+		start = str(int(key.split(":")[1].split("-")[0]) - 1)
+		stop = str(key.split(":")[1].split("-")[1])
+			
+		try:
+			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(stop)) - int(coordinate_by_scaffold_dict[scaffold].index(start)) + 1
+		except ValueError:
+			SNV_sites = 0
+			value_error_counter += 1
+
+		tract_coverage_depth_dict[key].append(SNV_sites)
+
+	tract_intersection_dict = dict()
+	
+	for overlap in overlaps:
+		tract_id = overlap.split("\t")[3].replace("_","-")
+		gene_id = overlap.split("\t")[7]
+		if tract_id in tract_intersection_dict:
+			tract_intersection_dict[tract_id].append(gene_id)
+		else:
+			tract_intersection_dict[tract_id] = [gene_id]
+
+	print(sorted(list(tract_coverage_depth_dict))[0])
+	print(lsorted(ist(tract_intersection_dict))[0])
+
+	for key,value in tract_coverage_depth_dict.items():
+		tract_coverage_depth_dict[key].append(tract_intersection_dict[key])
+
+	header = ["tract_name", "Sdro", "Sfra", "Spal", "Hpul", "SNV Sites", "Overlapping Genes"]
+	writer.writerow(header)
+	
+	for key,value in tract_coverage_depth_dict.items():
+		data = [key, value[0], value[1], value[2], value[3], value[4], ",".join(value[5])]
+		writer.writerow(data)
+	
+	csv_file.close()
+
 def write_introgressed_genes_to_bed():
 	with open("introgressed_genes.bed","w") as f:
 		for key,value in gene_intersection_dict.items():
@@ -496,6 +537,8 @@ def main():
 
 	create_gene_intersection_dict("gene_overlap.bed")
 	#create_gene_intersection_dict("exon_overlap.bed")
+
+	create_tract_info_file("gene_overlap.bed")
 
 	write_introgressed_genes_to_bed()
 
