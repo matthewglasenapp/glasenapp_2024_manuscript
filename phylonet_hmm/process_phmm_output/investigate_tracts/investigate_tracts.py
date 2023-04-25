@@ -429,6 +429,9 @@ def create_tract_info_file(overlap_file):
 	for key,value in tract_coverage_depth_dict.items():
 		tract_coverage_depth_dict[key].append(tract_intersection_dict[key])
 
+	csv_file = open("tract_info.csv","w")
+	writer = csv.writer(csv_file)	
+
 	header = ["tract_name", "Sdro", "Sfra", "Spal", "Hpul", "SNV Sites", "Overlapping Genes"]
 	writer.writerow(header)
 	
