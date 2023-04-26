@@ -1,7 +1,5 @@
 import csv 
 
-overlap_lst = []
-
 # CSV file of 6,520 single copy orthologs from Kober and Pogson. Rows 5 - 1,012 contain the 1,008 genes with significant tests for positive selection
 psg_file = "psg.csv"
 

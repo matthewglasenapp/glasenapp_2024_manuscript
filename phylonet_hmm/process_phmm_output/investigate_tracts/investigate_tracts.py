@@ -56,6 +56,9 @@ gene_ko_terms = "GeneKoTerms.txt"
 # Supp table S2
 tu_go_terms = "tu_2012_go.csv"
 
+# CSV file of 6,520 single copy orthologs from Kober and Pogson. Rows 5 - 1,012 contain the 1,008 genes with significant tests for positive selection
+psg_file = "psg.csv"
+
 # Gene dictionary in the format of {ECB-GENEPAGE_ID: symbol, name, synonyms, curation_status, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
 gene_dictionary = dict()
 
@@ -452,7 +455,7 @@ def create_tract_info_file(overlap_file):
 		
 	for overlap in overlaps:
 		tract_id = overlap.split("\t")[3].replace("_","-")
-		gene_id = overlap.split("\t")[7]
+		gene_id = overlap.split("\t")[7].split("gene-")[1]
 		if tract_id in tract_intersection_dict:
 			tract_intersection_dict[tract_id].append(gene_id)
 		else:
@@ -467,11 +470,16 @@ def create_tract_info_file(overlap_file):
 	csv_file = open("tract_info.csv","w")
 	writer = csv.writer(csv_file)	
 
-	header = ["tract_name", "Sdro", "Sfra", "Spal", "Hpul", "SNV Sites", "Overlapping Genes"]
+	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/bp", "Sdro", "Sfra", "Spal", "Hpul",  "Overlapping Genes"]
 	writer.writerow(header)
 	
 	for key,value in tract_coverage_depth_dict.items():
-		data = [key, value[0], value[1], value[2], value[3], value[4], ",".join(value[5])]
+		scaffold = key.split(":")[0]
+		start = key.split(":")[1].split("-")[0]
+		stop = key.split(":")[1].split("-")[1]
+		length = int(stop) - int(start)
+		snv_per_bp = int(value[4])/length
+		data = [key, scaffold, start, stop, length, value[4], snv_per_bp, value[0], value[1], value[2], value[3], ",".join(value[5])]
 		writer.writerow(data)
 	
 	csv_file.close()
@@ -555,6 +563,29 @@ def get_gene_overlap():
 
 	return sum(overlapping_bases)
 
+def find_psg_overlap():
+	with open(psg_file,"r") as file1, open("intersect.csv","r") as file2:
+		psg_list = list(csv.reader(file1))
+		introgressed_genes_list = list(csv.reader(file2))
+
+	# Get list of SPU identifiers from the set of positively selected genes 
+	psg_list = [n for n in psg_list[4:1012]]
+
+	with open("psg_intersect.txt","w") as file3:
+		for gene in psg_list:
+			for record in introgressed_genes_list:
+				if gene[0] in record or gene[1] in record or gene[2] in record:
+					file3.write(str(gene))
+					file3.write("\n")
+					file3.write(record[5])
+					file3.write("\n")
+					file3.write(record[6])
+					file3.write("\n")
+					file3.write(str(record))
+					file3.write("\n")
+					file3.write("Positively Selected Gene #{}".format(psg_list.index(gene)))
+					file3.write("\n")
+
 def main():
 	os.chdir(working_dir)
 	create_gene_dictionary()
@@ -605,6 +636,8 @@ def main():
 
 	print("Total introgressed bases: {}".format(total_bases_introgressed))
 	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
+
+	find_psg_overlap()
 
 if __name__ == "__main__":
 	main()
