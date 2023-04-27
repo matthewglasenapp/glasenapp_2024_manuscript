@@ -187,8 +187,8 @@ def filter_tracts_for_gaps(tract_file):
 				new_tract_2 = False
 
 				if gap_start > tract_start and gap_stop < tract_stop:
-					new_tract = [tract_start, gap_start]
-					new_tract_2 = [gap_stop, tract_stop]
+					new_tract = [tract_start, str(int(gap_start) + 1)]
+					new_tract_2 = [str(int(gap_stop) - 1), tract_stop]
 					print("The gap {} splits the tract {} in two.".format(gap_overlapped_tracts[tract][4], tract))
 					print("Splitting tract {} into two tracts to remove the gap {}.".format(tract, gap_overlapped_tracts[tract][4]))
 					print("The new tracts are {} and {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1], scaffold + ":" + new_tract_2[0] + "_" + new_tract_2[1]))
@@ -197,7 +197,7 @@ def filter_tracts_for_gaps(tract_file):
 					tracts_added += 1
 
 				elif gap_start > tract_start and gap_stop >= tract_stop:
-					new_tract = [tract_start, gap_start]
+					new_tract = [tract_start, str(int(gap_start) + 1)]
 					print("The gap {} overlaps with the end of the tract {}".format(gap_overlapped_tracts[tract][4], tract))
 					print("Trimming the end of tract {} from {} to {}".format(tract, tract_stop, gap_start))
 					print("The new tract is {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1]))
@@ -205,7 +205,7 @@ def filter_tracts_for_gaps(tract_file):
 					tracts_adjusted += 1
 
 				elif gap_start <= tract_start and gap_stop < tract_stop:
-					new_tract = [gap_stop, tract_stop]
+					new_tract = [str(int(gap_stop) - 1), tract_stop]
 					print("The gap {} overlaps with the beginning of the tract {}".format(gap_overlapped_tracts[tract][4], tract))
 					print("Trimming the beggining of tract{} from {} to {}".format(tract, tract_start, gap_stop))
 					print("The new tract is {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1]))
