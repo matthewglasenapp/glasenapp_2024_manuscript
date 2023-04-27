@@ -240,9 +240,6 @@ def filter_tracts_for_gaps(tract_file):
 	print("{} tracts written to tracts_gap_filter.bed".format(tracts_written_to_bed))
 	print("\n")
 
-def get_sites_by_tract(tract_list):
-	pass
-
 # Use mosdepth to get the mean coverage depth of each introgression tract for each species 
 def run_mosdepth(tract_file, bam_file):
 	prefix = bam_file.split("/")[-1].split("_dedup")[0]

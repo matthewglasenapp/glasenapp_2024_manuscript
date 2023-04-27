@@ -407,7 +407,7 @@ def create_tract_info_file(overlap_file):
 		scaffold = key.split(":")[0].replace("-","_")
 		start = str(int(key.split(":")[1].split("-")[0]) + 1)
 		stop = str(key.split(":")[1].split("-")[1])
-			
+		
 		if start in coordinate_by_scaffold_dict[scaffold] and stop in coordinate_by_scaffold_dict[scaffold]:
 			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(stop)) - int(coordinate_by_scaffold_dict[scaffold].index(start)) + 1
 		
@@ -445,8 +445,8 @@ def create_tract_info_file(overlap_file):
 				stop_pos = int(coordinate_by_scaffold_dict[scaffold][i-1])
 
 				print("New Stop: {}".format(stop_pos))
-			
-			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(str(stop_pos))) - int(coordinate_by_scaffold_dict[scaffold].index(str(start_pos))) + 1
+
+				SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(str(stop_pos))) - int(coordinate_by_scaffold_dict[scaffold].index(str(start_pos))) + 1
 
 		tract_coverage_depth_dict[key].append(SNV_sites)
 		
