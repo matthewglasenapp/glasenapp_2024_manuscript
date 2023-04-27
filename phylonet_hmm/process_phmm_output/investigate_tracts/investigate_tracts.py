@@ -530,8 +530,8 @@ def update_gene_intersection_dict():
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
 def create_gene_intersection_file():
-	csv_file = open("intersect.csv","w")
-	writer = csv.writer(csv_file)	
+	csv_file = open("intersect.tsv","w")
+	writer = csv.writer(csv_file, delimiter="\t")	
 	header = ["NCBI Gene ID", "Name", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Introgression Tract(s)", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Info", "Echinobase GO", "Echinobase KO", "Tu GO"]
 	writer.writerow(header)
 	
@@ -564,27 +564,24 @@ def get_gene_overlap():
 	return sum(overlapping_bases)
 
 def find_psg_overlap():
-	with open(psg_file,"r") as file1, open("intersect.csv","r") as file2:
-		psg_list = list(csv.reader(file1))
-		introgressed_genes_list = list(csv.reader(file2))
+	psg_list = list(csv.reader(open(psg_file,"r"), delimiter = ","))
+	introgressed_genes_list = list(csv.reader(open("intersect.tsv","r"), delimiter = "\t"))
 
 	# Get list of SPU identifiers from the set of positively selected genes 
 	psg_list = [n for n in psg_list[4:1012]]
 
-	with open("psg_intersect.txt","w") as file3:
-		for gene in psg_list:
+	csv_file = open("psg_intersect.tsv","w")
+	writer = csv.writer(csv_file, delimiter = "\t")	
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul"]
+	writer.writerow(header)
+	
+	for gene in psg_list:
 			for record in introgressed_genes_list:
 				if gene[0] in record or gene[1] in record or gene[2] in record:
-					file3.write(str(gene))
-					file3.write("\n")
-					file3.write(record[5])
-					file3.write("\n")
-					file3.write(record[6])
-					file3.write("\n")
-					file3.write(str(record))
-					file3.write("\n")
-					file3.write("Positively Selected Gene #{}".format(psg_list.index(gene)))
-					file3.write("\n")
+					data = [record[0], record[1], record[12], gene[0], gene[1], gene[2], psg_list.index(gene), record[2], record[3], record[4], record[5], record[10], record[6], record[7], record[8], record[9]]
+					writer.writerow(data)
+	
+	csv_file.close()
 
 def main():
 	os.chdir(working_dir)

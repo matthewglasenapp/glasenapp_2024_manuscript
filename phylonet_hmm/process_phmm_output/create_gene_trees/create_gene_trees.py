@@ -31,11 +31,15 @@ gff_file = "/hb/groups/pogson_group/dissertation/data/purpuratus_reference/GCF_0
 # Path to filtered multisample vcf file
 vcf_file = "/hb/scratch/mglasena/data/genotypes/franciscanus/insertions_removed.g.vcf.gz"
 
-#with open("intersect.csv","r") as f:
-	#inputs = f.read().splitlines()
-#gene_list = [item.split(",")[5] for item in inputs]
+# Intersection file containing introgressed genes
+intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/intersect.tsv"
 
-gene_lst = ["LOC115921720","LOC591845","LOC586866","LOC115921376","LOC586606","LOC115917953"]
+# PSG intersection file
+psg_intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/psg_intersect.csv"
+
+def get_gene_list():
+	introgressed_genes = [gene.split("\t")[0] for gene in open(intersect_file,"r").read().splitlines()[1:]]
+	return introgressed_genes 
 
 # Using S. purpuratus gff3 file, make gff file for each gene that passed previous filters
 def make_sco_gff(gene):
@@ -65,12 +69,16 @@ def clean_up_iqtree_files():
 	delete_iqtree = 'find ./vcf2fasta_gene/ -type f -name "*.iqtree" -delete'
 	delete_log = 'find ./vcf2fasta_gene/ -type f -name "*.log" -delete'
 	delete_mldist = 'find ./vcf2fasta_gene/ -type f -name "*.mldist" -delete'
+	delete_nex = 'find ./vcf2fasta_gene/ -type f -name "*.nex" -delete'
+	delete_phy = 'find ./vcf2fasta_gene/ -type f -name "*.phy" -delete'
 	os.system(delete_gz)
 	os.system(delete_bionj)
 	os.system(delete_contree)
 	os.system(delete_iqtree)
 	os.system(delete_log)
 	os.system(delete_mldist)
+	os.system(delete_nex)
+	os.system(delete_phy)
 
 def edit_tree_files(input_file):
 	with open("vcf2fasta_gene/" + input_file, "r") as f:
@@ -85,14 +93,58 @@ def edit_tree_files(input_file):
 					tree = new_tree
 			f2.write(tree + "\n")
 
+def update_gene_intersection_file():
+	csv_file = open("gene_intersect_file.tsv","w")
+	writer = csv.writer(csv_file, delimiter="\t")
+	header = ["NCBI Gene ID", "Name", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Introgression Tract(s)", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Info", "Echinobase GO", "Echinobase KO", "Tu GO", "Gene Tree"]
+
+	writer.writerow(header)
+
+	for record in open(intersect_file).read().splitlines()[1:]:
+		data = record.split("\t")
+		if data[0] + ".nwk" in os.listdir():
+			gene_tree = open(str(data[0]) + ".nwk", "r").readline()
+			data.append(gene_tree)
+		else:
+			data.append("missing")
+
+		writer.writerow(data)
+	
+	csv_file.close()
+
+def update_psg_intersection_file():
+	csv_file = open("psg_intersection_file.tsv","w")
+	writer = csv.writer(csv_file, delimiter="\t")
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Gene Tree"]
+	writer.writerow(header)
+
+	for record in open(psg_intersect_file).read().splitlines()[1:]:
+		data = record.split("\t")
+		if data[0] + ".nwk" in os.listdir():
+			gene_tree = open(str(data[0]) + ".nwk", "r").readline()
+			data.append(gene_tree)
+		else:
+			data.append("missing")
+
+		writer.writerow(data)
+	
+	csv_file.close()
+
+def concatenate_trees():
+	concatenate_trees = "cat *.nwk > concatenated_trees.nwk"
+	os.system(concatenate_trees)
+
 #For topology parsing, remove branch lengths and bootstraps. Arrange identical topologies to have the same texual representation. 
-# nw_topology creates cladogram. Option -I gets rid of branc lengths. 
+# nw_topology creates cladogram. Option -I gets rid of branch lengths. 
 # nw_order orders the tree so that trees with identical topologies will have identical newick strings. Ooption -c d reorders the tree in such a way as to remove the ladder. 
 def clean_gene_trees(input_file, output_file):
-	clean = "{}nw_topology -I {} | {}nw_order -c d - > {}".format(nw_utils, input_file, nw_utils, output_file)
+	outgroup = "franciscanus"
+	clean = "{}nw_reroot {} {} | {}nw_topology -I - | {}nw_order -c d - > {}".format(nw_utils, input_file, outgroup, nw_utils, nw_utils, output_file)
 	os.system(clean)
 
 def main():
+	gene_lst = get_gene_list()
+
 	os.system("mkdir single_gene_gff_records/")
 	Parallel(n_jobs=num_cores)(delayed(make_sco_gff)(gene) for gene in gene_lst)
 
@@ -111,6 +163,13 @@ def main():
 	
 	tree_file_lst = [item for item in os.listdir("vcf2fasta_gene/") if "treefile" in item]
 	Parallel(n_jobs=num_cores)(delayed(edit_tree_files)(input_file) for input_file in tree_file_lst)
+
+	update_gene_intersection_file()
+	update_psg_intersection_file()
+
+	clean_up_iqtree_files()
+	concatenate_trees()
+	clean_gene_trees("concatenated_trees.nwk", "clean_single_locus_trees.nwk")
 
 if __name__ == "__main__":
 	main()
