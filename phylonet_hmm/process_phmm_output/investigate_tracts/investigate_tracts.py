@@ -20,12 +20,9 @@ threads = 4
 introgressed_gene_coverage_dict = dict()
 
 # Total bases introgressed
-#prob_90
-total_bases_introgressed = 7903066
-#prob_80
-#total_bases_introgressed = 35708711
-#prob_75
-#total_bases_introgressed = 50712387
+tract_length_dist = list(csv.reader(open(process_hmm_output_dir + "tract_length_dist.csv","r")))
+total_bases_introgressed = sum([int(item) for item in tract_length_dist[0]])
+print("Total Bases Introgressed: {}".format(total_bases_introgressed))
 
 # Introgression tract file in bed format
 tract_file = process_hmm_output_dir + "tracts_pf.bed"
@@ -609,7 +606,7 @@ def main():
 
 	write_introgressed_genes_to_bed()
 
-	#Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("introgressed_genes.bed", bam_file) for bam_file in bam_file_paths_list)
+	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("introgressed_genes.bed", bam_file) for bam_file in bam_file_paths_list)
 
 	mosdepth_output_file_list = get_mosdepth_output_file_list()
 

@@ -1,4 +1,5 @@
 import os
+import csv
 from joblib import Parallel, delayed
 num_cores = 24
 
@@ -35,7 +36,7 @@ vcf_file = "/hb/scratch/mglasena/data/genotypes/franciscanus/insertions_removed.
 intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/intersect.tsv"
 
 # PSG intersection file
-psg_intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/psg_intersect.csv"
+psg_intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/psg_intersect.tsv"
 
 def get_gene_list():
 	introgressed_genes = [gene.split("\t")[0] for gene in open(intersect_file,"r").read().splitlines()[1:]]
@@ -143,33 +144,33 @@ def clean_gene_trees(input_file, output_file):
 	os.system(clean)
 
 def main():
-	gene_lst = get_gene_list()
+	#gene_lst = get_gene_list()
 
-	os.system("mkdir single_gene_gff_records/")
-	Parallel(n_jobs=num_cores)(delayed(make_sco_gff)(gene) for gene in gene_lst)
+	#os.system("mkdir single_gene_gff_records/")
+	#Parallel(n_jobs=num_cores)(delayed(make_sco_gff)(gene) for gene in gene_lst)
 
 	# Concatenate all single gene gff records into "sco_gff.gff" file
-	os.system('find ./single_gene_gff_records/ -type f -name "*.record" -exec cat {} \\; > sco_gff.gff')
+	#os.system('find ./single_gene_gff_records/ -type f -name "*.record" -exec cat {} \\; > sco_gff.gff')
 	
 	# Delete the single gene records
-	os.system('find ./single_gene_gff_records/ -type f -name "*.record" -delete')
-	os.system('rmdir single_gene_gff_records/')
+	#os.system('find ./single_gene_gff_records/ -type f -name "*.record" -delete')
+	#os.system('rmdir single_gene_gff_records/')
 
-	run_vcf2fasta()
-	replace_missing_genotype_char()
+	#run_vcf2fasta()
+	#replace_missing_genotype_char()
 	
-	fasta_file_list = os.listdir("vcf2fasta_gene/")
-	Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_file_list)
+	#fasta_file_list = os.listdir("vcf2fasta_gene/")
+	#Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_file_list)
 	
-	tree_file_lst = [item for item in os.listdir("vcf2fasta_gene/") if "treefile" in item]
-	Parallel(n_jobs=num_cores)(delayed(edit_tree_files)(input_file) for input_file in tree_file_lst)
+	#tree_file_lst = [item for item in os.listdir("vcf2fasta_gene/") if "treefile" in item]
+	#Parallel(n_jobs=num_cores)(delayed(edit_tree_files)(input_file) for input_file in tree_file_lst)
 
-	update_gene_intersection_file()
-	update_psg_intersection_file()
+	#update_gene_intersection_file()
+	#update_psg_intersection_file()
 
 	clean_up_iqtree_files()
-	concatenate_trees()
-	clean_gene_trees("concatenated_trees.nwk", "clean_single_locus_trees.nwk")
+	#concatenate_trees()
+	#clean_gene_trees("concatenated_trees.nwk", "clean_single_locus_trees.nwk")
 
 if __name__ == "__main__":
 	main()
