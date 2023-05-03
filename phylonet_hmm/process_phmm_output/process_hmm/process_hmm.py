@@ -48,7 +48,7 @@ bam_file_paths_list = [
 combined_results = []
 
 # Initialize a dictionary containing scaffold metrics in the format of: 
-# {scaffold: [length in base pairs, length spanned by first and last coordinates, number of sites in the all sites alignment, number nexus sites in PhyloNet-HMM alignment, number posterior probabilities > 90, number of introgression tracts, number of 10kb introgression tracts]}
+# {scaffold: [length in base pairs, length spanned by first and last coordinates, number of sites in the all sites alignment, number nexus sites in PhyloNet-HMM alignment, number posterior probabilities > threshold, number of introgression tracts, number of 10kb introgression tracts]}
 scaffold_dict = {}
 
 # Initialize a dictionary for coverage depth by species of all introgression tracts identified by PhyloNet-HMM
@@ -95,11 +95,11 @@ def find_tracts_scaffold(json_file_path, coordinate_file_path):
 	start = 0
 	stop = 0
 	i = 0
-	while (i < (len(introgression_probabilities) - 1)):
+	while i < len(introgression_probabilities):
 		if introgression_probabilities[i] >= posterior_probability_threshold:
 			start = i
 			stop = i
-			while introgression_probabilities[i] >= posterior_probability_threshold and i < (len(introgression_probabilities)-1):
+			while i < len(introgression_probabilities) and introgression_probabilities[i] >= posterior_probability_threshold:
 				stop = i
 				i = i+1
 			index_tract_list.append([start, stop])
@@ -169,12 +169,14 @@ def filter_tracts_for_gaps(tract_file):
 	tracts_adjusted = 0
 	tracts_filtered = 0
 	tracts_added = 0
+	
 	with open("tracts_gap_filter.bed","w") as f2:
 		for line in tracts:
 			tract = line.split("\t")[3]
 			if tract not in gap_overlapped_tracts:
 				f2.write(line + "\n")
 				tracts_written_to_bed += 1
+			
 			else:
 				print("The tract {} overlapped with the 100 kb gap {}".format(tract, gap_overlapped_tracts[tract][4]))
 				scaffold = tract.split(":")[0]
@@ -186,6 +188,8 @@ def filter_tracts_for_gaps(tract_file):
 				new_tract = False
 				new_tract_2 = False
 
+				# When converting a gap start to a tract stop, have to add 1 to the coordinate value 
+				# When converting a gap stop to a tract start, have to subtract 1 to the coordinate value 
 				if gap_start > tract_start and gap_stop < tract_stop:
 					new_tract = [tract_start, str(int(gap_start) + 1)]
 					new_tract_2 = [str(int(gap_stop) - 1), tract_stop]
@@ -199,7 +203,7 @@ def filter_tracts_for_gaps(tract_file):
 				elif gap_start > tract_start and gap_stop >= tract_stop:
 					new_tract = [tract_start, str(int(gap_start) + 1)]
 					print("The gap {} overlaps with the end of the tract {}".format(gap_overlapped_tracts[tract][4], tract))
-					print("Trimming the end of tract {} from {} to {}".format(tract, tract_stop, gap_start))
+					print("Trimming the end of tract {} from {} to {}".format(tract, tract_stop, new_tract[1]))
 					print("The new tract is {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1]))
 					print("\n")
 					tracts_adjusted += 1
@@ -207,18 +211,12 @@ def filter_tracts_for_gaps(tract_file):
 				elif gap_start <= tract_start and gap_stop < tract_stop:
 					new_tract = [str(int(gap_stop) - 1), tract_stop]
 					print("The gap {} overlaps with the beginning of the tract {}".format(gap_overlapped_tracts[tract][4], tract))
-					print("Trimming the beggining of tract{} from {} to {}".format(tract, tract_start, gap_stop))
+					print("Trimming the beggining of tract{} from {} to {}".format(tract, tract_start, new_tract[0]))
 					print("The new tract is {}".format(scaffold + ":" + new_tract[0] + "_" + new_tract[1]))
 					print("\n")
 					tracts_adjusted += 1
 
-				elif gap_start < tract_start and gap_stop > tract_stop:
-					print("The gap {} spans the entire tract {}".format(tract, gap_overlapped_tracts[tract][4]))
-					print("Filtering {} from tracts".format(tract))
-					print("\n")
-					tracts_filtered += 1
-
-				elif gap_start == tract_start and gap_stop == tract_stop:
+				elif gap_start <= tract_start and gap_stop >= tract_stop:
 					print("The gap {} spans the entire tract {}".format(tract, gap_overlapped_tracts[tract][4]))
 					print("Filtering {} from tracts".format(tract))
 					print("\n")
@@ -232,6 +230,7 @@ def filter_tracts_for_gaps(tract_file):
 					f2.write(scaffold + "\t" + new_tract_2[0] + "\t" + new_tract_2[1] + "\t" + scaffold + ":" + new_tract_2[0] + "_" + new_tract_2[1] + "\n")
 					tracts_written_to_bed += 1
 
+	print("Started with {} introgression tracts".format(len(tracts)))
 	print("Tracts adjusted: {}".format(tracts_adjusted))
 	print("Tracts filtered: {}".format(tracts_filtered))
 	print("Tracts added: {}".format(tracts_added))
@@ -283,9 +282,6 @@ def filter_tracts_by_depth():
 
 	for key in list(coverage_dict):
 		if min(coverage_dict[key]) < 5 or max(coverage_dict[key]) >= 100:
-			print("Tract {} filtered".format(key))
-			print(coverage_dict[key])
-			print("\n")
 			tracts_filtered += 1
 			continue
 		else:
@@ -309,7 +305,7 @@ def filter_tracts_by_depth():
 		Spal.append(value[2])
 		Hpul.append(value[3])
 
-	print("{} introgression tracts were filtered due to high or low coverage depth".format(tracts_filtered))
+	print("{} introgression tracts were filtered due to low or too high coverage depth".format(tracts_filtered))
 	print("{} introgression tracts passed coverage depth filters and were written to tracts_pf.bed".format(tracts_pass_filter))
 	print("Tracts passing filter and their coverage depth metrics were written to tract_coverage.tsv.")
 	print("\n")
@@ -352,7 +348,7 @@ def get_stats_on_tracts(tract_file):
 	print("Median tract length of introgression tracts longer than 10 kb: {}".format(statistics.median(ten_kb_length_dist)))
 	print("Standard deviation of introgression tracts greater than 10kb: {}".format(statistics.stdev(ten_kb_length_dist)))
 
-# Populate scaffold_dict dictionary in the format of {scaffold: [length in base pairs, length spanned by first and last coordinates, number of sites in the all sites alignment, number nexus sites in PhyloNet-HMM alignment, number posterior probabilities > 90, number of introgression tracts, number of 10kb introgression tracts]}
+# Populate scaffold_dict dictionary in the format of {scaffold: [length in base pairs, length spanned by first and last coordinates, number of sites in the all sites alignment, number nexus sites in PhyloNet-HMM alignment, number posterior probabilities > threshold, number of introgression tracts, number of 10kb introgression tracts]}
 def organize_tracts_by_scaffold(tract_file):
 	scaffold_list = open(scaffold_info_file,"r").read().splitlines()
 
@@ -360,7 +356,6 @@ def organize_tracts_by_scaffold(tract_file):
 		scaffold, length = scaffold.split("\t")
 		scaffold_dict[scaffold] = [int(length)]
 		first_coordinate = int(open(phylonet_hmm_alignment_dir + scaffold + "/" + "coordinates","r").read().splitlines()[0].split(":")[1]) - 1
-		# Do I need to subtrat by 1 here?
 		last_coordinate = int(open(phylonet_hmm_alignment_dir + scaffold + "/" + "coordinates","r").read().splitlines()[-1].split(":")[1])
 		total_scaffold_alignment_length = last_coordinate - first_coordinate
 		scaffold_dict[scaffold].append(total_scaffold_alignment_length)
@@ -372,11 +367,11 @@ def organize_tracts_by_scaffold(tract_file):
 	for scaffold in os.listdir(probability_file_dir):
 		scaffold_name = scaffold.split(".json")[0]
 		number_sites = len(json.load(open(probability_file_dir + scaffold,"r")))
-		number_sites_above_threshold = len([probability for probability in json.load(open(probability_file_dir + scaffold,"r")) if probability >= 0.9])
+		number_sites_above_threshold = len([probability for probability in json.load(open(probability_file_dir + scaffold,"r")) if probability >= (posterior_probability_threshold/100)])
 		scaffold_dict[scaffold_name].append(number_sites)
 		scaffold_dict[scaffold_name].append(number_sites_above_threshold)
 	
-	# Initiate counters for number tracts and number ten_kb_tracts
+	# Initialize counters for number tracts and number ten_kb_tracts
 	for scaffold in scaffold_dict:
 		scaffold_dict[scaffold].append(0)
 		scaffold_dict[scaffold].append(0)
@@ -393,7 +388,7 @@ def organize_tracts_by_scaffold(tract_file):
 def write_scaffold_dict_to_csv():
 	csv_file = open("introgression_by_scaffold.csv","w")
 	writer = csv.writer(csv_file)	
-	header = ["scaffold", "length (bp)", "length spanned by first and last sites (bp)", "number of sites in all_sites alignment", "number nexus sites in phmm alignment", "number posterior probabilities > 90", "number_tracts", "number_ten_kb_tracts"]
+	header = ["scaffold", "length (bp)", "length spanned by first and last sites (bp)", "number of sites in all_sites alignment", "number nexus sites in phmm alignment", "number posterior probabilities > threshold", "number_tracts", "number_ten_kb_tracts"]
 	writer.writerow(header)
 	for scaffold in scaffold_dict:
 		data = [scaffold, scaffold_dict[scaffold][0], scaffold_dict[scaffold][1],scaffold_dict[scaffold][2],scaffold_dict[scaffold][3],scaffold_dict[scaffold][4],scaffold_dict[scaffold][5],scaffold_dict[scaffold][6]]
@@ -474,7 +469,7 @@ def main():
 	# Print summary stats for introgression tracts passing filter 
 	get_stats_on_tracts("tracts_pf.bed")
 	
-	# Populate scaffold_dict dictionary in the format of {scaffold: [length in base pairs, length spanned by first and last coordinates, number of sites in the all sites alignment, number nexus sites in PhyloNet-HMM alignment, number posterior probabilities > 90, number of introgression tracts, number of 10kb introgression tracts]}
+	# Populate scaffold_dict dictionary in the format of {scaffold: [length in base pairs, length spanned by first and last coordinates, number of sites in the all sites alignment, number nexus sites in PhyloNet-HMM alignment, number posterior probabilities > threshold, number of introgression tracts, number of 10kb introgression tracts]}
 	organize_tracts_by_scaffold("tracts_pf.bed")
 	
 	# Write the populated scaffold_dict dictionary to a csv file called introgression_by_scaffold.csv
