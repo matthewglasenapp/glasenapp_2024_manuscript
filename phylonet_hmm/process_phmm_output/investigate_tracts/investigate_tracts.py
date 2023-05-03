@@ -3,8 +3,19 @@ import csv
 import gzip
 from joblib import Parallel, delayed
 
+# Number of threads to use for coverage depth analysis with mosdepth. Do not exceed 4. 
+threads = 4
+
+# Specify the directory that contains protein_coding_genes.bed, unique_exons.bed, GenePageGeneralInfo_AllGenes.txt, GeneGoTerms.txt, GeneKoTerms.txt, tu_2012_go.csv, and psg.csv
+input_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/"
+
+# Specify the directory with output from process_hmm.py 
 process_hmm_output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/"
-working_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/"
+
+# Specify the directory for output
+output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/"
+
+# Specify the directory contianing the scaffold alignments and coordinate files used in the PhyloNet-HMM analysis
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
 
 # Reference alignment BAM files for assessing coverage dpeth
@@ -14,15 +25,6 @@ bam_file_paths_list = [
 "/hb/home/mglasena/bam_files/pallidus_SRR5767285_dedup_aligned_reads.bam", 
 "/hb/home/mglasena/bam_files/pulcherrimus_SRR5767283_dedup_aligned_reads.bam"
 ]
-
-threads = 4
-
-introgressed_gene_coverage_dict = dict()
-
-# Total bases introgressed
-tract_length_dist = list(csv.reader(open(process_hmm_output_dir + "tract_length_dist.csv","r")))
-total_bases_introgressed = sum([int(item) for item in tract_length_dist[0]])
-print("Total Bases Introgressed: {}".format(total_bases_introgressed))
 
 # Introgression tract file in bed format
 tract_file = process_hmm_output_dir + "tracts_pf.bed"
@@ -38,41 +40,50 @@ exon_list_file = "unique_exons.bed"
 
 # Gene metadata from Echinobase 
 #os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
-gene_info_file = "GenePageGeneralInfo_AllGenes.txt"
+gene_info_file = input_dir + "GenePageGeneralInfo_AllGenes.txt"
 
 # Gene GO Terms from Echinobase 
 #os.system("wget https://download.echinobase.org/pub/GenePageReports/GeneGoTerms.txt")
-gene_go_terms = "GeneGoTerms.txt"
+gene_go_terms = input_dir + "GeneGoTerms.txt"
 
 # Gene KO Terms from Echinobase
 #os.system("wget https://download.echinobase.org/pub/GenePageReports/GeneKoTerms.txt")
-gene_ko_terms = "GeneKoTerms.txt"
+gene_ko_terms = input_dir + "GeneKoTerms.txt"
 
 # Tu et al. 2012 S. purpuratus GO terms
 # https://genome.cshlp.org/content/22/10/2079/suppl/DC1
 # Supp table S2
-tu_go_terms = "tu_2012_go.csv"
+tu_go_terms = input_dir + "tu_2012_go.csv"
 
 # CSV file of 6,520 single copy orthologs from Kober and Pogson. Rows 5 - 1,012 contain the 1,008 genes with significant tests for positive selection
-psg_file = "psg.csv"
+psg_file = input_dir + "psg.csv"
 
-# Gene dictionary in the format of {ECB-GENEPAGE_ID: symbol, name, synonyms, curation_status, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
+# Initialize dictionary for coverage depth for each introgression tract by species 
+introgressed_gene_coverage_dict = dict()
+
+# Total bases introgressed
+tract_length_dist = list(csv.reader(open(process_hmm_output_dir + "tract_length_dist.csv","r")))
+total_bases_introgressed = sum([int(item) for item in tract_length_dist[0]])
+
+# Initialize dictionary in the format of {ECB-GENEPAGE_ID: symbol, name, synonyms, curation_status, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
 gene_dictionary = dict()
 
-# Dictionary of {ECCB-GENEPAGE_ID: [SPU_IDs]}
+# Initialize dictionary mapping ECB gene IDs to SPU IDs in the format of: {ECCB-GENEPAGE_ID: [SPU_IDs]}
 ECB_SPU_dict = dict()
 
-# Same dictionary as gene_dictionary, but formatted as {LOC_ID: ECB-GENEPAGE-ID, name, synonyms, curation_stats, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
+# Initialize dictionary in the format of {LOC_ID: ECB-GENEPAGE-ID, name, synonyms, curation_stats, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
 LOC_gene_dictionary = dict()
 
-# Dictionary for genes overlapping with an introgression tract {LOC_ID: data}
+# Initialize dictionary for genes overlapping with an introgression tract {LOC_ID: data}
 gene_intersection_dict = dict()
 
-# Dictionary of the average coverage depths of each introgression tract for each species
+# Initalize dictionary of mean coverage depth by species for each introgression tract 
 tract_coverage_depth_dict = dict()
 
+# Initialize dictionary of nexus alignment coordinates by scaffold in the format of {scaffold: [coordinate_site_1, coordinate_site_2], []}
 coordinate_by_scaffold_dict = dict()
 
+# Initialize dictionary in the format of {introgression_tract: [overlapping gene 1, overlapping gene 2]}
 tract_intersection_dict = dict()
 
 # Create gene dictionary from GenePageGeneralInfo_AllGenes.txt
@@ -581,8 +592,10 @@ def find_psg_overlap():
 	csv_file.close()
 
 def main():
-	os.chdir(working_dir)
+	os.chdir(output_dir)
+	
 	create_gene_dictionary()
+	
 	create_ECB_SPU_mapping_dict()
 	add_GO_KO_termns_to_gene_dictionary()
 	
@@ -623,12 +636,12 @@ def main():
 	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
 	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
 
+	print("Total bases introgressed: {}".format(total_bases_introgressed))
 	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
 	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
 	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
 	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
 
-	print("Total introgressed bases: {}".format(total_bases_introgressed))
 	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
 
 	find_psg_overlap()

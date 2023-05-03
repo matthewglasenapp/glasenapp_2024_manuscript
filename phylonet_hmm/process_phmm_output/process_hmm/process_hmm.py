@@ -40,7 +40,7 @@ gaps_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/100kb_gaps.bed"
 bam_file_paths_list = [
 "/hb/home/mglasena/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
 "/hb/home/mglasena/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
-"/hb/home/mglasena/data/bam_files/pallidus_SRR5767285_dedup_aligned_reads.bam", 
+"/hb/home/mglasena/bam_files/pallidus_SRR5767285_dedup_aligned_reads.bam", 
 "/hb/home/mglasena/bam_files/pulcherrimus_SRR5767283_dedup_aligned_reads.bam"
 ]
 
