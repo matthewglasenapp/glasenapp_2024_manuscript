@@ -15,19 +15,19 @@ sample_names = {
 }
 
 # nw_utils directory
-nw_utils = "/hb/groups/pogson_group/dissertation/software/newick_utils/src/"
+nw_utils = "/hb/home/mglasena/software/newick_utils/src/"
 
 # Path to vcf2fasta.py
-vcf2fasta = "/hb/groups/pogson_group/dissertation/software/vcf2fasta/vcf2fasta.py"
+vcf2fasta = "/hb/home/mglasena/software/vcf2fasta/vcf2fasta.py"
 
 # Feature of gff file that vcf2fasta.py will build alignments for
 feature = "gene"
 
 # Path to S. purpuratus reference genome
-reference_genome = "/hb/groups/pogson_group/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
+reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
 
 # S. purpuratus gff3 file
-gff_file = "/hb/groups/pogson_group/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.gff"
+gff_file = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.gff"
 
 # Path to filtered multisample vcf file
 vcf_file = "/hb/scratch/mglasena/data/genotypes/franciscanus/insertions_removed.g.vcf.gz"
