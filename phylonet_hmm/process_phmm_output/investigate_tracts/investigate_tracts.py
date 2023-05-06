@@ -637,13 +637,11 @@ def main():
 	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
 
 	print("Total bases introgressed: {}".format(total_bases_introgressed))
+	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
 	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
 	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
 	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
-	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
-
-	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
-
+	
 	find_psg_overlap()
 
 if __name__ == "__main__":
