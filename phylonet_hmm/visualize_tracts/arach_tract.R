@@ -8,7 +8,6 @@ setwd("/Users/matt/desktop/hmm_R_analysis/")
 introgression_probabilities = fromJSON(file = "NW_022145601.1.json")
 class(introgression_probabilities)
 
-# Need to re-download coordinate file
 coordinates = read.table("NW_022145601.1_coordinates", header = FALSE)
 coordinates = as.vector(coordinates[, 1])
 
