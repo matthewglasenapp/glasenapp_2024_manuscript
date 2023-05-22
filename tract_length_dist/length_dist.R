@@ -1,6 +1,12 @@
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/tract_length_dist/")
 
 library(ggExtra)
+library(ggplot2)
+
+x = read.csv("tract_dist.csv",header=F)
+#x = read.csv("all_tracts.csv",header=F)
+y=unlist(x)
+
 options(scipen = 999)
 ggplot() + 
   aes(y) + 
@@ -15,5 +21,6 @@ ggplot() +
   scale_y_continuous(expand = expansion(mult = c(0, .03))) + 
   theme(panel.background = element_blank()) + 
   stat_bin(binwidth = 10000, aes(y=..count.., label=ifelse(..count..==0,"",..count..)), geom="text", vjust = -.5)
+
 
 
