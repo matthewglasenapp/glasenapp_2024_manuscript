@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd("/Users/matt/desktop/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/tracts_by_scaffold/")
 
 mytheme <- theme_classic() + theme(
   legend.position = "top",
@@ -42,7 +42,7 @@ figure <- ggplot(plot_data) +
     aes(x = 0, xend = length, y = chromosome, yend = chromosome),
     color = "black", size = 0.1
   ) + 
-  labs(x = "Position", y = "Chromosome") +
+  labs(x = "Position along Chromosome (base pairs)", y = "Chromosome") +
   scale_x_continuous(labels = scales::comma) +
   theme(
     panel.background = element_blank(),
@@ -51,5 +51,7 @@ figure <- ggplot(plot_data) +
     axis.text = element_text(size = 8),
     axis.title = element_text(size = 20)
   )
+
+figure
 
 ggsave(filename = "tracts.png", plot = figure, dpi = 700)

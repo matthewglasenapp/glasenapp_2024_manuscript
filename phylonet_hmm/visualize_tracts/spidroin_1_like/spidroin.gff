@@ -1,0 +1,4 @@
+NW_022145601.1	Gnomon	gene	771454	772809	.	-	.	ID=gene-LOC115924796;Dbxref=GeneID:115924796;Name=LOC115924796;gbkey=Gene;gene=LOC115924796;gene_biotype=protein_coding
+NW_022145601.1	Gnomon	mRNA	771454	772809	.	-	.	ID=rna-XM_030987627.1;Parent=gene-LOC115924796;Dbxref=GeneID:115924796,Genbank:XM_030987627.1;Name=XM_030987627.1;gbkey=mRNA;gene=LOC115924796;model_evidence=Supporting evidence includes similarity to: 8 Proteins;product=spidroin-1-like;transcript_id=XM_030987627.1
+NW_022145601.1	Gnomon	exon	771454	772809	.	-	.	ID=exon-XM_030987627.1-1;Parent=rna-XM_030987627.1;Dbxref=GeneID:115924796,Genbank:XM_030987627.1;gbkey=mRNA;gene=LOC115924796;product=spidroin-1-like;transcript_id=XM_030987627.1
+NW_022145601.1	Gnomon	CDS	771454	772809	.	-	0	ID=cds-XP_030843487.1;Parent=rna-XM_030987627.1;Dbxref=GeneID:115924796,Genbank:XP_030843487.1;Name=XP_030843487.1;gbkey=CDS;gene=LOC115924796;product=spidroin-1-like;protein_id=XP_030843487.1
