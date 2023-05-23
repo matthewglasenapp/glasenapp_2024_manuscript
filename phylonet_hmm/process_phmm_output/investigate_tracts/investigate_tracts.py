@@ -15,10 +15,10 @@ process_hmm_output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/proce
 # Specify the directory for output
 output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/"
 
-# Specify the directory contianing the scaffold alignments and coordinate files used in the PhyloNet-HMM analysis
+# Specify the directory containing the scaffold alignments and coordinate files used in the PhyloNet-HMM analysis
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
 
-# Reference alignment BAM files for assessing coverage dpeth
+# Reference alignment BAM files for assessing coverage depth
 bam_file_paths_list = [
 "/hb/home/mglasena/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
 "/hb/home/mglasena/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
@@ -33,10 +33,10 @@ tract_file = process_hmm_output_dir + "tracts_pf.bed"
 tract_coverage_file = process_hmm_output_dir + "tract_coverage.tsv"
 
 # Bed file of all S. purpuratus protein coding genes 
-gene_list_file = "protein_coding_genes.bed"
+gene_list_file = input_dir + "protein_coding_genes.bed"
 
 # File of unique protein-coding exons 
-exon_list_file = "unique_exons.bed"
+exon_list_file = input_dir + "unique_exons.bed"
 
 # Gene metadata from Echinobase 
 #os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
@@ -98,7 +98,7 @@ def create_gene_dictionary():
 		# Delete any empty lists that occurred due to consecutive tab characters. Each record was split into a list on each "\t"
 		lst = list(filter(None, lst))
 		
-		# Each record begins with an ECB-GENEPAGE- numer 
+		# Each record begins with an ECB-GENEPAGE- number 
 		echinobase_gene_id = lst[0]
 		
 		# Symbol is generally the corresponding LOC number, but sometimes it is a name
@@ -108,7 +108,7 @@ def create_gene_dictionary():
 		# Delete echinobase_gene_id, symbol, and name form list after saving them to variables. This makes parsing the rest of the list easier. 
 		del lst[0:3]
 
-		# Define variables to be filled later.
+		# Define variables to be populated later. Give the the default value of "n/a"
 		curation_status = "n/a"
 		synonyms = "n/a"
 		info = "n/a"
@@ -134,7 +134,7 @@ def create_gene_dictionary():
 					lst.pop(lst.index(item))
 			
 		# There is one weird edge case where the list still has two records: ['Metallothioneins have a high content of cysteine residues that bind various heavy metals.', 'SPU_017134']
-		# I checked to ensure that this records synonyms variable is "n/a"
+		# I checked to ensure that this record's synonyms variable is "n/a"
 		# Assigned 'SPU_017134' to synonyms variable 
 		if len(lst) > 1:
 			for item in lst:
@@ -142,7 +142,7 @@ def create_gene_dictionary():
 					synonyms = item
 					lst.pop(lst.index(synonyms))
 
-		# Now all records are a list of 1 or empty lists. The records with a list of one are the info column. Populate info variable.
+		# Now all records are a list of 1 or empty lists. The records with a list of one contain the info column. Populate info variable.
 		# After this chunk, all records will be an empty list 
 		if len(lst) == 1:
 			info = lst[0].strip()
@@ -204,7 +204,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 		
 		# If the length of the value is 6, GO terms have already been added for this key (ECB-GENEPAGE ID)
 		# Append the additional GO terms to the pre-existing list 
-		elif len(gene_dictionary[gene[0]]) == 6:
+		elif len(gene_dictionary[gene[0]]) >= 6:
 			gene_dictionary[gene[0]][5].append(gene[3])
 
 	# Append "n/a" to gene dictionary records if GO Terms weren't appended
@@ -221,7 +221,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 		
 		# If the length of the value is 7, KO terms have already been added for this key (ECB-GENEPAGE ID)
 		# Append the additional KO terms to the pre-existing list 
-		elif len(gene_dictionary[gene[0]]) == 7:
+		elif len(gene_dictionary[gene[0]]) >= 7:
 			gene_dictionary[gene[0]][5].append(gene[3])
 
 	# Append "n\a" to gene dictionary records if didn't append KO Terms
@@ -235,12 +235,11 @@ def add_GO_KO_termns_to_gene_dictionary():
 	for item in tu_go_terms_list:
 		tu_go_dict[item[0]] = item[1]
 
-	# Is this appropriate? When multiple SPU IDs map to one ECB-GENEPAGE ID? Is it appropriate to append all the SPU Tu et al. GO Terms to the one ECB-GENEPAGE ID?
 	for gene in gene_dictionary:
 		# If there are multiple SPU_ IDs for the given ECB-GENEPAGE number, create go_lst and add the GO terms for all SPU numbers to this list
 		if len(ECB_SPU_dict[gene]) > 1:
 			spu_lst = ECB_SPU_dict[gene]
-			go_lst =[]
+			go_lst = []
 			for spu_number in spu_lst:
 				if spu_number in tu_go_dict.keys():
 					go_lst.append(tu_go_dict[spu_number])
@@ -259,7 +258,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 		elif len(ECB_SPU_dict[gene]) == 0:
 			gene_dictionary[gene].append("n/a")
 		
-		# If there is exactly one SPU_ ID for the given ECB-GENEPAGE number 
+		# If there is exactly one SPU_ID for the given ECB-GENEPAGE number 
 		elif len(ECB_SPU_dict[gene]) == 1:
 			spu = ECB_SPU_dict[gene][0]
 			
@@ -282,8 +281,6 @@ def add_GO_KO_termns_to_gene_dictionary():
 
 		if type(value[6]) is list:
 			value[6] = ",".join(list(set(value[6])))
-
-	# Deal with redundant Tu et al. terms here!
 
 # Use bedtools intersect to create file bed file containing the overlap between introgression tracts and protein coding genes 
 def intersect_genes(tract_file, gene_file, outfile):
@@ -360,6 +357,7 @@ def create_gene_intersection_dict(overlap_file):
 		#LOC ID
 		gene_id = record[7].split("-",1)[1]
 
+		# For cases when multiple introgression tracts span one gene. Append the new tract, add the new number of overlapping bases to the previous number, and recalculated percent introgressed. 
 		if gene_id in gene_intersection_dict:
 			additional_tract = record[3].replace("_","-")
 			bp_overlap = int(record[14])
@@ -386,9 +384,9 @@ def create_gene_intersection_dict(overlap_file):
 				gene_ECB_KO = LOC_gene_dictionary[gene_id][6]
 				gene_tu_GO = LOC_gene_dictionary[gene_id][7]
 
-			# If gene_id isn't in LOC_gene_dictionary.keys(), check to see if it is the synonyms of another record
+			# If gene_id isn't in LOC_gene_dictionary.keys(), check to see if it is the synonym of another record
 			else:
-				# I verified that this doesn't lead to finding multiple records and overwriting. 
+				# Verified that this doesn't lead to finding multiple records and overwriting. 
 				for key,value in LOC_gene_dictionary.items():
 					if gene_id in value[2]:
 						gene_ecb_id = value[0]
@@ -412,7 +410,6 @@ def create_gene_intersection_dict(overlap_file):
 
 def create_tract_info_file(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
-	value_error_counter = 0 
 	
 	for key,value in tract_coverage_depth_dict.items():
 		scaffold = key.split(":")[0].replace("-","_")
@@ -552,8 +549,7 @@ def create_gene_intersection_file():
 def get_exon_overlap():
 	overlapping_bases = []
 
-	with open("exon_overlap.bed","r") as f:
-		inputs = f.read().splitlines()
+	inputs = open("exon_overlap.bed","r").read().splitlines()
 
 	for overlap in inputs:
 		overlapping_bases.append(int(overlap.split("\t")[14]))
