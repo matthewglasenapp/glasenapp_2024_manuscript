@@ -12,7 +12,7 @@ mytheme <- theme_classic() + theme(
 theme_set(mytheme)
 
 # Read the bed file
-bed_file <- "ten_kb_tracts.bed"
+bed_file <- "ten_kb_tracts_80.bed"
 genes <- read.table(bed_file, sep = "\t", header = FALSE)
 
 # Rename the columns
@@ -54,4 +54,4 @@ figure <- ggplot(plot_data) +
 
 figure
 
-ggsave(filename = "tracts.png", plot = figure, dpi = 700)
+ggsave(filename = "tracts_80.png", plot = figure, dpi = 700)

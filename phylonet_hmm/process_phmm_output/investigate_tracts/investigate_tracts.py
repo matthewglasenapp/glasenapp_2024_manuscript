@@ -193,7 +193,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 
 	# List of Tu et al. 2012 GO Terms by SPU_ number 
 	# File has one line header
-	tu_go_terms_list = [gene.split(",",1) for gene in open("tu_2012_go.csv","r").read().splitlines()[1:]]
+	tu_go_terms_list = [gene.split(",",1) for gene in open(tu_go_terms,"r").read().splitlines()[1:]]
 
 	# Add Echinobase GO Terms to gene dictionary
 	# Add GO Terms as a list because there are duplicate ECB-GENEPAGE numbers in the GO Terms file
@@ -504,7 +504,7 @@ def run_mosdepth(tract_file, bam_file):
 
 # Get list of mosdepth output file paths in alphabetic order 
 def get_mosdepth_output_file_list():
-	find_files = "find {} -type f -name '*.regions*' | grep -v 'csi' > mosdepth_output_files".format(working_dir)
+	find_files = "find {} -type f -name '*.regions*' | grep -v 'csi' > mosdepth_output_files".format(output_dir)
 	os.system(find_files)
 	mosdepth_output_file_list = open("mosdepth_output_files","r").read().splitlines()
 	os.system("rm mosdepth_output_files")

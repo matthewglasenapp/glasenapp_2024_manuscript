@@ -1,15 +1,24 @@
 # Install and load the necessary package
+
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/basic_vis/")
+
 library(ggplot2)
 
 # Create a data frame with the given data
 data <- data.frame(
   Category = c("Coding", "Intron", "Intergenic"),
-  Bases = c(842951, 3455534, 4773694),
+  Bases = c(843011, 3455504, 4773694),
   Percentage = c(9.3, 38.1, 52.6)
 )
 
+data_2 <- data.frame(
+  Category = c("Coding", "Intron", "Intergenic"),
+  Bases = c(4572943, 18897527, 25575344),
+  Percentage = c(9.3, 38.5, 52.1)
+)
+
 # Create a pie chart using ggplot2
-ggplot(data, aes(x = "", y = Percentage, fill = Category)) +
+figure <- ggplot(data, aes(x = "", y = Percentage, fill = Category)) +
   geom_bar(width = 1, stat = "identity") +
   coord_polar("y", start = 0) +
   geom_text(aes(label = paste0(Category, "\n ", Percentage, "%")), position = position_stack(vjust = 0.5)) +
@@ -17,3 +26,6 @@ ggplot(data, aes(x = "", y = Percentage, fill = Category)) +
   guides(fill = FALSE) +
   theme_void()
 
+figure
+
+ggsave(filename = "distribution_bases_90.svg", plot = figure)
