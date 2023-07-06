@@ -29,3 +29,23 @@ figure <- ggplot(data, aes(x = "", y = Percentage, fill = Category)) +
 figure
 
 ggsave(filename = "distribution_bases_90.svg", plot = figure)
+
+### Whole Genome
+data_3 <- data.frame(
+  Category = c("Coding", "Intron", "Intergenic"),
+  Bases = c(82267625, 412196958, 427391210),
+  Percentage = c(8.9, 44.7, 46.4)
+)
+
+# Create a pie chart using ggplot2
+figure <- ggplot(data_3, aes(x = "", y = Percentage, fill = Category)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(Category, "\n ", Percentage, "%")), position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Blues") +
+  guides(fill = FALSE) +
+  theme_void()
+
+figure
+
+ggsave(filename = "whole_genome_bases.svg", plot = figure)

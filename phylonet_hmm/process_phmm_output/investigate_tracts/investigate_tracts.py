@@ -98,7 +98,7 @@ def create_gene_dictionary():
 		# Delete any empty lists that occurred due to consecutive tab characters. Each record was split into a list on each "\t"
 		lst = list(filter(None, lst))
 		
-		# Each record begins with an ECB-GENEPAGE- number 
+		# Each record begins with an "ECB-GENEPAGE-" number 
 		echinobase_gene_id = lst[0]
 		
 		# Symbol is generally the corresponding LOC number, but sometimes it is a name
@@ -184,6 +184,7 @@ def create_ECB_SPU_mapping_dict():
 					spu_lst.append(item)
 				ECB_SPU_dict[key] = spu_lst
 
+# Add gene ontology and KEGG ontology terms from Echinobase, and gene ontology terms from Tu et al. (2012), to applicable records in gene_dictionary. 
 def add_GO_KO_termns_to_gene_dictionary():
 	# List of GO Terms by ECB-GENEPAGE record 
 	gene_go_terms_list = [gene.split("\t") for gene in open(gene_go_terms,"r").read().splitlines()]
@@ -287,10 +288,9 @@ def intersect_genes(tract_file, gene_file, outfile):
 	print("Intersecting {} with {}. Writing results to {}".format(tract_file, gene_file, outfile))
 	os.system("bedtools intersect -a " + tract_file + " -b " + gene_file + " -wo > " + outfile)
 
+# Remove records with duplicate symbols or merge them together into a single record 
 def handle_duplicates_and_reverse_dictionary():
-	# Write code to remove records with duplicate symbols or merge them together into a single record 
-
-	# Population LOC_gene_dictionary
+	# Populate LOC_gene_dictionary
 	for key,value in gene_dictionary.items():
 		if value[0] not in LOC_gene_dictionary.keys():
 			LOC_gene_dictionary[value[0]] = [key, value[1], value[2], value[3], value[4], value[5], value[6], value[7]]
@@ -313,6 +313,7 @@ def handle_duplicates_and_reverse_dictionary():
 			#else:
 				#print(key,value)
 
+# Write gene_dictionary of metadata for all S. purpuratus genes to csv file called "all_genes.csv"
 def write_gene_dictionary_to_csv():
 	csv_file = open("all_genes.csv","w")
 	writer = csv.writer(csv_file)	
@@ -324,6 +325,7 @@ def write_gene_dictionary_to_csv():
 		data = [key, value[0], value[1], "|".join(value[2]), value[3], value[4], value[5], value[6], value[7]]
 		writer.writerow(data)
 
+# Populate tract_coverage_depth_dict with mean coverage depth by introgression tract for each species 
 def make_coverage_depths_dict():
 	coverage_depths = open(tract_coverage_file,"r").read().splitlines()
 	print("Adding {} records to tract_coverage_depth_dict".format(len(coverage_depths)))
@@ -335,6 +337,7 @@ def make_coverage_depths_dict():
 		pul = record.split("\t")[4]
 		tract_coverage_depth_dict[tract_name] = [dro,fra,pal,pul]
 
+# Get list of scaffold coordinate files from the PhyloNet-HMM input
 def get_coordinate_file_paths():
 	print("Indexing scaffold coordinate files from {}".format(phylonet_hmm_alignment_dir))
 	find_files = "find {} -type f -name '*coordinates*' > coordinate_files".format(phylonet_hmm_alignment_dir)
@@ -343,11 +346,13 @@ def get_coordinate_file_paths():
 	os.system("rm coordinate_files")
 	return coordinate_file_list
 
+# Populate coordinate_by_scaffold dict with the coordinates applied in each scaffold nexus matrix input file
 def create_coordinate_dict(coordinate_file_list):
 	for coordinate_file in coordinate_file_list:
 		scaffold = open(coordinate_file,"r").readline().split(":")[0]
 		coordinate_by_scaffold_dict[scaffold] = [item.split(":")[1] for item in open(coordinate_file,"r").read().splitlines()]
 
+# Populate gene_intersection_dict with info from the genes that intersect introgression tracts 
 def create_gene_intersection_dict(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
 	print("Number of records in overlap file: {}".format(len(overlaps)))
@@ -408,6 +413,8 @@ def create_gene_intersection_dict(overlap_file):
 
 	print("Length of gene_intersection_dict: {}".format(len(gene_intersection_dict)))
 
+# Create file called tract_info.csv that provides data for each introgression tract identified by PhyloNet-HMM
+# Adjust start/stop coordinates for trimmed introgression tracts that spanned 10kb gaps
 def create_tract_info_file(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
 	
@@ -489,6 +496,7 @@ def create_tract_info_file(overlap_file):
 	
 	csv_file.close()
 
+# Create bed file for introgressed genes 
 def write_introgressed_genes_to_bed():
 	with open("introgressed_genes.bed","w") as f:
 		for key,value in gene_intersection_dict.items():
@@ -497,6 +505,7 @@ def write_introgressed_genes_to_bed():
 				stop = value[4].split(":")[1].split("-")[1]
 				f.write(scaffold + "\t" + str(start) + "\t" + str(stop) + "\t" + key + "\n")
 
+# Use mosdepth to get coverage depth metrics for introgressed genes by species 
 def run_mosdepth(tract_file, bam_file):
 	prefix = bam_file.split("/")[-1].split("_dedup")[0]
 	mosdepth = "mosdepth --by " + tract_file + " --no-per-base --thresholds 1,10,20 -t {} --fast-mode {} {}".format(threads, prefix, bam_file)
@@ -524,6 +533,7 @@ def parse_mosdepth(mosdepth_region_file):
 		else:
 			introgressed_gene_coverage_dict[gene].append(coverage)
 
+# Add coverage depth metrics to gene_intersection_dict 
 def update_gene_intersection_dict():
 	for key,value in gene_intersection_dict.items():
 		values = value
@@ -534,6 +544,7 @@ def update_gene_intersection_dict():
 			if gene_intersection_dict[key][3] == 100:
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
+# Write introgressed genes to "intersect.tsv"
 def create_gene_intersection_file():
 	csv_file = open("intersect.tsv","w")
 	writer = csv.writer(csv_file, delimiter="\t")	
@@ -546,6 +557,7 @@ def create_gene_intersection_file():
 	
 	csv_file.close()
 
+# Calculate the number of exon bases declared introgressed by PhyloNet-HMM
 def get_exon_overlap():
 	overlapping_bases = []
 
@@ -556,6 +568,7 @@ def get_exon_overlap():
 
 	return sum(overlapping_bases)
 
+# Calculate the number of gene bases declared introgressed by PhyloNet-HMM
 def get_gene_overlap():
 	overlapping_bases = []
 
@@ -567,6 +580,7 @@ def get_gene_overlap():
 
 	return sum(overlapping_bases)
 
+# Identify any positively selected genes from Kober and Pogson (2017) with bases declared introgressed. 
 def find_psg_overlap():
 	psg_list = list(csv.reader(open(psg_file,"r"), delimiter = ","))
 	introgressed_genes_list = list(csv.reader(open("intersect.tsv","r"), delimiter = "\t"))

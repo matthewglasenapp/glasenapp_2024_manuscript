@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyverse)
 library(ggarchery)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/arachidonate_5_lipoxygenase/")
 
 theme(plot.margin = margin(10, 50, 10, 10)) # Increase the margin at the top
 

@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyverse)
 library(ggarchery)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/glutathione_peroxidase_1/")
 
 introgression_probabilities = fromJSON(file = "NW_022145611.1.json")
 class(introgression_probabilities)
@@ -18,16 +18,19 @@ data_df <- data.frame(coordinates = coordinates[697310:697757],
                       introgression_probabilities = introgression_probabilities[697310:697757])
 
 ggplot(data_df, aes(x = coordinates, y = introgression_probabilities)) +
-  geom_line(color = "red", linetype = "solid") +
+  geom_line(color = "blue", linetype = "solid") +
   geom_hline(yintercept = 0.9, linetype = "dashed", color = "black") + # Add the dashed line
-  xlab("Position on Scaffold NW_022145601.1") + ylab("Probability of Hybrid Ancestry") +
+  xlab("Position on Chromosome NW_022145601.1 (bp)") + ylab("Probability of Introgressed Ancestry") +
   # Remove the background from the theme
   theme(panel.background = element_blank()) +
   # Add lines representing the X and Y Axes
-  theme(panel.border = element_blank(),
+  theme(panel.background = element_blank(),
+        panel.border = element_blank(),
         axis.line = element_line(colour = "black", size = 1),
-        axis.text = element_text(size = 16), # increase font size of axis labels
-        axis.title = element_text(size = 20)) + # increase font size of axis titles
+        axis.text.x = element_text(size = 16, angle = 45, hjust = 1),  # Rotate x-axis tick labels by 45 degrees
+        axis.text.y = element_text(size = 16),  # Keep y-axis tick labels horizontal
+        axis.title = element_text(size = 20, face = "bold")) +  # Bold axis titles
+  scale_y_continuous(breaks = c(0.25, 0.5, 0.75, 1.00)) +
   # Overlay rectangles and lines representing gene coordinates at the top of the plot
   annotate("rect", xmin = 34800855, xmax = 34801115, ymin = 1.00, ymax = 1.05, 
            fill = "black", color = "black", size = 1) +

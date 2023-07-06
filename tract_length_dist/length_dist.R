@@ -3,16 +3,17 @@ setwd("/Users/matt/Documents/Github/dissertation_chapter_2/tract_length_dist/")
 library(ggExtra)
 library(ggplot2)
 
-x = read.csv("tract_dist_80.csv",header=F)
+#x = read.csv("tract_dist.csv",header=F)
 #x = read.csv("all_tracts.csv",header=F)
+x = read.csv("tract_dist_80.csv",header=F)
 y=unlist(x)
 
 options(scipen = 999)
 figure <- ggplot() + 
   aes(y) + 
   geom_histogram(binwidth=10000, colour="black", fill="light blue") + 
-  xlab("length (bases)") + 
-  ylab("count") + 
+  xlab("Length (bases)") + 
+  ylab("Number of Introgression Tracts") + 
   theme(axis.title.x = element_text(size=14, face="bold")) + 
   theme(axis.title.y = element_text(size=14, face="bold")) + 
   theme(axis.text.x= element_text(size=12)) + 

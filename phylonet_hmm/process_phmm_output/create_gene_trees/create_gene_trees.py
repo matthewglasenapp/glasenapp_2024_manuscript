@@ -38,6 +38,7 @@ intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_t
 # PSG intersection file
 psg_intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/psg_intersect.tsv"
 
+# Get list of introgressed gene NCBI LOC IDs
 def get_gene_list():
 	introgressed_genes = [gene.split("\t")[0] for gene in open(intersect_file,"r").read().splitlines()[1:]]
 	return introgressed_genes 
@@ -47,6 +48,7 @@ def make_sco_gff(gene):
 	command = "grep {} {} > single_gene_gff_records/{}.record".format(gene, gff_file, gene)
 	os.system(command)
 
+# Create fasta matrix for each gene in sco_gff.gff file  
 def run_vcf2fasta():
 	run_vcf2fasta = "{} --fasta {} --vcf {} --gff sco_gff.gff --feat {}".format(vcf2fasta, reference_genome, vcf_file, feature)
 	os.system(run_vcf2fasta)
@@ -59,10 +61,12 @@ def replace_missing_genotype_char():
 	delete_bak_files = 'find ./vcf2fasta_gene/ -type f -name "*.bak" -delete'
 	os.system(delete_bak_files)
 
+# Reconstruct gene trees for each fasta alignment in vcf2fasta_gene/ directory
 def run_iqtree(fasta_file):
 	run_iqtree = "iqtree2 -s vcf2fasta_gene/{} -m MFP -B 1000".format(fasta_file)
 	os.system(run_iqtree)
 
+# Delete unwanted files 
 def clean_up_iqtree_files():
 	delete_gz = 'find ./vcf2fasta_gene/ -type f -name "*.gz" -delete'
 	delete_bionj = 'find ./vcf2fasta_gene/ -type f -name "*.bionj" -delete'
@@ -81,6 +85,7 @@ def clean_up_iqtree_files():
 	os.system(delete_nex)
 	os.system(delete_phy)
 
+# Replace sample id numbers with species scientific names 
 def edit_tree_files(input_file):
 	with open("vcf2fasta_gene/" + input_file, "r") as f:
 		tree_list = f.read().splitlines()
@@ -94,6 +99,7 @@ def edit_tree_files(input_file):
 					tree = new_tree
 			f2.write(tree + "\n")
 
+# Write new "gene_intersect_file.tsv" file that includes the gene tree topology for each introgressed gene along with all the existing info in intersect_file
 def update_gene_intersection_file():
 	csv_file = open("gene_intersect_file.tsv","w")
 	writer = csv.writer(csv_file, delimiter="\t")
@@ -113,6 +119,7 @@ def update_gene_intersection_file():
 	
 	csv_file.close()
 
+# Write new "psg_intersection_file.tsv" file that includes the gene tree topology for each introgressed, positively selected gene along with all the existing info in psg_intersect_file
 def update_psg_intersection_file():
 	csv_file = open("psg_intersection_file.tsv","w")
 	writer = csv.writer(csv_file, delimiter="\t")
@@ -131,11 +138,12 @@ def update_psg_intersection_file():
 	
 	csv_file.close()
 
+# Concatenate all gene tree topologies into one file called "concatenated_trees.nwk"
 def concatenate_trees():
 	concatenate_trees = "cat *.nwk > concatenated_trees.nwk"
 	os.system(concatenate_trees)
 
-#For topology parsing, remove branch lengths and bootstraps. Arrange identical topologies to have the same texual representation. 
+# For topology parsing, remove branch lengths and bootstraps. Arrange identical topologies to have the same texual representation. 
 # nw_topology creates cladogram. Option -I gets rid of branch lengths. 
 # nw_order orders the tree so that trees with identical topologies will have identical newick strings. Ooption -c d reorders the tree in such a way as to remove the ladder. 
 def clean_gene_trees(input_file, output_file):

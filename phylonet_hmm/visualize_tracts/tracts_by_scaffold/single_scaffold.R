@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd("/Users/matt/desktop/")
+setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/phylonet_hmm/visualize_tracts/tracts_by_scaffold/")
 
 mytheme <- theme_classic() + theme(
   legend.position = "top",
@@ -12,7 +12,7 @@ mytheme <- theme_classic() + theme(
 theme_set(mytheme)
 
 # Read the bed file
-bed_file <- "ten_kb_tracts.bed"
+bed_file <- "ten_kb_tracts_80.bed"
 genes <- read.table(bed_file, sep = "\t", header = FALSE)
 
 # Rename the columns
@@ -57,6 +57,8 @@ figure <- ggplot() +
     axis.line.y = element_blank()
   )
 
+figure
+
 # Create the plot
 figure <- ggplot() +
   geom_segment(
@@ -83,11 +85,13 @@ figure <- ggplot() +
     axis.line.y = element_blank()
   )
 
+figure
+
 
 # Print the plot
 print(figure)
 
 
 # Print the plot
-ggsave(filename = "single_tract.png", plot = figure, dpi = 700)
+ggsave(filename = "single_tract_80.svg", plot = figure)
 
