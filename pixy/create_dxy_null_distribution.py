@@ -43,7 +43,7 @@ def run_pixy(file):
 def get_dist():
 	mean_lst = []
 	for file in os.listdir(pixy_dir):
-		mean_dxy = mean([float(row.split("\t")[5]) for row in open(pixy_replicate_dir + file,"r").read().splitlines()[1:] if row.split("\t")[5] != "NA"])
+		mean_dxy = mean([float(row.split("\t")[5]) for row in open(pixy_dir + file,"r").read().splitlines()[1:] if row.split("\t")[5] != "NA"])
 		mean_lst.append(mean_dxy)
 
 	output_csv = open("species_tree_tracts_mean_dxy.csv","w")

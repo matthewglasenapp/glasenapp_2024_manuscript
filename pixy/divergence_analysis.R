@@ -2,8 +2,8 @@ library(sjPlot)
 library(fitdistrplus)
 library(ggplot2)
 library(ggpubr)
-library(dplyr)
 library(plyr)
+library(dplyr)
 
 # Change margin settings
 par(mar=c(2,2,2,1))
@@ -11,9 +11,9 @@ par(mar=c(2,2,2,1))
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/pixy/")
 
 # Define the csv files with list of dXY values 
-#introgression_tract_dxy_file = "introgression_tracts_mean_dxy_dist.csv"
+introgression_tract_dxy_file = "introgression_tracts_mean_dxy_dist.csv"
 
-#species_tree_tract_dxy_file = "species_tree_tracts_mean_dxy.csv"
+species_tree_tract_dxy_file = "species_tree_tracts_mean_dxy.csv"
 
 # Read the CSV file as a one-dimensional vector
 dist_introgression_tract_dxy <- scan(introgression_tract_dxy_file, what = numeric(), sep = ",")
@@ -60,7 +60,7 @@ t.test(divergence~tract_type, data=df, paired=FALSE, var.eq=T)
 # Use dplyr package to calculate the length, mean, standard deviation, standard error,and confidence intervals of the Density variable for each treatment
 summary = df %>%
   group_by(tract_type) %>%
-  summarise(n=n(),mean=mean(divergence),sd=sd(divergence)) %>%
+  dplyr::summarize(n=n(),mean=mean(divergence),sd=sd(divergence)) %>%
   mutate(se=sd/sqrt(n)) %>%
   mutate(ic=se * qt((1-0.05)/2 + .5, n-1))
 
