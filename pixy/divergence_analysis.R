@@ -81,12 +81,14 @@ ggplot(summary) +
 #Calculate the mean for each group
 mu <- ddply(df, "tract_type", summarise, grp.mean=mean(divergence))
 
-ggplot(df, aes(x=divergence, fill=tract_type)) +
+figure <- ggplot(df, aes(x=divergence, fill=tract_type)) +
   geom_density(alpha=0.4) +
-  geom_vline(data=mu, aes(xintercept=grp.mean, color=tract_type), show.legend = FALSE, linetype="dashed") + 
+  #geom_vline(data=mu, aes(xintercept=grp.mean, color=tract_type), show.legend = FALSE, linetype="dashed") + 
   theme(panel.background = element_blank()) + 
   theme(axis.line = element_line(colour = "black", size = 1)) + 
   scale_fill_discrete(labels=c('Introgression Tracts', 'Genome-Wide Background')) + theme(legend.title = element_blank())
+
+ggsave(filename = "dXY.png", plot = figure)
 
 ggplot(df, aes(x=divergence, color=tract_type, fill=tract_type)) + 
   geom_histogram(aes(y=..density..), alpha=0.4, 
