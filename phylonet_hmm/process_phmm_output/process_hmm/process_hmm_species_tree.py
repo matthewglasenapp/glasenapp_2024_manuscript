@@ -13,16 +13,15 @@ import gzip
 # Number of threads to use for coverage depth analysis with mosdepth
 threads = 4
 
+# Specify the posterior probability cutoff (1-100) for confidently calling a site for the species tree 
+posterior_probability_threshold = 90
+
 # Directory for output
 output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm_species_tree/"
+make_output_dir = "mkdir -p {}".format(output_dir)
+os.system(make_output_dir)
 
-# Directory where vcf2phylip was run
-original_vcf2phylip_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
-
-# Root directory where phylonet_hmm was run
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm/"
-
-# Directory with json files of introgression probability arrays from cat.py
+# Directory with json files of species tree probability arrays
 probability_file_dir = "/hb/scratch/mglasena/phylonet_hmm/probability_files_species_tree/"
 
 # Directory containing the scaffold alignments of all sites 
@@ -32,12 +31,13 @@ all_sites_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_al
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
 
 # Tsv file with scaffold names and length in base pairs
-scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.tsv"
+scaffold_info_file = "//hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/scaffolds.tsv"
 
 # File containing 100 kb gaps in the nexus alignments 
-gaps_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/100kb_gaps.bed"
+gaps_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/100kb_gaps.bed"
 
-# Reference alignment BAM files for assessing coverage dpeth
+# Specify the paths to the BAM files for each species used for assessing coverage depth
+# Must be in alphabetical order by species name 
 bam_file_paths_list = [
 "/hb/groups/pogson_group/dissertation/data/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
 "/hb/groups/pogson_group/dissertation/data/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
@@ -51,13 +51,11 @@ combined_results = []
 # Dictionary containing scaffolds in the format {scaffold: [length in base pairs, length spanned by first and last coordinates, number of sites in all_sites alignment, number nexus sites in phmm alignment, number posterior probabilities > 90, number_tracts, number_ten_kb_tracts]}
 scaffold_dict = {}
 
-# Dictionary for coverage of all introgression tracts identified by phylonet-hmm
+# Dictionary for coverage of all species tree tracts identified by phylonet-hmm
 coverage_dict = dict()
 
-# Dictionary for coverage of filtered introgression tracts
+# Dictionary for coverage of filtered species tree tracts
 filtered_coverage_dict = dict()
-
-posterior_probability_threshold = 90
 
 # Return list of phylonet_hmm output files matched with their respective coordinate files from the scaffold alignments
 def get_file_paths_pairs_list():
@@ -82,29 +80,29 @@ def get_file_paths_pairs_list():
 	
 	return sorted_zipped_list
 
-# Locate introgression tracts and add to combined_results
+# Locate species_tree tracts and add to combined_results
 def find_tracts_scaffold(json_file_path, coordinate_file_path):
 	coordinates = open(coordinate_file_path,"r").read().splitlines()
-	introgression_probabilities = [probability * 100 for probability in json.load(open(json_file_path,"r"))]
+	species_tree_probabilities = [probability * 100 for probability in json.load(open(json_file_path,"r"))]
 
-	# Create list of lists of introgression tracts in format [[start_index,stop_index,length], [start_index,stop_index,length]]
+	# Create list of lists of species_tree tracts in format [[start_index,stop_index,length], [start_index,stop_index,length]]
 	index_tract_list = []
 	coordinate_tract_list = []
 	start = 0
 	stop = 0
-	# Find indexes of introgression tracts and add them to index_tract_list in the form of [Start index, Stop index]
+	# Find indexes of species_tree tracts and add them to index_tract_list in the form of [Start index, Stop index]
 	i = 0
-	while (i < (len(introgression_probabilities) - 1)):
-		if introgression_probabilities[i] >= posterior_probability_threshold:
+	while (i < (len(species_tree_probabilities) - 1)):
+		if species_tree_probabilities[i] >= posterior_probability_threshold:
 			start = i
 			stop = i
-			while introgression_probabilities[i] >= posterior_probability_threshold and i < (len(introgression_probabilities)-1):
+			while species_tree_probabilities[i] >= posterior_probability_threshold and i < (len(species_tree_probabilities)-1):
 				stop = i
 				i = i+1
 			index_tract_list.append([start, stop])
 		i=i+1
 	
-	# Append each introgression tract from index_tract_list to coordinate_tract_list in format of [start_coordinate, stop_coordinate, length in base pairs] 
+	# Append each species_tree tract from index_tract_list to coordinate_tract_list in format of [start_coordinate, stop_coordinate, length in base pairs] 
 	for tract in index_tract_list:
 		# Format chr:coordinate. These coordinates are from the vcf file which is 1-based. Need to convert to zero-based
 		start = coordinates[tract[0]]
@@ -133,7 +131,7 @@ def find_tracts_scaffold(json_file_path, coordinate_file_path):
 # Write tract_list in format chr start stop
 def write_tracts_to_bed(file_name, tract_list):
 	total_number_tracts = len(tract_list)
-	print("{} introgression tracts found and written to tracts.bed".format(total_number_tracts))
+	print("{} species tree tracts found and written to tracts.bed".format(total_number_tracts))
 	print("\n")
 	with open(file_name,"w") as bed_file:
 		for tract in tract_list:
@@ -142,7 +140,7 @@ def write_tracts_to_bed(file_name, tract_list):
 			stop = str(tract[1]).split(":")[1].split("'")[0]
 			bed_file.write(scaffold + "\t" + start + "\t" + stop + "\t" + scaffold + ":" + start + "_" + stop + "\n")
 
-# Intersect introgression tract file with bed file containing positions of 100kb gaps 
+# Intersect species_tree tract file with bed file containing positions of 100kb gaps 
 def intersect_tract_file_with_100kb_gaps(tract_file):
 	os.system("bedtools intersect -a " + tract_file + " -b " + gaps_file + " -wo > gap_overlap.bed")
 
@@ -150,7 +148,7 @@ def intersect_tract_file_with_100kb_gaps(tract_file):
 def filter_tracts_for_gaps(tract_file):
 	gap_overlaps = open("gap_overlap.bed", "r").read().splitlines()
 	number_gap_overlapped_tracts = len(gap_overlaps)
-	print("{} introgression tract(s) overlapped with a 100 kb gap".format(number_gap_overlapped_tracts))
+	print("{} species tree tract(s) overlapped with a 100 kb gap".format(number_gap_overlapped_tracts))
 	print("\n")
 
 	gap_overlapped_tracts = dict()
@@ -240,7 +238,7 @@ def filter_tracts_for_gaps(tract_file):
 	print("{} tracts written to tracts_gap_filter.bed".format(tracts_written_to_bed))
 	print("\n")
 
-# Use mosdepth to get the mean coverage depth of each introgression tract for each species 
+# Use mosdepth to get the mean coverage depth of each species tree tract for each species 
 def run_mosdepth(tract_file, bam_file):
 	prefix = bam_file.split("/")[-1].split("_dedup")[0]
 	mosdepth = "mosdepth --by " + tract_file + " --no-per-base --thresholds 1,10,20 -t {} --fast-mode {} {}".format(threads, prefix, bam_file)
@@ -308,15 +306,15 @@ def filter_tracts_by_depth():
 		Spal.append(value[2])
 		Hpul.append(value[3])
 
-	print("{} introgression tracts were filtered due to high or low coverage depth".format(tracts_filtered))
-	print("{} introgression tracts passed coverage depth filters and were written to tracts_pf.bed".format(tracts_pass_filter))
+	print("{} species tracts were filtered due to high or low coverage depth".format(tracts_filtered))
+	print("{} species tracts passed coverage depth filters and were written to tracts_pf.bed".format(tracts_pass_filter))
 	print("Tracts passing filter and their coverage depth metrics were written to tract_coverage.tsv.")
 	print("\n")
 
-	print("Sdro mean coverage of introgressed tracts: {}".format(mean(Sdro)))
-	print("Sfra mean coverage of introgressed tracts: {}".format(mean(Sfra)))
-	print("Spal mean coverage of introgressed tracts: {}".format(mean(Spal)))
-	print("Hpul mean coverage of introgressed tracts: {}".format(mean(Hpul)))
+	print("Sdro mean coverage of species tree tracts: {}".format(mean(Sdro)))
+	print("Sfra mean coverage of species tree tracts: {}".format(mean(Sfra)))
+	print("Spal mean coverage of species tree tracts: {}".format(mean(Spal)))
+	print("Hpul mean coverage of species tree tracts: {}".format(mean(Hpul)))
 	print("\n")
 
 def get_stats_on_tracts(tract_file):
@@ -325,26 +323,26 @@ def get_stats_on_tracts(tract_file):
 	length_dist = [int(tract.split("\t")[2]) - int(tract.split("\t")[1]) for tract in tracts]
 	ten_kb_length_dist = [item for item in length_dist if item >= 10000]
 
-	# Total number of introgression tracts 
+	# Total number of species tree tracts 
 	num_tracts = len(length_dist)
 	print("Number of species tree tracts: {}".format(num_tracts))
 
-	# Combined length of all introgression tracts 
-	total_length_introgression_tracts = sum(length_dist)
-	print("Combined length of the species tree tracts: {}".format(total_length_introgression_tracts))
+	# Combined length of all species tree tracts 
+	total_length_species_tree_tracts = sum(length_dist)
+	print("Combined length of the species tree tracts: {}".format(total_length_species_tree_tracts))
 
 	# Calculate mean, median and stdev of tract lengths 
 	print("Mean species tree tract length: {}".format(statistics.mean(length_dist)))
 	print("Median species tree tract length: {}".format(statistics.median(length_dist)))
 	print("Standard Deviation for all species tree tracts: {}".format(statistics.stdev(length_dist)))
 
-	# Number of introgression tracts 10 kb in length or greater 
+	# Number of species tree tracts 10 kb in length or greater 
 	num_ten_kb_tracts = len(ten_kb_length_dist)
 	print("Number of 10kb species tree tracts: {}".format(num_ten_kb_tracts))
 
-	# Combined length of 10kb introgression tracts 
-	total_length_ten_kb_introgression_tracts = sum(ten_kb_length_dist)
-	print("Combined length of the 10kb species tree tracts: {}".format(total_length_ten_kb_introgression_tracts))
+	# Combined length of 10kb species tree tracts 
+	total_length_ten_kb_species_tree_tracts = sum(ten_kb_length_dist)
+	print("Combined length of the 10kb species tree tracts: {}".format(total_length_ten_kb_species_tree_tracts))
 
 	# Calculate mean, median, stdev of tracts larger than 10kb
 	print("Mean tract length of species tree tracts greater than 10 kb: {}".format(statistics.mean(ten_kb_length_dist)))
@@ -388,7 +386,7 @@ def organize_tracts_by_scaffold(tract_file):
 			scaffold_dict[scaffold][6] += 1
 
 def write_scaffold_dict_to_csv():
-	csv_file = open("introgression_by_scaffold.csv","w")
+	csv_file = open("species_tree_by_scaffold.csv","w")
 	writer = csv.writer(csv_file)	
 	header = ["scaffold", "length (bp)", "length spanned by first and last sites (bp)", "number of sites in all_sites alignment", "number nexus sites in phmm alignment", "number posterior probabilities > 90", "number_tracts", "number_ten_kb_tracts"]
 	writer.writerow(header)
@@ -434,7 +432,7 @@ def main():
 	# Flatten the combined_results list of lists into a single list in format of [[start_coordinate, stop_coordinate, length in bp],[]]
 	flattened_combined_results = [item for sublist in combined_results for item in sublist]
 	
-	# Sort flat_combined_results list of all introgression tracts by tract length in base pairs in descending order. 
+	# Sort flat_combined_results list of all species tree tracts by tract length in base pairs in descending order. 
 	flattened_combined_results.sort(reverse=True, key=itemgetter(2))
 
 	write_tracts_to_bed("tracts.bed", flattened_combined_results)

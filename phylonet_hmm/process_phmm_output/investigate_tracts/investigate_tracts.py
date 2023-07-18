@@ -7,13 +7,15 @@ from joblib import Parallel, delayed
 threads = 4
 
 # Specify the directory that contains protein_coding_genes.bed, unique_exons.bed, GenePageGeneralInfo_AllGenes.txt, GeneGoTerms.txt, GeneKoTerms.txt, tu_2012_go.csv, and psg.csv
-input_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/"
+genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata"
 
 # Specify the directory with output from process_hmm.py 
 process_hmm_output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/"
 
 # Specify the directory for output
 output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/"
+make_output_dir = "mkdir -p {}".format(output_dir)
+os.system(make_output_dir)
 
 # Specify the directory containing the scaffold alignments and coordinate files used in the PhyloNet-HMM analysis
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
@@ -33,30 +35,30 @@ tract_file = process_hmm_output_dir + "tracts_pf.bed"
 tract_coverage_file = process_hmm_output_dir + "tract_coverage.tsv"
 
 # Bed file of all S. purpuratus protein coding genes 
-gene_list_file = input_dir + "protein_coding_genes.bed"
+gene_list_file = genome_metadata_dir + "protein_coding_genes.bed"
 
 # File of unique protein-coding exons 
-exon_list_file = input_dir + "unique_exons.bed"
+exon_list_file = genome_metadata_dir + "unique_exons.bed"
 
 # Gene metadata from Echinobase 
 #os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
-gene_info_file = input_dir + "GenePageGeneralInfo_AllGenes.txt"
+gene_info_file = genome_metadata_dir + "GenePageGeneralInfo_AllGenes.txt"
 
 # Gene GO Terms from Echinobase 
 #os.system("wget https://download.echinobase.org/pub/GenePageReports/GeneGoTerms.txt")
-gene_go_terms = input_dir + "GeneGoTerms.txt"
+gene_go_terms = genome_metadata_dir + "GeneGoTerms.txt"
 
 # Gene KO Terms from Echinobase
 #os.system("wget https://download.echinobase.org/pub/GenePageReports/GeneKoTerms.txt")
-gene_ko_terms = input_dir + "GeneKoTerms.txt"
+gene_ko_terms = genome_metadata_dir + "GeneKoTerms.txt"
 
 # Tu et al. 2012 S. purpuratus GO terms
 # https://genome.cshlp.org/content/22/10/2079/suppl/DC1
 # Supp table S2
-tu_go_terms = input_dir + "tu_2012_go.csv"
+tu_go_terms = genome_metadata_dir + "tu_2012_go.csv"
 
 # CSV file of 6,520 single copy orthologs from Kober and Pogson. Rows 5 - 1,012 contain the 1,008 genes with significant tests for positive selection
-psg_file = input_dir + "psg.csv"
+psg_file = genome_metadata_dir + "psg.csv"
 
 # Initialize dictionary for coverage depth for each introgression tract by species 
 introgressed_gene_coverage_dict = dict()

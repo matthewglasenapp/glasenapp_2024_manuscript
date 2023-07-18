@@ -11,9 +11,11 @@ par(mar=c(2,2,2,1))
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/pixy/")
 
 # Define the csv files with list of dXY values 
-introgression_tract_dxy_file = "introgression_tracts_mean_dxy_dist.csv"
+#introgression_tract_dxy_file = "introgression_tracts_mean_dxy_dist.csv"
+introgression_tract_dxy_file = "introgression_tracts_mean_dxy_dist_80.csv"
 
-species_tree_tract_dxy_file = "species_tree_tracts_mean_dxy.csv"
+#species_tree_tract_dxy_file = "species_tree_tracts_mean_dxy.csv"
+species_tree_tract_dxy_file = "species_tree_tracts_mean_dxy_dist_80.csv"
 
 # Read the CSV file as a one-dimensional vector
 dist_introgression_tract_dxy <- scan(introgression_tract_dxy_file, what = numeric(), sep = ",")
@@ -87,6 +89,8 @@ figure <- ggplot(df, aes(x=divergence, fill=tract_type)) +
   theme(panel.background = element_blank()) + 
   theme(axis.line = element_line(colour = "black", size = 1)) + 
   scale_fill_discrete(labels=c('Introgression Tracts', 'Genome-Wide Background')) + theme(legend.title = element_blank())
+
+figure
 
 ggsave(filename = "dXY.png", plot = figure)
 

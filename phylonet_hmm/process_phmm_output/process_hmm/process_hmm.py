@@ -18,6 +18,8 @@ posterior_probability_threshold = 90
 
 # Specify the directory for output files 
 output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/"
+make_output_dir = "mkdir -p {}".format(output_dir)
+os.system(make_output_dir)
 
 # Specify the directory with the output from aggregate_output.py.
 # This directory contains json files of introgression probability arrays for each scaffold. 
@@ -30,10 +32,10 @@ all_sites_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_al
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
 
 # Specify the tsv file with scaffold names and length in base pairs
-scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/scaffolds.tsv"
+scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/scaffolds.tsv"
 
 # Specify the file identifying any 100 kb gaps present in the nexus alignments 
-gaps_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/100kb_gaps.bed"
+gaps_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/100kb_gaps.bed"
 
 # Specify the paths to the BAM files for each species used for assessing coverage depth
 # Must be in alphabetical order by species name 

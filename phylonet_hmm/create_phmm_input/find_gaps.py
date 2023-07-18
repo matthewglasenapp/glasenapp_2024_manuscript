@@ -1,6 +1,8 @@
 import os
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_all_sites"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_all_sites/"
+
+output_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/"
 
 gap_dict = dict()
 
@@ -65,7 +67,7 @@ def get_gap_stats():
 			f.write(scaffold + "\t" + str(number_gaps) + "\n") 
 
 def write_bed_file():
-	with open("100kb_gaps.bed","w") as f:
+	with open(output_dir + "100kb_gaps.bed","w") as f:
 		for key,value in gap_dict.items():
 			for gap in value:
 				scaffold = gap.split(":")[0]
