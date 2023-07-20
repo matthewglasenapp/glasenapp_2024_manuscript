@@ -19,11 +19,15 @@ filtered_vcf = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_v
 # Path to vcf2phylip program
 vcf2phylip_path = "/hb/home/mglasena/software/vcf2phylip/"
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/"
 
-os.mkdir(root_dir + "hmm_input/")
-os.mkdir(root_dir + "hmm_input/vcf_by_scaffold/")
-os.mkdir(root_dir + "hmm_input/scaffold_nexus_alignments/")
+vcf_by_scaffold_dir = root_dir + "vcf_by_scaffold_all_sites/"
+make_vcf_by_scaffold_dir = "mkdir -p {}".format(vcf_by_scaffold_dir)
+os.system(make_vcf_by_scaffold_dir)
+
+scaffold_nexus_alignment_dir = root_dir + "hmm_input/scaffold_nexus_alignments_all_sites/"
+make_scaffold_nexus_alignment_dir = "mkdir -p {}".format(scaffold_nexus_alignment_dir)
+os.system(make_scaffold_nexus_alignment_dir)
 
 outgroup_sample_name = "QB3KMK016"
 number_species = "4"
@@ -35,21 +39,21 @@ def get_scaffold_list():
 
 # Get a vcf file for each scaffold 
 def subset_vcf_by_scaffold(scaffold):
-	output_dir = root_dir + "hmm_input/vcf_by_scaffold/"
-	subset_vcf_by_scaffold = "gatk SelectVariants -R {} -V {} --select-type-to-include SNP --select-type-to-exclude MNP --select-type-to-exclude INDEL --select-type-to-exclude SYMBOLIC --select-type-to-exclude MIXED -O {}{}.vcf.gz -L {} --select-type-to-exclude NO_VARIATION --exclude-filtered true --exclude-non-variants true".format(reference_genome, filtered_vcf, output_dir, scaffold, scaffold)
+	output_dir = vcf_by_scaffold_dir
+	subset_vcf_by_scaffold = "gatk SelectVariants -R {} -V {} --select-type-to-exclude MNP --select-type-to-exclude INDEL --select-type-to-exclude SYMBOLIC --select-type-to-exclude MIXED -O {}{}.vcf.gz -L {} --exclude-filtered true".format(reference_genome, filtered_vcf, output_dir, scaffold, scaffold)
 	os.system(subset_vcf_by_scaffold)
 
 # Run vcf2phylip on each individual scaffold
 def convert_vcf_to_nexus(scaffold):
-	input_dir = root_dir + "hmm_input/vcf_by_scaffold/" 
-	output_dir = root_dir + "hmm_input/scaffold_nexus_alignments/" + scaffold + "/"
+	input_dir = vcf_by_scaffold_dir
+	output_dir = scaffold_nexus_alignment_dir + scaffold + "/"
 	run_vcf2phylip = "python3 {}vcf2phylip.py -w --input {}{}.vcf.gz --min-samples-locus {} -p -n -r --outgroup {} --output-folder {} --output-prefix {}".format(vcf2phylip_path, input_dir, scaffold, number_species, outgroup_sample_name, output_dir, scaffold)
 	
 	os.system(run_vcf2phylip)
 
 # Reformat vcf2phylip used sites output file for compatibility with phylonet_hmm output. 
 def reformat_coordinate_files(scaffold):
-	input_dir = root_dir + "hmm_input/scaffold_nexus_alignments/" + scaffold
+	input_dir = scaffold_nexus_alignment_dir + scaffold
 	os.chdir(input_dir)
 	
 	os.environ['coordinate_file'] = "{}.min{}.used_sites.tsv".format(scaffold, number_species)
