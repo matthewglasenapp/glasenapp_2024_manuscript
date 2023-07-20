@@ -3,8 +3,8 @@ import os
 reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
 
 # Raw genotype calls file. Leave this commented out. 
-genotype_calls = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_vcf_files/genotype_calls.g.vcf.gz"
-#genotype_calls_split_multiallelics = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_vcf_files/genotype_calls_split_multiallelics.g.vcf.gz"
+#genotype_calls = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_vcf_files/genotype_calls.g.vcf.gz"
+genotype_calls_split_multiallelics = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_vcf_files/genotype_calls_split_multiallelics.g.vcf.gz"
 
 output_directory = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_vcf_files/"
 
@@ -81,8 +81,8 @@ def index_vcf(input_file):
 
 def main():
 	# Leave commented out unless running for the first time
-	split_multiallelics()
-	index_vcf(output_directory + "genotype_calls_split_multiallelics.g.vcf.gz")
+	#split_multiallelics()
+	#index_vcf(output_directory + "genotype_calls_split_multiallelics.g.vcf.gz")
 	
 	separate_variant_nonvariant()
 	filter_variants()
