@@ -38,8 +38,8 @@ def separate_variant_nonvariant():
 	output_nonvariant = output_directory + "genotype_calls_nonvariant.g.vcf.gz"
 	get_variant = "gatk SelectVariants -V {} {} --select-type-to-include SNP --exclude-non-variants --output {}".format(input_file, sample_string, output_variant)
 	get_nonvariant = "gatk SelectVariants -V {} {} --select-type-to-include NO_VARIATION --output {}".format(input_file, sample_string, output_nonvariant)
-	#os.system(get_variant)
-	os.system(get_nonvariant)
+	os.system(get_variant)
+	#os.system(get_nonvariant)
 
 def filter_variants():
 	input_variant = output_directory + "genotype_calls_variant.g.vcf.gz"

@@ -75,6 +75,8 @@ def create_hmm_input_file(scaffold_file):
 def main():
         scaffold_alignment_file_path_list = get_scaffold_file_paths()
 
+        print(scaffold_alignment_file_path_list)
+
         Parallel(n_jobs=num_scaffolds)(delayed(create_hmm_input_file)(scaffold_alignment_file) for scaffold_alignment_file in scaffold_alignment_file_path_list)
 
 if __name__ == "__main__":

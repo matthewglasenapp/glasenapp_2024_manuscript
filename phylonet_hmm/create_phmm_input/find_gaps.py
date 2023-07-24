@@ -1,6 +1,6 @@
 import os
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_all_sites/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments_all_sites/"
 
 output_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/"
 

@@ -25,7 +25,7 @@ vcf_by_scaffold_dir = root_dir + "vcf_by_scaffold_all_sites/"
 make_vcf_by_scaffold_dir = "mkdir -p {}".format(vcf_by_scaffold_dir)
 os.system(make_vcf_by_scaffold_dir)
 
-scaffold_nexus_alignment_dir = root_dir + "hmm_input/scaffold_nexus_alignments_all_sites/"
+scaffold_nexus_alignment_dir = root_dir + "scaffold_nexus_alignments_all_sites/"
 make_scaffold_nexus_alignment_dir = "mkdir -p {}".format(scaffold_nexus_alignment_dir)
 os.system(make_scaffold_nexus_alignment_dir)
 
