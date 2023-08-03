@@ -25,7 +25,7 @@ os.system(make_output_dir)
 probability_file_dir = "/hb/scratch/mglasena/phylonet_hmm/probability_files_species_tree/"
 
 # Directory containing the scaffold alignments of all sites 
-all_sites_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_all_sites/"
+all_sites_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments_all_sites/"
 
 # Directory contianing the scaffold alignments used in phylonet_hmm
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
@@ -39,10 +39,10 @@ gaps_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata
 # Specify the paths to the BAM files for each species used for assessing coverage depth
 # Must be in alphabetical order by species name 
 bam_file_paths_list = [
-"/hb/groups/pogson_group/dissertation/data/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
-"/hb/groups/pogson_group/dissertation/data/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
-"/hb/groups/pogson_group/dissertation/data/bam_files/pallidus_SRR5767285_dedup_aligned_reads.bam", 
-"/hb/groups/pogson_group/dissertation/data/bam_files/pulcherrimus_SRR5767283_dedup_aligned_reads.bam"
+"/hb/home/mglasena/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
+"/hb/home/mglasena/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
+"/hb/home/mglasena/bam_files/pallidus_SRR5767285_dedup_aligned_reads.bam", 
+"/hb/home/mglasena/bam_files/pulcherrimus_SRR5767283_dedup_aligned_reads.bam"
 ]
 
 # List of coordinate_tract_lists for each scaffold in format of [[start_coordinate, stop_coordinate, length in bp], []]

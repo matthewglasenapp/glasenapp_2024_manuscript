@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 threads = 4
 
 # Specify the directory that contains protein_coding_genes.bed, unique_exons.bed, GenePageGeneralInfo_AllGenes.txt, GeneGoTerms.txt, GeneKoTerms.txt, tu_2012_go.csv, and psg.csv
-genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata"
+genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/"
 
 # Specify the directory with output from process_hmm.py 
 process_hmm_output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/"
@@ -449,7 +449,7 @@ def create_tract_info_file(overlap_file):
 				print("New Start: {}".format(start_pos))
 
 			if stop in coordinate_by_scaffold_dict[scaffold]:
-				print("Stop in coordinate_by_scaffold_dict: {}".format(stop_pos))
+				print("Stop in coordinate_by_scaffold_dict: {}".format(stop))
 				stop_pos = int(stop)
 			else:
 				print("Finding New Stop")

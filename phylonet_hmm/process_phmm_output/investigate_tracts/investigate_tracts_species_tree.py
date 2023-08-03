@@ -6,14 +6,17 @@ from joblib import Parallel, delayed
 process_hmm_output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm_species_tree/"
 working_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts_species_tree/"
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
-genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata"
+genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/"
+
+make_working_dir = "mkdir -p {}".format(working_dir)
+os.system(make_working_dir)
 
 # Reference alignment BAM files for assessing coverage dpeth
 bam_file_paths_list = [
-"/hb/groups/pogson_group/dissertation/data/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
-"/hb/groups/pogson_group/dissertation/data/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
-"/hb/groups/pogson_group/dissertation/data/bam_files/pallidus_SRR5767285_dedup_aligned_reads.bam", 
-"/hb/groups/pogson_group/dissertation/data/bam_files/pulcherrimus_SRR5767283_dedup_aligned_reads.bam"
+"/hb/home/mglasena/bam_files/droebachiensis_SRR5767286_dedup_aligned_reads.bam", 
+"/hb/home/mglasena/bam_files/fragilis_SRR5767279_dedup_aligned_reads.bam", 
+"/hb/home/mglasena/bam_files/pallidus_SRR5767285_dedup_aligned_reads.bam", 
+"/hb/home/mglasena/bam_files/pulcherrimus_SRR5767283_dedup_aligned_reads.bam"
 ]
 
 threads = 4
@@ -183,7 +186,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 
 	# List of Tu et al. 2012 GO Terms by SPU_ number 
 	# File has one line header
-	tu_go_terms_list = [gene.split(",",1) for gene in open("tu_2012_go.csv","r").read().splitlines()[1:]]
+	tu_go_terms_list = [gene.split(",",1) for gene in open(tu_go_terms,"r").read().splitlines()[1:]]
 
 	# Add Echinobase GO Terms to gene dictionary
 	# Add GO Terms as a list because there are duplicate ECB-GENEPAGE numbers in the GO Terms file
@@ -433,7 +436,7 @@ def create_tract_info_file(overlap_file):
 				print("New Start: {}".format(start_pos))
 
 			if stop in coordinate_by_scaffold_dict[scaffold]:
-				print("Stop in coordinate_by_scaffold_dict: {}".format(stop_pos))
+				print("Stop in coordinate_by_scaffold_dict: {}".format(stop))
 				stop_pos = int(stop)
 			else:
 				print("Finding New Stop")

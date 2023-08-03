@@ -26,7 +26,7 @@ os.system(make_output_dir)
 probability_file_dir = "/hb/scratch/mglasena/phylonet_hmm/probability_files/"
 
 # Specify the directory containing the scaffold alignments of all sites (including monomorphic sites)
-all_sites_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/nexus_alignments_all_sites/"
+all_sites_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments_all_sites/"
 
 # Specify the directory contianing the scaffold alignments and coordinate files used in the PhyloNet-HMM analysis
 phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
