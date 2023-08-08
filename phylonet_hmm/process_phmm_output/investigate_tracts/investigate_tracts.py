@@ -546,6 +546,11 @@ def update_gene_intersection_dict():
 			if gene_intersection_dict[key][3] == 100:
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
+	with open("majority_bases_introgressed_genes_coverage.tsv","w") as f:
+		for key,value in introgressed_gene_coverage_dict.items():
+			if gene_intersection_dict[key][3] > 50:
+				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
+
 # Write introgressed genes to "intersect.tsv"
 def create_gene_intersection_file():
 	csv_file = open("intersect.tsv","w")
