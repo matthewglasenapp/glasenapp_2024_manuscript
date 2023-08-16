@@ -17,7 +17,7 @@ cores = 24
 percent_gene_overlap_threshold = 0.5
 
 # Directory containing replicate interval (BED) files 
-replicate_interval_file_dir = "/hb/scratch/mglasena/dxy/pixy/process_hmm_90/species_tree_tracts/replicate_interval_files/"
+replicate_interval_file_dir = "/hb/scratch/mglasena/bootstrap_resample_introgression_tracts/replicate_interval_files/"
 
 # BED file containing all protein-coding genes in the S. purpuratus reference genome assembly
 gene_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/protein_coding_genes.bed"
@@ -32,12 +32,12 @@ count_genes_dict = dict()
 count_bases_dict = dict()
 
 # Create output directory for the output files resulting from running bedtools intersect with the replicate interval files and protein_coding_genes.bed
-output_directory_genes = "/hb/scratch/mglasena/dxy/pixy/process_hmm_90/species_tree_tracts/bedtools_intersect_dir_genes/"
+output_directory_genes = "/hb/scratch/mglasena/bootstrap_resample_introgression_tracts/bedtools_intersect_dir_genes/"
 make_output_directory_genes = "mkdir -p {}".format(output_directory_genes)
 os.system(make_output_directory_genes)
 
 # Create output directory for the output files resulting from running bedtools intersect with the replicate interval files and unique_exons.bed
-output_directory_exons = "/hb/scratch/mglasena/dxy/pixy/process_hmm_90/species_tree_tracts/bedtools_intersect_dir_exons/"
+output_directory_exons = "/hb/scratch/mglasena/bootstrap_resample_introgression_tracts/bedtools_intersect_dir_exons/"
 make_output_directory_exons = "mkdir -p {}".format(output_directory_exons)
 os.system(make_output_directory_exons)
 
