@@ -1,7 +1,7 @@
 import os
 import csv
 
-parent_directory = "/hb/home/mglasena/local_ancestry_project/paml_sco/single_copy_ortholog_fasta_alignments/"
+parent_directory = "/hb/scratch/mglasena/test_rna_metrics/single_copy_ortholog_fasta_alignments/"
 
 dN_dS_dict = dict()
 
@@ -11,9 +11,6 @@ def get_gene_paths():
     return gene_paths_lst
 
 def extract_paml(gene):
-    if("." in gene):
-        return()
-    
     with open(gene + '/paml_out.txt') as f:
         lines = f.readlines() # list containing lines of file
         columns = [] # To store column names
