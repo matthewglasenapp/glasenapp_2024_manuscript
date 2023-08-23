@@ -471,23 +471,42 @@ def get_fasta_alignment_paths():
 
 def convert_fasta_to_phylip(input_fasta_file):
 	output_parent_dir = "single_copy_ortholog_fasta_alignments/"
-	make_output_dir = "mkdir -p {}".format(output_parent_dir)
-	os.system(make_output_dir)
+	make_output_parent_dir = "mkdir -p {}".format(output_parent_dir)
+	os.system(make_output_parent_dir)
 
 	output_dir = "/hb/scratch/mglasena/test_rna_metrics/" + output_parent_dir + input_fasta_file.split("/")[-1].split(".fas")[0] + "/"
-	os.mkdir(output_dir)
+	make_output_dir = "mkdir -p {}".format(output_dir)
+	os.system(make_output_dir)
 
 	records = SeqIO.parse(input_fasta_file, "fasta")
+	#SeqIO.write(records, output_dir + "consensAlign.ordered.phylip", "phylip-sequential")
 	SeqIO.write(records, output_dir + "consensAlign.ordered.phylip", "phylip-sequential")
-
-def run_iqtree(fasta_alignment_path):
-	run_iqtree = "iqtree -s {} -m MFP".format(fasta_alignment_path)
-	os.system(run_iqtree)
 
 def get_fasta_alignment_paths_2():
 	subdirectory_lst = os.listdir("single_copy_ortholog_fasta_alignments/")
 	fasta_file_paths_lst = ["/hb/scratch/mglasena/test_rna_metrics/single_copy_ortholog_fasta_alignments/" + subdir + "/" + "consensAlign.ordered.phylip" for subdir in subdirectory_lst]
 	return fasta_file_paths_lst
+
+def reformat_phylip(input_phylip_file):
+	input_file = open(input_phylip_file,"r").read().splitlines()
+	output_dir = input_phylip_file.split("consens")[0]
+
+	line_1 = input_file[0]
+	line_2 = "  ".join(input_file[1].split(" "))
+	line_3 = "  ".join(input_file[2].split(" "))
+	line_4 = "  ".join(input_file[3].split(" "))
+	line_5 = "  ".join(input_file[4].split(" "))
+
+	with open(output_dir + "consensAlign.ordered.phylip","w") as output_file:
+		output_file.write(line_1 + "\n")
+		output_file.write(line_2 + "\n")
+		output_file.write(line_3 + "\n")
+		output_file.write(line_4 + "\n")
+		output_file.write(line_5 + "\n")
+
+def run_iqtree(fasta_alignment_path):
+	run_iqtree = "iqtree -s {} -m MFP".format(fasta_alignment_path)
+	os.system(run_iqtree)
 
 def get_gene_paths():
 	parent_directory = "/hb/scratch/mglasena/test_rna_metrics/single_copy_ortholog_fasta_alignments/"
@@ -540,14 +559,15 @@ def main():
 	# write_passed_rna_dict_csv()
 	# replace_missing_genotype_char()
 
-	# fasta_alignment_paths_list = get_fasta_alignment_paths()
-	# Parallel(n_jobs=num_cores)(delayed(convert_fasta_to_phylip)(fasta_file) for fasta_file in fasta_alignment_paths_list)
+	#fasta_alignment_paths_list = get_fasta_alignment_paths()
+	#Parallel(n_jobs=num_cores)(delayed(convert_fasta_to_phylip)(fasta_file) for fasta_file in fasta_alignment_paths_list)
 
 	fasta_alignment_paths_list_2 = get_fasta_alignment_paths_2()
-	Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_alignment_paths_list_2)
-	
+	#Parallel(n_jobs=num_cores)(delayed(reformat_phylip)(fasta_file) for fasta_file in fasta_alignment_paths_list_2)
+	# Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_alignment_paths_list_2)
+
 	for file in fasta_alignment_paths_list_2:
-		file_dir = file.split("consensAlignAA.ordered.phylip")[0]
+		file_dir = file.split("consensAlign.ordered.phylip")[0]
 		copy = "cp codeml.ctl " + file_dir
 		os.system(copy)
 
