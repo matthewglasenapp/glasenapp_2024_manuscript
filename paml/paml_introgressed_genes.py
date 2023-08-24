@@ -8,6 +8,8 @@ from Bio import SeqIO
 
 num_cores = 24
 
+root_dir = "/hb/scratch/mglasena/test_rna_metrics/"
+
 # nw_utils directory
 nw_utils = "/hb/home/mglasena/software/newick_utils/src/"
 
@@ -77,6 +79,9 @@ mrna_gene_dict = dict()
 
 # Initialize dictionary mapping CDS names to parent mRNA names for CDS of genes that had an mRNA pass previous filters. 
 cds_parent_rna_dict = dict()
+
+# Initialize dictionary mapping parent mRNA names to CDS of genes that had an mRNA pass previous filters. 
+parent_rna_cds_dict = dict()
 
 # Populate subset_mean_coverage_spur5_exons variable with the samples included in the subset_sample_list variable
 def subset_coverage_dict():
@@ -299,14 +304,14 @@ def remove_redundant_isoforms():
 
 	records = open("cds.gff","r").read().splitlines()
 
-	parent_rna_cds_dict = dict()
+	# Create dictionaries mapping mRNA names to CDS names 
 	for record in records:
 		cds_name = record.split("\t")[8].split(";")[0].split("cds-")[1]
 		parent_rna_name = record.split("\t")[8].split(";")[1].split("rna-")[1]
 		cds_parent_rna_dict[cds_name] = parent_rna_name
 		parent_rna_cds_dict[parent_rna_name] = cds_name
 
-	# Reversed dictionary in format of LOC_ID: [mRNA name 1, mRNA name 2]
+	# Reverse mrna_gene_dict in format of {LOC_ID: [mRNA name 1, mRNA name 2]}
 	reversed_mrna_gene_dict = dict()
 	for key,value in mrna_gene_dict.items():
 		if value in reversed_mrna_gene_dict:
@@ -314,42 +319,46 @@ def remove_redundant_isoforms():
 		else:
 			reversed_mrna_gene_dict[value] = [key]
 
+	cds_to_delete = []
 	mrna_to_pop = []
+	
+	# Check for cds records whose parent RNA is not in mrna_gene_dict 
+	for key,value in cds_parent_rna_dict.items():
+		if not value in mrna_gene_dict.keys():
+			cds_to_delete.append(key)
+			mrna_to_pop.append(value)
+
+	# Only keep longest isoform when 1 gene has more than one mRNA/CDS record built by vcf2fasta
 	for key,value in reversed_mrna_gene_dict.items():
 		if len(value) != 1:
 			mrna_lengths_dict = dict()
 			for mrna in value:
 				cds = parent_rna_cds_dict[mrna]
 				cds_file = "vcf2fasta_CDS/" + cds + ".fas"
-				cds_length = open(cds_file).read().splitlines()[1]
-				mrna_lengths_dict[cds_file] = [cds_length]
+				cds_length = len(open(cds_file).read().splitlines()[1])
+				mrna_lengths_dict[cds] = [cds_length]
 			
 			sorted_mrna_lengths = sorted(mrna_lengths_dict.items(), key=lambda x:x[1], reverse=True)
 			
 			for cds in sorted_mrna_lengths[1:]:
-				mrna_to_pop.append(cds[0])
+				cds_to_delete.append(cds[0])
+				mrna_to_pop.append(cds_parent_rna_dict[cds[0]])
 
-	for cds in mrna_to_pop:
-		delete = "rm {}".format(cds)
+	# Remove fasta files for records in cds_to_delete list
+	for cds in cds_to_delete:
+		delete = "rm vcf2fasta_CDS/{}.fas".format(cds)
 		print(delete)
 		os.system(delete)
 
-	# List of redundant isoforms to delete following vcf2fasta
-	records_to_delete = []
+	# Remove records from mrna_gene_dict
+	for mrna in mrna_to_pop:
+		if mrna in mrna_gene_dict:
+			mrna_gene_dict.pop(mrna)
+
+	print("{} records in mrna_gene_dict".format(len(mrna_gene_dict)))
 	
-	passed_rnas_LOC_lst = list(mrna_gene_dict.keys())
-
-	for key,value in cds_parent_rna_dict.items():
-		if not value in passed_rnas_LOC_lst:
-			records_to_delete.append(key)
-
-	for record in records_to_delete:
-		cds_parent_rna_dict.pop(record)
-		delete = "rm vcf2fasta_CDS/{}.fas".format(record)
-		os.system(delete)
-
-	os.system("rm sco_gff.gff")
-	os.system("rm cds.gff")
+	#os.system("rm sco_gff.gff")
+	#os.system("rm cds.gff")
 
 def remove_not_multiple_of_three():
 	get_file_lst = 'find ./vcf2fasta_CDS/ -type f -name "*.fas" > fasta_file_list'
@@ -376,12 +385,12 @@ def remove_not_multiple_of_three():
 		else:
 			passed_cds_length_dict[key] = value
 
-	os.system("mkdir not_multiple_of_three")
+	if not_multiple_of_three_counter > 0:
+		os.system("mkdir not_multiple_of_three")
 	
 	for cds in not_multiple_of_three_lst:
 		rna = cds_parent_rna_dict[cds]
-		passed_rnas_LOC.remove(rna)
-		filtered_mrna_gene_dict.pop(rna)
+		mrna_gene_dict.pop(rna)
 		cds_parent_rna_dict.pop(cds)
 		move = "mv vcf2fasta_CDS/{}.fas not_multiple_of_three/".format(cds)
 		os.system(move)
@@ -390,9 +399,9 @@ def remove_not_multiple_of_three():
 	print("Number of concatenated CDS records that are not a multiple of 3: {}".format(not_multiple_of_three_counter))
 
 def write_passed_rna_dict_csv():
-	csv_file = open("passed_rna.csv","w")
+	csv_file = open("paml_genes.csv","w")
 	writer = csv.writer(csv_file)	
-	header = ["mRNA"]
+	header = ["LOC", "mRNA", "CDS"]
 	records_written = 0 
 	
 	for i in range(4):
@@ -403,21 +412,16 @@ def write_passed_rna_dict_csv():
 
 	# Update this to only include the RNA used in vcf2fasta
 	for key,value in passed_rna_dict.items():
-		if key in filtered_mrna_gene_dict.keys():
-			row = [key] + value[0] + value[1] + value[2] + value[3]
+		if key in mrna_gene_dict.keys():
+			LOC = mrna_gene_dict[key]
+			CDS = parent_rna_cds_dict[key]
+			row = [LOC] + [key] + [CDS] + value[0] + value[1] + value[2] + value[3]
 			records_written += 1
 			writer.writerow(row)
 
 	csv_file.close()
 
-	print("{} records written to passed_rna.csv".format(records_written))
-
-	print("{} mRNAs in passed_rnas_LOC list".format(len(passed_rnas_LOC)))
-	print("{} mRNAs in filtered_mrna_gene_dict".format(len(filtered_mrna_gene_dict)))
-
-	with open("passed_rnas_LOC.txt","w") as f:
-		for record in passed_rnas_LOC:
-			f.write(record + "\n")
+	print("{} records written to paml_genes.csv".format(records_written))
 
 # Iqtree does not tolerate the '*'' symbol. Replace '*' with 'N'
 def replace_missing_genotype_char():
@@ -434,7 +438,7 @@ def replace_missing_genotype_char():
 
 def get_fasta_alignment_paths():
 	fasta_files = os.listdir("vcf2fasta_CDS/")
-	fasta_file_paths_lst = ["/hb/scratch/mglasena/test_rna_metrics/vcf2fasta_CDS/" + item for item in fasta_files]
+	fasta_file_paths_lst = [root_dir + "vcf2fasta_CDS/" + item for item in fasta_files]
 	return fasta_file_paths_lst
 
 def convert_fasta_to_phylip(input_fasta_file):
@@ -442,7 +446,7 @@ def convert_fasta_to_phylip(input_fasta_file):
 	make_output_parent_dir = "mkdir -p {}".format(output_parent_dir)
 	os.system(make_output_parent_dir)
 
-	output_dir = "/hb/scratch/mglasena/test_rna_metrics/" + output_parent_dir + input_fasta_file.split("/")[-1].split(".fas")[0] + "/"
+	output_dir = root_dir + output_parent_dir + input_fasta_file.split("/")[-1].split(".fas")[0] + "/"
 	make_output_dir = "mkdir -p {}".format(output_dir)
 	os.system(make_output_dir)
 
@@ -450,9 +454,9 @@ def convert_fasta_to_phylip(input_fasta_file):
 	#SeqIO.write(records, output_dir + "consensAlign.ordered.phylip", "phylip-sequential")
 	SeqIO.write(records, output_dir + "consensAlign.ordered.phylip", "phylip-sequential")
 
-def get_fasta_alignment_paths_2():
+def get_phylip_alignment_paths():
 	subdirectory_lst = os.listdir("single_copy_ortholog_fasta_alignments/")
-	fasta_file_paths_lst = ["/hb/scratch/mglasena/test_rna_metrics/single_copy_ortholog_fasta_alignments/" + subdir + "/" + "consensAlign.ordered.phylip" for subdir in subdirectory_lst]
+	fasta_file_paths_lst = [root_dir + "single_copy_ortholog_fasta_alignments/" + subdir + "/" + "consensAlign.ordered.phylip" for subdir in subdirectory_lst]
 	return fasta_file_paths_lst
 
 def reformat_phylip(input_phylip_file):
@@ -476,8 +480,8 @@ def run_iqtree(fasta_alignment_path):
 	run_iqtree = "iqtree -s {} -m MFP".format(fasta_alignment_path)
 	os.system(run_iqtree)
 
-def get_gene_paths():
-	parent_directory = "/hb/scratch/mglasena/test_rna_metrics/single_copy_ortholog_fasta_alignments/"
+def get_gene_dir_paths():
+	parent_directory = root_dir + "single_copy_ortholog_fasta_alignments/"
 	subdirectory_lst = os.listdir(parent_directory)
 	gene_paths_lst = [parent_directory + subdir for subdir in subdirectory_lst]
 	return gene_paths_lst
@@ -520,25 +524,25 @@ def main():
 	run_vcf2fasta()
 
 	remove_redundant_isoforms()
-	# remove_not_multiple_of_three()
-	# write_passed_rna_dict_csv()
-	# replace_missing_genotype_char()
+	remove_not_multiple_of_three()
+	write_passed_rna_dict_csv()
+	replace_missing_genotype_char()
 
-	#fasta_alignment_paths_list = get_fasta_alignment_paths()
-	#Parallel(n_jobs=num_cores)(delayed(convert_fasta_to_phylip)(fasta_file) for fasta_file in fasta_alignment_paths_list)
+	fasta_alignment_paths_list = get_fasta_alignment_paths()
+	Parallel(n_jobs=num_cores)(delayed(convert_fasta_to_phylip)(fasta_file) for fasta_file in fasta_alignment_paths_list)
 
-	# fasta_alignment_paths_list_2 = get_fasta_alignment_paths_2()
-	# #Parallel(n_jobs=num_cores)(delayed(reformat_phylip)(fasta_file) for fasta_file in fasta_alignment_paths_list_2)
-	# # Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_alignment_paths_list_2)
+	phylip_alignment_path_list = get_phylip_alignment_paths()
+	Parallel(n_jobs=num_cores)(delayed(reformat_phylip)(fasta_file) for fasta_file in phylip_alignment_path_list)
+	Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in phylip_alignment_path_list)
 
-	# for file in fasta_alignment_paths_list_2:
-	# 	file_dir = file.split("consensAlign.ordered.phylip")[0]
-	# 	copy = "cp codeml.ctl " + file_dir
-	# 	os.system(copy)
+	for file in phylip_alignment_path_list:
+		file_dir = file.split("consensAlign.ordered.phylip")[0]
+		copy = "cp codeml.ctl " + file_dir
+		os.system(copy)
 
-	# gene_paths_list = get_gene_paths()
-	# print("Gene paths length: {}".format(len(gene_paths_list)))
-	# Parallel(n_jobs=num_cores)(delayed(run_paml)(gene) for gene in gene_paths_list)
+	gene_paths_list = get_gene_dir_paths()
+	print("Gene paths length: {}".format(len(gene_paths_list)))
+	Parallel(n_jobs=num_cores)(delayed(run_paml)(gene) for gene in gene_paths_list)
 
 if __name__ == "__main__":
 	main()
