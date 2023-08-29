@@ -1,0 +1,206 @@
+---
+title: "Nonrandom Patterns of Introgressed Regions"
+author: "Matt Glasenapp"
+date: "2023-08-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(sjPlot)
+library(fitdistrplus)
+library(ggplot2)
+library(ggpubr)
+library(plyr)
+library(dplyr)
+library(fitdistrplus)
+```
+
+# R Markdown
+
+## Divergence of Introgressed Regions vs. Genome-Wide Background
+
+Load the csv files containing the distribution of mean dXY values and read as a one-dimensional vector
+
+Files for posterior probability > 90
+```{r}
+dist_introgression_tract_dxy_90 <- scan("introgression_tracts_mean_dxy_dist_90.csv", what = numeric(), sep = ",")
+dist_species_tree_tract_dxy_90 <- scan("species_tree_tracts_mean_dxy_dist_90.csv", what = numeric(), sep = ",")
+```
+
+Files for posterior probability > 80
+```{r}
+dist_introgression_tract_dxy_80 <- scan("introgression_tracts_mean_dxy_dist_80.csv", what = numeric(), sep = ",")
+dist_species_tree_tract_dxy_80 <- scan("species_tree_tracts_mean_dxy_dist_80.csv", what = numeric(), sep = ",")
+```
+
+Add one-dimensional vectors of mean dXY values to a dataframe called df
+```{r}
+df <- data.frame(
+  dist_type = factor(c(rep("introgression_tract", 1000), rep("species_tree_tract", 1000), rep("introgression_tract", 1000), rep("species_tree_tract", 1000))),
+  mean_divergence = c(dist_introgression_tract_dxy_90, dist_species_tree_tract_dxy_90, dist_introgression_tract_dxy_80, dist_species_tree_tract_dxy_80),
+  posterior_probability = factor(c(rep("probability_90", 2000), rep("probability_80", 2000)))
+)
+```
+
+# View the first ten lines of the df dataframe
+```{r}
+head(df)
+```
+
+Reorder levels of posterior_probability
+```{r}
+df$posterior_probability <- factor(df$posterior_probability, levels = c("probability_90", "probability_80"))
+```
+
+Plot histograms of mean absolute nucleotide divergence (dXY)
+``` {r}
+fig1 <- ggplot(data = df, aes(x = mean_divergence, fill = dist_type)) +
+  geom_histogram(aes(y=..density..), alpha = 0.4, color = "black", binwidth = 0.0001) +
+  geom_density(alpha=0) + 
+  facet_wrap(
+    ~ posterior_probability,
+    ncol = 1,
+    scales = "free_x",
+    labeller = labeller(
+      posterior_probability = c(
+        "probability_90" = "Posterior Probability Threshold: 90%",
+        "probability_80" = "Posterior Probability Threshold: 80%"
+      )
+    )
+  ) +
+  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F")) +
+  labs(
+    x = "Divergence",
+    y = "Frequency",
+    fill = "Dist Type"
+  ) + theme_blank() +
+  theme(
+    legend.position = "none",
+    panel.grid = element_blank()
+  )
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap = "Figure 1. Distribution of mean absolute nucleotide divergence for introgression tracts and species tree tracts by PhyloNet-HMM posterior probability threshold (90%, 80%)"}
+plot(fig1)
+```
+
+## Inidividual Histograms with density overlay
+
+fig1
+
+## QQ Plots
+ggqqplot(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_90"])
+
+ggqqplot(df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_90"])
+
+ggqqplot(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_80"])
+
+ggqqplot(df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_80"])
+
+
+## Shapiro Wilk Tests
+shapiro.test(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_90"])
+
+shapiro.test(df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_90"])
+
+shapiro.test(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_80"])
+
+shapiro.test(df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_80"])
+
+## Fitdistrplus Doesn't Work
+# Plot histogram and overlay normal fit 
+fit.norm=fitdist(df$mean_divergence,"norm")
+plot(fit.norm)
+
+filtered_df <- df[df$posterior_probability == "probability_90" & df$dist_type == "species_tree_tract", ]
+
+# Fit a normal distribution to the filtered mean_divergence values
+fit.norm <- fitdist(filtered_df$mean_divergence, "norm")
+
+# Plot the fitted distribution
+plot(fit.norm)
+
+result <- df %>%
+  group_by(dist_type, posterior_probability) %>%
+  summarise(sd_mean_divergence = sd(mean_divergence),
+            variance_mean_divergence = sd_mean_divergence^2,
+            .groups = "drop") %>%
+  arrange(posterior_probability)
+
+print(result)
+
+var.test(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_90"],df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_90"])
+
+var.test(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_80"],df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_80"])
+
+var.test(log(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_90"]),log(df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_90"]))
+
+var.test(log(df$mean_divergence[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_80"]),log(df$mean_divergence[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_80"]))
+
+
+## Run t-tests
+# Subset to posterior_probability = "probability_90"
+
+subset_90 = df[df$posterior_probability == "probability_90", ]
+t.test(mean_divergence~dist_type, data=subset, paired=FALSE, var.eq=F, alternative="two.sided")
+
+subset_80 = df[df$posterior_probability == "probability_80", ]
+t.test(mean_divergence~dist_type, data=subset_80, paired=FALSE, var.eq=F, alternative="two.sided")
+
+## Create figures for publication
+```{r}
+fig2 <- ggplot(data = df, aes(x = mean_divergence, fill = dist_type)) +
+  geom_density(aes(y=after_stat(density))) + 
+  facet_wrap(
+    ~ posterior_probability,
+    ncol = 1,
+    scales = "free_y",
+    #scales = "free_x",
+    labeller = labeller(
+      posterior_probability = c(
+        "probability_90" = "Posterior Probability Threshold: 90%",
+        "probability_80" = "Posterior Probability Threshold: 80%"
+      )
+    )
+  ) +
+  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"), labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")
+) + labs(
+  x = expression(
+      atop(
+        paste("Mean ", italic("H. pulcherrimus"), " - ", italic("S. fragilis")),
+        paste("Absolute Nucleotide Divergence (", italic("d")[XY], ")")
+      )
+    ),
+    y = "Probability Denstiy",
+    fill = "Dist Type"
+  ) + theme_blank() +
+  theme(
+    axis.title = element_text(size = 14),
+    legend.position = "right",
+    panel.grid = element_blank(), 
+  ) + 
+  guides(fill = guide_legend(title = NULL))
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap = "Figure 2. Distribution of mean absolute nucleotide divergence for introgression tracts and species tree tracts by PhyloNet-HMM posterior probability threshold (90%, 80%)"}
+plot(fig2)
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+ggsave(filename = "dXY.eps", plot = fig2)
+ggsave(filename = "dXY.png", plot = fig2)
+```
+
+
+
+## Including Plots
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```

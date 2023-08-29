@@ -113,14 +113,14 @@ def main():
 	# Write distribution of the number of overlapping protein-coding genes to csv 
 	write_to_csv(count_genes_dict, "count_genes.csv")
 
-	# Intersect each replicate interval file with protein_coding_genes.bed
+	# Intersect each replicate interval file with unique_exons.bed
 	Parallel(n_jobs=cores)(delayed(intersect)(replicate, exon_file, output_directory_exons) for replicate in replicate_files)
 
 	# Get a list of the output files from running bedtools intersect with unique_exons.bed
 	intersect_file_path_lst_exons = os.listdir(output_directory_exons)
 	intersect_files_exons = [output_directory_exons + item for item in intersect_file_path_lst_exons]
 
-	# Populate count_exons_dict with each replicate interval file and the number of overlapping protein-coding bases
+	# Populate count_exons_dict with each replicate interval file and the number of overlapping coding bases
 	for file in intersect_files_exons:
 		add_to_count_bases_dict(file)
 

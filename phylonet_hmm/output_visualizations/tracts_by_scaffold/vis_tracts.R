@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/tracts_by_scaffold/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/output_visualizations/tracts_by_scaffold/")
 
 mytheme <- theme_classic() + theme(
   legend.position = "top",
@@ -12,8 +12,8 @@ mytheme <- theme_classic() + theme(
 theme_set(mytheme)
 
 # Read the bed file
-bed_file <- "ten_kb_tracts_80.bed"
-#bed_file <- "ten_kb_tracts.bed"
+#bed_file <- "ten_kb_tracts_80.bed"
+bed_file <- "ten_kb_tracts.bed"
 genes <- read.table(bed_file, sep = "\t", header = FALSE)
 
 # Rename the columns
@@ -41,18 +41,19 @@ figure <- ggplot(plot_data) +
   geom_segment(
     data = scaffold_lengths,
     aes(x = 0, xend = length, y = chromosome, yend = chromosome),
-    color = "black", size = 0.1
+    color = "black", size = 0.3
   ) + 
   labs(x = "Position along Chromosome (base pairs)", y = "Chromosome") +
   scale_x_continuous(labels = scales::comma) +
   theme(
     panel.background = element_blank(),
     panel.border = element_blank(),
-    axis.line = element_line(colour = "black", size = 1),
+    axis.line = element_line(colour = "black", linewidth = 0.5),
     axis.text = element_text(size = 8),
-    axis.title = element_text(size = 20)
+    axis.title = element_text(size = 16)
   )
 
 figure
 
-ggsave(filename = "tracts_80.svg", plot = figure)
+ggsave(filename = "tracts_90.svg", plot = figure)
+ggsave(filename = "tracts_90.png", plot = figure)

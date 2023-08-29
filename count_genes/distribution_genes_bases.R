@@ -67,7 +67,7 @@ print(out_bases)
 
 
 ggplot(df, aes(x=gene_count, fill=tract_type)) +
-  geom_density(alpha=0.4) +
+  geom_density(aes(y=after_stat(density)), alpha=0.4) +
   #geom_vline(data=mu, aes(xintercept=grp.mean, color=tract_type), show.legend = FALSE, linetype="dashed") + 
   theme(panel.background = element_blank()) + 
   theme(axis.line = element_line(colour = "black", size = 1)) + 

@@ -28,6 +28,12 @@ df <- data.frame(
   divergence = c(dist_introgression_tract_dxy, dist_species_tree_tract_dxy)
 )
 
+introgression_tract_dist <- df[df$tract_type == "introgression_tract", ]
+hist(introgression_tract_dist$divergence)
+
+species_tree_tract_dist <- df[df$tract_type == "species_tree_tract", ]
+hist(species_tree_tract_dist$divergence)
+
 df_filtered <- df[df$divergence != 0, ]
 
 boxplot(divergence~tract_type,data=df, ylab = "Divergence (Mean dXY)", xlab = "Type")

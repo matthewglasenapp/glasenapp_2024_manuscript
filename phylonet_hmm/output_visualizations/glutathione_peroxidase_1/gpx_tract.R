@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyverse)
 library(ggarchery)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/glutathione_peroxidase_1/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/output_visualizations/glutathione_peroxidase_1/")
 
 introgression_probabilities = fromJSON(file = "NW_022145611.1.json")
 class(introgression_probabilities)
@@ -29,7 +29,7 @@ ggplot(data_df, aes(x = coordinates, y = introgression_probabilities)) +
         axis.line = element_line(colour = "black", size = 1),
         axis.text.x = element_text(size = 16, angle = 45, hjust = 1),  # Rotate x-axis tick labels by 45 degrees
         axis.text.y = element_text(size = 16),  # Keep y-axis tick labels horizontal
-        axis.title = element_text(size = 20, face = "bold")) +  # Bold axis titles
+        axis.title = element_text(size = 16, face = "bold")) +  # Bold axis titles
   scale_y_continuous(breaks = c(0.25, 0.5, 0.75, 1.00)) +
   # Overlay rectangles and lines representing gene coordinates at the top of the plot
   annotate("rect", xmin = 34800855, xmax = 34801115, ymin = 1.00, ymax = 1.05, 
@@ -68,3 +68,4 @@ ggplot(data_df, aes(x = coordinates, y = introgression_probabilities)) +
   scale_x_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
 
 ggsave("gpx.svg")
+ggsave("gpx.png")
