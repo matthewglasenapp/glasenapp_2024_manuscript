@@ -175,7 +175,7 @@ fig2 <- ggplot(data = df, aes(x = mean_divergence, fill = dist_type)) +
         paste("Absolute Nucleotide Divergence (", italic("d")[XY], ")")
       )
     ),
-    y = "Probability Denstiy",
+    y = "Probability Density",
     fill = "Dist Type"
   ) + theme_blank() +
   theme(
