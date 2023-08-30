@@ -7,7 +7,7 @@ par(mar=c(2,2,2,1))
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/count_genes/")
 
 # Define the csv files with list of gene and base countscounts 
-introgression_tract_gene_count = "introgression_tract_gene_count.csv"
+introgression_tract_gene_count = "introgression_tract_gene_count_90.csv"
 introgression_tract_base_count = "introgression_tract_base_count.csv"
 
 species_tree_tract_gene_count = "species_tree_tract_gene_count.csv"
