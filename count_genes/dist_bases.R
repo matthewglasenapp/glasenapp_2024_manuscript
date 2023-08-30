@@ -24,6 +24,16 @@ dist_species_tree_tract_bases_90 <- scan(species_tree_tract_base_count_90, what 
 dist_introgression_tract_bases_80 <- scan(introgression_tract_base_count_80, what = numeric(), sep = ",")
 dist_species_tree_tract_bases_80 <- scan(species_tree_tract_base_count_80, what = numeric(), sep = ",")
 
+total_bases_90_st = 4644060
+total_bases_90_it = 4644092
+total_bases_80_st = 27343212
+total_bases_80_it = 27476503
+
+dist_introgression_tract_bases_90 <- dist_introgression_tract_bases_90 / total_bases_90_it * 100
+dist_introgression_tract_bases_80 <- dist_introgression_tract_bases_80 / total_bases_80_it * 100
+dist_species_tree_tract_bases_90 <- dist_species_tree_tract_bases_90 / total_bases_90_st * 100
+dist_species_tree_tract_bases_80 <- dist_species_tree_tract_bases_80 / total_bases_80_st * 100
+
 # Add one-dimensional vectors of mean dXY values to a dataframe called df
 df <- data.frame(
   dist_type = factor(c(rep("introgression_tract", 1000), rep("species_tree_tract", 1000), rep("introgression_tract", 1000), rep("species_tree_tract", 1000))),
@@ -52,7 +62,7 @@ fig1 <- ggplot(data = df, aes(x = base_count, fill = dist_type)) +
   ) +
   scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"), labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")
   ) + labs(
-    x = "Mean Number of Protein Coding Bases",
+    x = "Mean Percent Coding",
     y = "Probability Density",
     fill = "Dist Type"
   ) + theme_blank() +
@@ -64,3 +74,7 @@ fig1 <- ggplot(data = df, aes(x = base_count, fill = dist_type)) +
   guides(fill = guide_legend(title = NULL))
 
 fig1
+
+ggsave(filename = "dist_coding.eps", plot = fig1)
+ggsave(filename = "dist_coding.png", plot = fig1)
+

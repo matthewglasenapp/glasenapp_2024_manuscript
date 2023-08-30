@@ -24,6 +24,16 @@ dist_species_tree_tract_genes_90 <- scan(species_tree_tract_gene_count_90, what 
 dist_introgression_tract_genes_80 <- scan(introgression_tract_gene_count_80, what = numeric(), sep = ",")
 dist_species_tree_tract_genes_80 <- scan(species_tree_tract_gene_count_80, what = numeric(), sep = ",")
 
+mb_introgressed_90 = 4.644092
+mb_introgressed_80 = 27.476503
+mb_species_tree_90 = 4.644060
+mb_species_tree_80 = 27.343212
+
+dist_introgression_tract_genes_90 <- dist_introgression_tract_genes_90 / mb_introgressed_90
+dist_species_tree_tract_genes_90 <- dist_species_tree_tract_genes_90 / mb_species_tree_90
+dist_introgression_tract_genes_80 <- dist_introgression_tract_genes_80 / mb_introgressed_80
+dist_species_tree_tract_genes_80 <- dist_species_tree_tract_genes_80 / mb_species_tree_80
+
 # Add one-dimensional vectors of mean dXY values to a dataframe called df
 df <- data.frame(
   dist_type = factor(c(rep("introgression_tract", 1000), rep("species_tree_tract", 1000), rep("introgression_tract", 1000), rep("species_tree_tract", 1000))),
@@ -52,7 +62,7 @@ fig1 <- ggplot(data = df, aes(x = gene_count, fill = dist_type)) +
   ) +
   scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"), labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")
   ) + labs(
-    x = "Mean Number of Protein Coding Genes",
+    x = "Mean Number of Protein Coding Genes/Mb",
     y = "Probability Density",
     fill = "Dist Type"
   ) + theme_blank() +
@@ -64,3 +74,7 @@ fig1 <- ggplot(data = df, aes(x = gene_count, fill = dist_type)) +
   guides(fill = guide_legend(title = NULL))
 
 fig1
+
+ggsave(filename = "dist_genes.eps", plot = fig1)
+ggsave(filename = "dist_genes.png", plot = fig1)
+
