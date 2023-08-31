@@ -55,11 +55,7 @@ def get_distributions():
 
 		mean_dN_dist.append(mean(dN_list))
 		mean_dS_dist.append(mean(dS_list))
-		mean_dNdS_dist.append(mean(dS_list))
-
-	output_csv_1 = open("introgression_tracts_mean_dN_dist.csv","w")
-	output_csv_2 = open("introgression_tracts_mean_dS_dist.csv","w")
-	output_csv_3 = open("introgression_tracts_mean_dNdS_dist.csv","w")
+		mean_dNdS_dist.append(mean(dNdS_list))
 
 	distribution_dict["mean_dN"] = mean_dN_dist
 	distribution_dict["mean_dS"] = mean_dS_dist
@@ -72,7 +68,6 @@ def write_csv(output_file_name, dist):
 	output_csv = open(output_file, "w")
 	writer = csv.writer(output_csv)
 	value_lst = dist
-	print(value_lst)
 	writer.writerow(value_lst)
 	output_csv.close()
 

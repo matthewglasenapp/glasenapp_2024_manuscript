@@ -1,11 +1,11 @@
-library("rjson")
+library(rjson)
 library(ggplot2)
 library(tidyverse)
 library(ggarchery)
 
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/output_visualizations/arachidonate_5_lipoxygenase/")
 
-theme(plot.margin = margin(10, 50, 10, 10)) # Increase the margin at the top
+theme() # Increase the margin at the top
 
 introgression_probabilities = fromJSON(file = "NW_022145601.1.json")
 class(introgression_probabilities)
@@ -29,6 +29,7 @@ figure <- ggplot(data_df, aes(x = coordinates, y = introgression_probabilities))
         axis.text.x = element_text(size = 16, angle = 45, hjust = 1),
         axis.text.y = element_text(size = 16),
         axis.title = element_text(size = 20, face = "bold")) +
+  coord_cartesian(ylim = c(0, 1.08)) + 
   # Overlay rectangles and lines representing gene coordinates at the top of the plot
   annotate("rect", xmin = 170756, xmax = 172402, ymin = 1.00, ymax = 1.05, 
            fill = "black", color = "black", size = 0.5) +
@@ -56,10 +57,10 @@ figure <- ggplot(data_df, aes(x = coordinates, y = introgression_probabilities))
            fill = "black", color = "black", size = 0.5) +
   geom_arrowsegment(aes(x = 170401, y = 1.025, xend = 184101, yend = 1.025), arrow_positions = 0.3, arrows = arrow(length=unit(.35, 'cm'), ends = "last", type = "closed")) + 
   annotate("text", x = mean(c(170401, 184101)), y = 1.06, 
-           label = "arachidonate 5-lipoxygenase", color = "black", vjust = 0) + 
+           label = "arachidonate\n5-lipoxygenase", color = "black", vjust = 0) + 
   geom_arrowsegment(aes(x = 151263, y = 1.025, xend = 162808, yend = 1.025), arrow_positions = 0.3, arrows = arrow(length=unit(.35, 'cm'), ends = "last", type = "closed")) + 
   annotate("text", x = mean(c(151263, 162808)), y = 1.06, 
-           label = "lysosomal amino acid transporter 1", color = "black", vjust = 0) + 
+           label = "lysosomal amino acid\ntransporter 1", color = "black", vjust = 0) + 
   annotate("rect", xmin = 151263, xmax = 151397, ymin = 1.00, ymax = 1.05, 
            fill = "black", color = "black", size = 0.5) +
   annotate("rect", xmin = 152335, xmax = 152661, ymin = 1.00, ymax = 1.05, 
@@ -84,7 +85,7 @@ figure <- ggplot(data_df, aes(x = coordinates, y = introgression_probabilities))
            fill = "black", color = "black", size = 0.5) +
   geom_arrowsegment(aes(x = 198738, y = 1.025, xend = 210294, yend = 1.025), arrow_positions = 0.33, arrows = arrow(length=unit(.35, 'cm'), ends = "last", type = "closed")) + 
   annotate("text", x = mean(c(198738, 210294)), y = 1.06, 
-           label = "glycosyltransferase 8 domain-containing\nprotein 1", color = "black", vjust = 0) +
+           label = "glycosyltransferase 8\ndomain-containing protein 1", color = "black", vjust = 0) +
   annotate("rect", xmin = 198738, xmax = 199186, ymin = 1.00, ymax = 1.05, 
            fill = "black", color = "black", size = 0.5) +
   annotate("rect", xmin = 201299, xmax = 201391, ymin = 1.00, ymax = 1.05, 
@@ -102,9 +103,12 @@ figure <- ggplot(data_df, aes(x = coordinates, y = introgression_probabilities))
   annotate("rect", xmin = 206637, xmax = 210294, ymin = 1.00, ymax = 1.05, 
            fill = "black", color = "black", size = 0.5) +
   # Add commas representing to the x axis tick marks 
-  scale_x_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE))
+  scale_x_continuous(labels = function(x) format(x, big.mark = ",", scientific = FALSE)) + 
+  scale_y_continuous(breaks = c(0.25, 0.5, 0.75, 1.0))
 
 figure
+
+ggsave(filename="arach.png",plot=figure)
   
 ggsave(filename = "arach.svg", width = 11, height = 8.5, plot = figure, dpi = 700)
 ggsave(filename = "arach.png", width = 11, height = 8.5, plot = figure)
