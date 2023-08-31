@@ -78,3 +78,9 @@ fig1
 ggsave(filename = "dist_coding.eps", plot = fig1)
 ggsave(filename = "dist_coding.png", plot = fig1)
 
+###
+
+model <- lm(dist_species_tree_tract_bases_80 ~ 1)
+
+# Calculate the confidence interval
+confint(model, level=0.95)

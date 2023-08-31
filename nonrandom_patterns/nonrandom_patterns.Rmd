@@ -146,7 +146,7 @@ var.test(log(df$mean_divergence[df$dist_type == "introgression_tract" & df$poste
 # Subset to posterior_probability = "probability_90"
 
 subset_90 = df[df$posterior_probability == "probability_90", ]
-t.test(mean_divergence~dist_type, data=subset, paired=FALSE, var.eq=F, alternative="two.sided")
+results <- t.test(mean_divergence~dist_type, data=subset_90, paired=FALSE, var.eq=F, alternative="two.sided")
 
 subset_80 = df[df$posterior_probability == "probability_80", ]
 t.test(mean_divergence~dist_type, data=subset_80, paired=FALSE, var.eq=F, alternative="two.sided")
@@ -204,3 +204,13 @@ You can also embed plots, for example:
 ```{r pressure, echo=FALSE}
 plot(pressure)
 ```
+
+
+#####
+
+
+model <- lm(dist_species_tree_tract_dxy_80 ~ 1)
+
+# Calculate the confidence interval
+confint(model, level=0.95)
+

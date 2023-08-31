@@ -38,7 +38,7 @@ bed_file_dir = "/hb/home/mglasena/dissertation/data/mosdepth/mrna_cov/"
 bed_file = "/hb/home/mglasena/dissertation/data/mosdepth/mrna_cov/pallidus_SRR5767285.regions.bed.gz"
 
 # File containing genes with the majority of ther bases introgressed 
-introgressed_genes = "majority_bases_introgressed_genes_coverage.tsv"
+introgressed_genes = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts_species_tree/majority_bases_introgressed_genes_coverage.tsv"
 
 # Specify species to include for ortholog finder. MUST BE ALPHABETICAL!
 # Strongylocentrotidae Subset

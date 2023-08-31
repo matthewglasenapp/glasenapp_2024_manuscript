@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyverse)
 library(ggarchery)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/visualize_tracts/arachidonate_5_lipoxygenase/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/output_visualizations/arachidonate_5_lipoxygenase/")
 
 theme(plot.margin = margin(10, 50, 10, 10)) # Increase the margin at the top
 
@@ -26,8 +26,9 @@ figure <- ggplot(data_df, aes(x = coordinates, y = introgression_probabilities))
   # Add lines representing the X and Y Axes
   theme(panel.border = element_blank(),
         axis.line = element_line(colour = "black", size = 1),
-        axis.text = element_text(size = 16), # increase font size of axis labels
-        axis.title = element_text(size = 20)) + # increase font size of axis titles
+        axis.text.x = element_text(size = 16, angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 16),
+        axis.title = element_text(size = 20, face = "bold")) +
   # Overlay rectangles and lines representing gene coordinates at the top of the plot
   annotate("rect", xmin = 170756, xmax = 172402, ymin = 1.00, ymax = 1.05, 
            fill = "black", color = "black", size = 0.5) +
@@ -106,3 +107,5 @@ figure <- ggplot(data_df, aes(x = coordinates, y = introgression_probabilities))
 figure
   
 ggsave(filename = "arach.svg", width = 11, height = 8.5, plot = figure, dpi = 700)
+ggsave(filename = "arach.png", width = 11, height = 8.5, plot = figure)
+

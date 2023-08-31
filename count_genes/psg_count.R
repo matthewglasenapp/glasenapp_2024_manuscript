@@ -1,5 +1,9 @@
 library(ggplot2)
 library(fitdistrplus)
+library(sjPlot)
+library(ggpubr)
+library(plyr)
+library(dplyr)
 
 # Change margin settings
 par(mar=c(2,2,2,1))
@@ -7,27 +11,75 @@ par(mar=c(2,2,2,1))
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/count_genes/")
 
 # Define the csv files with list of gene and base countscounts 
-introgression_tract_psg_count = "introgression_tract_psg_count.csv"
-species_tree_tract_psg_count = "species_tree_tract_psg_count.csv"
+introgression_tract_psg_count_90 = "introgression_tract_psg_count_90.csv"
+species_tree_tract_psg_count_90 = "species_tree_tract_psg_count_90.csv"
+introgression_tract_psg_count_80 = "introgression_tract_psg_count_80.csv"
+species_tree_tract_psg_count_80 = "species_tree_tract_psg_count_80.csv"
 
 # Read the CSV file as a one-dimensional vector
-dist_introgression_tract_psg <- scan(introgression_tract_psg_count, what = numeric(), sep = ",")
-dist_species_tree_tract_psg <- scan(species_tree_tract_psg_count, what = numeric(), sep = ",")
+dist_introgression_tract_psg_90 <- scan(introgression_tract_psg_count_90, what = numeric(), sep = ",")
+dist_species_tree_tract_psg_90 <- scan(species_tree_tract_psg_count_90, what = numeric(), sep = ",")
+dist_introgression_tract_psg_80 <- scan(introgression_tract_psg_count_80, what = numeric(), sep = ",")
+dist_species_tree_tract_psg_80 <- scan(species_tree_tract_psg_count_80, what = numeric(), sep = ",")
+
+mb_introgressed_90 = 4.644092
+mb_introgressed_80 = 27.476503
+mb_species_tree_90 = 4.644060
+mb_species_tree_80 = 27.343212
+
+dist_introgression_tract_psg_90 <- dist_introgression_tract_psg_90 / mb_introgressed_90
+dist_species_tree_tract_psg_90 <- dist_species_tree_tract_psg_90 / mb_species_tree_90
+dist_introgression_tract_psg_80 <- dist_introgression_tract_psg_80 / mb_introgressed_80
+dist_species_tree_tract_psg_80 <- dist_species_tree_tract_psg_80 / mb_species_tree_80
+
+mean(dist_introgression_tract_psg_90)
+mean(dist_species_tree_tract_psg_90)
+mean(dist_introgression_tract_psg_80)
+mean(dist_species_tree_tract_psg_80)
 
 df <- data.frame(
-  tract_type = c(rep("introgression_tract", length(dist_introgression_tract_psg)),
-                 rep("species_tree_tract", length(dist_species_tree_tract_psg))),
-  psg_count = c(dist_introgression_tract_psg, dist_species_tree_tract_psg))
+  dist_type = factor(c(rep("introgression_tract", 1000), rep("species_tree_tract", 1000), rep("introgression_tract", 1000), rep("species_tree_tract", 1000))),
+  psg_count = c(dist_introgression_tract_psg_90, dist_species_tree_tract_psg_90, dist_introgression_tract_psg_80, dist_species_tree_tract_psg_80),
+  posterior_probability = factor(c(rep("probability_90", 2000), rep("probability_80", 2000)))
+)
 
-boxplot(psg_count~tract_type,data=df, ylab = "Overlapping Genes", xlab = "Type")
+# Reorder levels of posterior_probability
+df$posterior_probability <- factor(df$posterior_probability, levels = c("probability_90", "probability_80"))
 
-ggplot(df, aes(x=psg_count, fill=tract_type)) +
-  geom_density(alpha=0.4) +
-  #geom_vline(data=mu, aes(xintercept=grp.mean, color=tract_type), show.legend = FALSE, linetype="dashed") + 
-  theme(panel.background = element_blank()) + 
-  theme(axis.line = element_line(colour = "black", size = 1)) + 
-  scale_fill_discrete(labels=c('Introgression Tracts', 'Genome-Wide Background')) + theme(legend.title = element_blank())
+# Plot data
+fig1 <- ggplot(data = df, aes(x = psg_count, fill = dist_type)) +
+  geom_density(aes(y=after_stat(density))) + 
+  facet_wrap(
+    ~ posterior_probability,
+    ncol = 1,
+    scales = "free",
+    #scales = "free_y",
+    #scales = "free_x",
+    labeller = labeller(
+      posterior_probability = c(
+        "probability_90" = "Posterior Probability Threshold: 90%",
+        "probability_80" = "Posterior Probability Threshold: 80%"
+      )
+    )
+  ) +
+  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"), labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")
+  ) + labs(
+    x = "Mean Number of Positively Selected Genes",
+    y = "Probability Density",
+    fill = "Dist Type"
+  ) + theme_blank() +
+  theme(
+    axis.title = element_text(size = 14),
+    legend.position = "right",
+    panel.grid = element_blank(), 
+  ) + 
+  guides(fill = guide_legend(title = NULL))
 
-t.test(psg_count~tract_type, data=df, paired=FALSE, var.eq=T)
+fig1
 
-mean(df$tract_type)
+#####
+
+model <- lm(dist_species_tree_tract_psg_80 ~ 1)
+
+# Calculate the confidence interval
+confint(model, level=0.95)

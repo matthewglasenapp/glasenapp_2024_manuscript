@@ -78,3 +78,10 @@ fig1
 ggsave(filename = "dist_genes.eps", plot = fig1)
 ggsave(filename = "dist_genes.png", plot = fig1)
 
+######
+
+model <- lm(dist_introgression_tract_genes_80 ~ 1)
+
+# Calculate the confidence interval
+confint(model, level=0.95)
+
