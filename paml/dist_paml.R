@@ -107,6 +107,13 @@ mean(dist_dS_species_tree_90)
 mean(dist_dNdS_introgression_tract_90)
 mean(dist_dNdS_species_tree_90)
 
+mean(dist_dN_introgression_tract_80)
+mean(dist_dN_species_tree_80)
+mean(dist_dS_introgression_tract_80)
+mean(dist_dS_species_tree_80)
+mean(dist_dNdS_introgression_tract_80)
+mean(dist_dNdS_species_tree_80)
+
 ####
 T-Tests
 t.test(mean_dN~dist_type, data=df, paired=FALSE, var.eq=F, alternative="two.sided")
