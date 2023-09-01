@@ -1,7 +1,8 @@
 import os
 import csv
+import math 
 
-parent_directory = "/hb/scratch/mglasena/test_rna_metrics/single_copy_ortholog_fasta_alignments/"
+parent_directory = "/hb/scratch/mglasena/paml_80/introgression_tracts/single_copy_ortholog_fasta_alignments/"
 
 dN_dS_dict = dict()
 
@@ -13,7 +14,6 @@ def get_gene_paths():
 def extract_paml(gene):
     with open(gene + '/paml_out.txt') as f:
         lines = f.readlines() # list containing lines of file
-        columns = [] # To store column names
         i = 1
         count = 0
         
@@ -32,7 +32,7 @@ def extract_paml(gene):
                 ds = float(line.split()[-1])
                 count += 1
         
-            if count == 3:
+            if count == 3 and math.isnan(omega) != True:
                 dN_dS_dict[gene.split('/')[-1]] = [ds, dn, omega]
                 count = 0
                 break

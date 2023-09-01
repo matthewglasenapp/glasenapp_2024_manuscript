@@ -57,7 +57,7 @@ def get_distributions():
 
 	distribution_dict["mean_dN"] = mean_dN_dist
 	distribution_dict["mean_dS"] = mean_dS_dist
-	distribution_dict["mean_dNdS_dist"] = mean_dNdS_dist
+	distribution_dict["mean_dNdS"] = mean_dNdS_dist
 
 	return distribution_dict
 

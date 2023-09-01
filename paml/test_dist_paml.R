@@ -1,11 +1,6 @@
 library(ggplot2)
-library(fitdistrplus)
-library(sjPlot)
-library(ggpubr)
-library(plyr)
-library(dplyr)
 library(tidyr)
-library(ggh4x)
+library(gridExtra)
 
 # Change margin settings
 #par(mar=c(2,2,2,1))
@@ -51,64 +46,39 @@ df <- data.frame(
   mean_dS = c(dist_dS_introgression_tract_90, dist_dS_species_tree_90, dist_dS_introgression_tract_80, dist_dS_species_tree_80),
   mean_dNdS = c(dist_dNdS_introgression_tract_90, dist_dNdS_species_tree_90, dist_dNdS_introgression_tract_80, dist_dNdS_species_tree_80),
   posterior_probability = factor(c(rep("probability_90", 2000), rep("probability_80", 2000)))
-  )
-  
-# Convert data to long format
-df_long <- df %>% pivot_longer(cols = c(mean_dN, mean_dS, mean_dNdS),
-                               names_to = "metric",
-                               values_to = "value")
+)
 
-# Reorder the levels of the metric variable
-df_long$metric <- factor(df_long$metric, levels = c("mean_dN", "mean_dS", "mean_dNdS"))
+library(ggplot2)
+library(tidyr)
 
-# Reorder the levels of the metric variable
-df_long$posterior_probability <- factor(df_long$posterior_probability, levels = c("probability_90", "probability_80"))
+# Reshape the data to long format
+df_long <- df %>%
+  gather(variable, value, mean_dN, mean_dS, mean_dNdS)
 
-###########
-
-# Create the ggplot using facet_grid for independent scales
-fig1 <- ggplot(df_long, aes(x = value, fill = dist_type)) +
-  geom_density(aes(y=after_stat(density)), alpha=0.8) +
-  facet_grid2(
-    posterior_probability ~ metric,
-    scales = "free", independent = "all",
-    labeller = labeller(posterior_probability = c(
-      "probability_90" = "Posterior\nProbability\n> 90%",
-      "probability_80" = "Posterior\nProbability\n> 80%"),
-      metric = c(
-        mean_dN = "Mean dN",
-        mean_dS = "Mean dS",
-        mean_dNdS = "Mean dNdS"
-      )
-    ), switch = "x") +
-  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"),
-                    labels = c("Introgression Tract", "Genome-Wide Background")) +
+# Create a ggplot2 density plot
+density_plot <- ggplot(df_long, aes(x = value, fill = dist_type)) +
+  geom_density(alpha = 0.7) +
+  labs(title = "Density Plots",
+       x = "Value",
+       y = "Density") +
+  facet_grid(posterior_probability ~ variable, scales = "free_x") + 
+  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"), labels = c("Introgression Tract", "Genome-Wide Background")) +
   labs(x = "", y = "Probability Density", fill = "") +
   theme_blank() +
-  theme(strip.placement = "outside",
-        axis.title = element_text(size = 20),
-        legend.position = "top",
-        panel.grid = element_blank(),
-        strip.text.y = element_text(size = 12, angle = 0),
-        strip.text.x = element_text(size = 16), # Font size for facet labels
-        legend.text = element_text(size = 16)
+  theme(
+    axis.title = element_text(size = 14),
+    legend.position = "right",
+    panel.grid = element_blank()
   ) +
   guides(fill = guide_legend(title = NULL))
 
-fig1
+# Print the density plot
+print(density_plot)
 
-ggsave(filename = "dist_paml.eps", plot = fig1)
-ggsave(filename = "dist_paml.png", plot = fig1)
 
-mean(dist_dN_introgression_tract_90)
-mean(dist_dN_species_tree_90)
-mean(dist_dS_introgression_tract_90)
-mean(dist_dS_species_tree_90)
-mean(dist_dNdS_introgression_tract_90)
-mean(dist_dNdS_species_tree_90)
 
-####
-T-Tests
-t.test(mean_dN~dist_type, data=df, paired=FALSE, var.eq=F, alternative="two.sided")
-t.test(mean_dS~dist_type, data=df, paired=FALSE, var.eq=F, alternative="two.sided")
-t.test(mean_dNdS~dist_type, data=df, paired=FALSE, var.eq=F, alternative="two.sided")
+
+
+
+
+
