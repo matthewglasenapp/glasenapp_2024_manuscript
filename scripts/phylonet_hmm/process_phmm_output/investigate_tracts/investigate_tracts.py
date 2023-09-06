@@ -590,12 +590,15 @@ def get_gene_overlap():
 # Identify any positively selected genes from Kober and Pogson (2017) with bases declared introgressed. 
 def find_psg_overlap():
 	psg_list = list(csv.reader(open(psg_file,"r"), delimiter = ","))
-	introgressed_genes_list = list(csv.reader(open("intersect.tsv","r"), delimiter = "\t"))
+
+	intersect_file = output_dir + "intersect.tsv"
+	introgressed_genes_list = list(csv.reader(open(intersect_file,"r"), delimiter = "\t"))
 
 	# Get list of SPU identifiers from the set of positively selected genes 
 	psg_list = [n for n in psg_list[4:1012]]
 
-	csv_file = open("psg_intersect.tsv","w")
+	csv_output = output_dir + "psg_intersect.tsv"
+	csv_file = open(csv_output,"w")
 	writer = csv.writer(csv_file, delimiter = "\t")	
 	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul"]
 	writer.writerow(header)
@@ -616,7 +619,8 @@ def update_introgression_by_scaffold():
 	introgressed_threshold_full = 100
 	introgressed_threshold_partial = 10
 
-	genes = open("intersect.tsv","r").read().splitlines()[1:]
+	intsersect_file = output_dir + "intersect.tsv"
+	genes = open(intsersect_file,"r").read().splitlines()[1:]
 	genes = [gene.split("\t") for gene in genes]
 
 	for gene in genes:
@@ -638,7 +642,7 @@ def update_introgression_by_scaffold():
 	combined_tract_length_by_scaffold = dict()
 	combined_tract_length_by_scaffold_10kb = dict()
 
-	tracts = open("tract_info.csv","r").read().splitlines()[1:]
+	tracts = open(output_dir + "tract_info.csv","r").read().splitlines()[1:]
 	tracts = [tract.split(",") for tract in tracts]
 
 	for tract in tracts:
@@ -656,7 +660,8 @@ def update_introgression_by_scaffold():
 			else:
 				combined_tract_length_by_scaffold_10kb[scaffold] = length
 
-	csv_file = open("introgression_by_scaffold_updated.tsv","w")
+	output_csv_file = output_dir + "introgression_by_scaffold_updated.tsv"
+	csv_file = open(output_csv_file,"w")
 	writer = csv.writer(csv_file, delimiter = "\t")	
 	header = ["scaffold", "length (bp)", "length spanned by first and last sites (bp)", "number of sites in all_sites alignment", "number nexus sites in phmm alignment", "number posterior probabilities > threshold", "number_tracts", "number_ten_kb_tracts", "combined_tract_length", "combined_tract_length_10kb", "fully_introgressed_genes", "partially_introgressed_genes"]
 	writer.writerow(header)
@@ -729,7 +734,7 @@ def main():
 	# print("Overlapping coding bases: {}".format(overlapping_coding_bases))
 	# print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
 	
-	# find_psg_overlap()
+	find_psg_overlap()
 	update_introgression_by_scaffold()
 
 if __name__ == "__main__":
