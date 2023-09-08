@@ -248,19 +248,30 @@ def run_mosdepth(tract_file, bam_file):
 	os.system(mosdepth)
 
 # Create a list of the relevant mosdepth output file paths in alphabetic order by species name 
-def get_mosdepth_output_file_list():
-	find_files = "find {} -type f -name '*.regions*' | grep -v 'csi' > mosdepth_output_files".format(output_dir)
-	os.system(find_files)
-	mosdepth_output_file_list = open("mosdepth_output_files","r").read().splitlines()
-	os.system("rm mosdepth_output_files")
-	return sorted(mosdepth_output_file_list)
+def get_mosdepth_file_paths_pairs_list():
+	find_regions_files = "find {} -type f -name '*.regions*' | grep -v 'csi' > mosdepth_regions_files".format(output_dir)
+	os.system(find_regions_files)
+
+	find_threshold_files = "find {} -type f -name '*.thresholds*' | grep -v 'csi' > mosdepth_threshold_files".format(output_dir)
+	os.system(find_threshold_files)
+
+	regions_files_list = open("mosdepth_regions_files","r").read().splitlines()
+	threshold_files_list = open("mosdepth_threshold_files","r").read().splitlines()
+
+	sorted_zipped_list = [list(n) for n in zip(sorted(regions_files_list),sorted(threshold_files_list))]
+
+	os.system("rm mosdepth_regions_files")
+	os.system("rm mosdepth_threshold_files")
+
+	print(sorted_zipped_list)
+
+	return sorted_zipped_list
 
 # Populate the coverage_dict dictionary in the format of {tract_name: [coverage depth]}
-def parse_mosdepth(mosdepth_region_file):
-	with gzip.open(mosdepth_region_file,"rt") as f:
-		inputs = f.read().splitlines()
+def parse_mosdepth(regions_file):
+	depths = gzip.open(regions_file,"rt").read().splitlines()
 	
-	for record in inputs:
+	for record in depths:
 		tract_name = record.split("\t")[3]
 		coverage = float(record.split("\t")[4])
 
@@ -269,6 +280,18 @@ def parse_mosdepth(mosdepth_region_file):
 		else:
 			coverage_dict[tract_name].append(coverage)
 
+def append_thresholds_by_species_to_coverage_dict(thresholds_file):
+	thresholds = gzip.open(thresholds_file, "rt").read().splitlines()[1:]
+
+	for record in thresholds:
+		tract_name = record.split("\t")[3]
+		length = int(record.split("\t")[2]) - int(record.split("\t")[1])
+		prop_1x =  float(int(record.split("\t")[4]) / length)
+		prop_10x = float((intrecord.split("\t")[5]) / length)
+
+		coverage_dict[tract_name].append(int(prop_1x))
+		coverage_dict[tract_name].append(int(prop_10x))
+
 # Removes all mosdepth outputfiles from output directory
 def clean_up_mosdepth_output():
 	os.system("rm *.dist.txt")
@@ -276,14 +299,17 @@ def clean_up_mosdepth_output():
 	os.system("rm *.gz")
 	os.system("rm *.csi")
 
-# Filter the coverage_dict for introgression tracts where one sample has lower than 5x mean coverage depth or higher than 100x mean coverage depth. Add introgression tracts passing filter to filtered_coverage_dict. Write tracts passing filter to tracts_pf.bed. Create tract_coverage.tsv with coverage depth for each species by introgression tract.
+# Filter the coverage_dict for introgression tracts where one sample has lower than 5x mean coverage depth or higher than 100x mean coverage depth. 
+# Add introgression tracts passing filter to filtered_coverage_dict. 
+# Write tracts passing filter to tracts_pf.bed. Create tract_coverage.tsv with coverage depth for each species by introgression tract.
 def filter_tracts_by_depth():
 	tracts_filtered = 0
 	tracts_pass_filter = 0 
 	tracts = open("tracts_gap_filter.bed","r").read().splitlines()
 
 	for key in list(coverage_dict):
-		if min(coverage_dict[key]) < 5 or max(coverage_dict[key]) >= 100:
+		depths = coverage_dict[key][0:4]
+		if min(depths) < 5 or max(depths) >= 100:
 			tracts_filtered += 1
 			continue
 		else:
@@ -297,7 +323,7 @@ def filter_tracts_by_depth():
 
 	with open("tract_coverage.tsv","w") as f4:
 		for key,value in filtered_coverage_dict.items():
-			f4.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
+			f4.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\t" + str(value[4]) + "\t" + str(value[5]) + "\t" + str(value[6]) + "\t" + str(value[7]) + "\t" + str(value[8]) + "\t" + str(value[9]) + "\t" + str(value[10]) + "\t" + str(value[11]) + "\n")
 
 	Sdro, Sfra, Spal, Hpul = ([] for i in range(4))
 
@@ -453,11 +479,16 @@ def main():
 	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("tracts_gap_filter.bed", bam_file) for bam_file in bam_file_paths_list)
 
 	# Create a list of the relevant mosdepth output file paths in alphabetic order by species name 
-	mosdepth_output_file_list = get_mosdepth_output_file_list()
+	mosdepth_output_file_list = get_mosdepth_file_paths_pairs_list()
 
 	# Populates the coverage_dict dictionary in the format of {tract_name: [coverage depth Sdro, coverage depth Sfra, coverage depth Spal, coverage depth Hpul]}
-	for file in mosdepth_output_file_list:
-		parse_mosdepth(file)
+	for file_pair in mosdepth_output_file_list:
+		regions_file = file_pair[0]
+		parse_mosdepth(regions_file)
+
+	for file_pair in mosdepth_output_file_list:
+		thresholds_file = file_pair[1]
+		append_thresholds_by_species_to_coverage_dict(thresholds_file)
 
 	# Removes all mosdepth outputfiles from output directory
 	clean_up_mosdepth_output()
@@ -466,6 +497,7 @@ def main():
 	filter_tracts_by_depth()
 
 	# Use mosdepth and tracts_pf.bed to get the mean coverage depth of each introgression tracts by species for tracts passing filters that will be used in downstream analyses
+	# Mosdepth is ran a second time to get metrics for only tracts passing filter 
 	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("tracts_pf.bed", bam_file) for bam_file in bam_file_paths_list)
 
 	# Print summary stats for introgression tracts passing filter 
