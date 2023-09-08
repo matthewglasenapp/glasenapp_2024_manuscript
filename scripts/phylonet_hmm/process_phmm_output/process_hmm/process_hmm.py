@@ -287,10 +287,10 @@ def append_thresholds_by_species_to_coverage_dict(thresholds_file):
 		tract_name = record.split("\t")[3]
 		length = int(record.split("\t")[2]) - int(record.split("\t")[1])
 		prop_1x =  float(int(record.split("\t")[4]) / length)
-		prop_10x = float((intrecord.split("\t")[5]) / length)
+		prop_10x = float(int(record.split("\t")[5]) / length)
 
-		coverage_dict[tract_name].append(int(prop_1x))
-		coverage_dict[tract_name].append(int(prop_10x))
+		coverage_dict[tract_name].append(prop_1x)
+		coverage_dict[tract_name].append(prop_10x)
 
 # Removes all mosdepth outputfiles from output directory
 def clean_up_mosdepth_output():

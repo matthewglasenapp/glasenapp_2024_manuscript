@@ -76,7 +76,7 @@ ECB_SPU_dict = dict()
 # Initialize dictionary in the format of {LOC_ID: ECB-GENEPAGE-ID, name, synonyms, curation_stats, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
 LOC_gene_dictionary = dict()
 
-# Initialize dictionary for genes overlapping with an introgression tract {LOC_ID: data}
+# Initialize dictionary for genes that overlap one or more introgression tracts {LOC_ID: data}
 gene_intersection_dict = dict()
 
 # Initalize dictionary of mean coverage depth by species for each introgression tract 
@@ -337,7 +337,15 @@ def make_coverage_depths_dict():
 		fra = record.split("\t")[2]
 		pal = record.split("\t")[3]
 		pul = record.split("\t")[4]
-		tract_coverage_depth_dict[tract_name] = [dro,fra,pal,pul]
+		dro_prop_1x = record.split("\t")[5]
+		dro_prop_10x = record.split("\t")[6]
+		fra_prop_1x = record.split("\t")[7]
+		fra_prop_10x = record.split("\t")[8]
+		pal_prop_1x = record.split("\t")[9]
+		pal_prop_10x = record.split("\t")[10]
+		pul_prop_1x = record.split("\t")[11]
+		pul_prop_10x  = record.split("\t")[12]
+		tract_coverage_depth_dict[tract_name] = [dro,fra,pal,pul,dro_prop_1x,dro_prop_10x,fra_prop_1x,fra_prop_10x,pal_prop_1x,pal_prop_10x,pul_prop_1x,pul_prop_10x]
 
 # Get list of scaffold coordinate files from the PhyloNet-HMM input
 def get_coordinate_file_paths():
@@ -481,10 +489,25 @@ def create_tract_info_file(overlap_file):
 		else:
 			tract_coverage_depth_dict[key].append(["n/a"])
 
+	exon_overlaps = open("exon_overlap.bed","r").read().splitlines()
+
+	for record in exon_overlaps:
+		tract_name = record.split("\t")[3].replace("_","-")
+		bases_overlapped = int(record.split("\t")[-1])
+
+		if len(tract_coverage_depth_dict[tract_name]) == 14:
+			tract_coverage_depth_dict[tract_name].append(bases_overlapped)
+		elif len(tract_coverage_depth_dict[tract_name]) == 15:
+			tract_coverage_depth_dict[tract_name][14] += bases_overlapped
+
+	for value in tract_coverage_depth_dict.values():
+		if len(value) == 14:
+			value.append(0)
+
 	csv_file = open("tract_info.csv","w")
 	writer = csv.writer(csv_file)	
 
-	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/bp", "Sdro", "Sfra", "Spal", "Hpul",  "Overlapping Genes"]
+	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/bp", "Overlapping Coding Bases", "Percent Coding", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Genes", "Sdro 1x", "Sdro 10x", "Sfra 1x", "Sfra 10x", "Spal 1x", "Spal 10x", "Hpul 1x", "Hpul 10x"]
 	writer.writerow(header)
 	
 	for key,value in tract_coverage_depth_dict.items():
@@ -492,8 +515,9 @@ def create_tract_info_file(overlap_file):
 		start = key.split(":")[1].split("-")[0]
 		stop = key.split(":")[1].split("-")[1]
 		length = int(stop) - int(start)
-		snv_per_bp = int(value[4])/length
-		data = [key, scaffold, start, stop, length, value[4], snv_per_bp, value[0], value[1], value[2], value[3], ",".join(value[5])]
+		snv_per_bp = int(value[12])/length
+		percent_coding = value[14] / length
+		data = [key, scaffold, start, stop, length, value[12], snv_per_bp, value[14], percent_coding, value[0], value[1], value[2], value[3], ",".join(value[13]), value[4], value[5], value[6], value[7], value[8], value[9], value[10], value[11]]
 		writer.writerow(data)
 	
 	csv_file.close()
@@ -684,55 +708,55 @@ def update_introgression_by_scaffold():
 	csv_file.close()
 
 def main():
-	# os.chdir(output_dir)
+	os.chdir(output_dir)
 	
-	# create_gene_dictionary()
+	create_gene_dictionary()
 	
-	# create_ECB_SPU_mapping_dict()
-	# add_GO_KO_termns_to_gene_dictionary()
+	create_ECB_SPU_mapping_dict()
+	add_GO_KO_termns_to_gene_dictionary()
 	
-	# intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
-	# intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
+	intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
+	intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
 	
-	# handle_duplicates_and_reverse_dictionary()
+	handle_duplicates_and_reverse_dictionary()
 
-	# write_gene_dictionary_to_csv()
+	write_gene_dictionary_to_csv()
 
-	# make_coverage_depths_dict()
+	make_coverage_depths_dict()
 
-	# coordinate_files = get_coordinate_file_paths()
-	# create_coordinate_dict(coordinate_files)
+	coordinate_files = get_coordinate_file_paths()
+	create_coordinate_dict(coordinate_files)
 
-	# create_gene_intersection_dict("gene_overlap.bed")
+	create_gene_intersection_dict("gene_overlap.bed")
 
-	# #create_gene_intersection_dict("exon_overlap.bed")
+	#create_gene_intersection_dict("exon_overlap.bed")
 
-	# create_tract_info_file("gene_overlap.bed")
+	create_tract_info_file("gene_overlap.bed")
 
-	# write_introgressed_genes_to_bed()
+	write_introgressed_genes_to_bed()
 
-	# Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("introgressed_genes.bed", bam_file) for bam_file in bam_file_paths_list)
+	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("introgressed_genes.bed", bam_file) for bam_file in bam_file_paths_list)
 
-	# mosdepth_output_file_list = get_mosdepth_output_file_list()
+	mosdepth_output_file_list = get_mosdepth_output_file_list()
 
-	# for file in mosdepth_output_file_list:
-	# 	parse_mosdepth(file)
+	for file in mosdepth_output_file_list:
+		parse_mosdepth(file)
 
-	# update_gene_intersection_dict()
+	update_gene_intersection_dict()
 
-	# create_gene_intersection_file()
-	# #create_exon_intersection_file()
+	create_gene_intersection_file()
+	#create_exon_intersection_file()
 
-	# overlapping_coding_bases = get_exon_overlap()
-	# overlapping_genic_bases = get_gene_overlap()
-	# overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
-	# overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
+	overlapping_coding_bases = get_exon_overlap()
+	overlapping_genic_bases = get_gene_overlap()
+	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
+	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
 
-	# print("Total bases introgressed: {}".format(total_bases_introgressed))
-	# print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
-	# print("Overlapping genic bases: {}".format(overlapping_genic_bases))
-	# print("Overlapping coding bases: {}".format(overlapping_coding_bases))
-	# print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
+	print("Total bases introgressed: {}".format(total_bases_introgressed))
+	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
+	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
+	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
+	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
 	
 	find_psg_overlap()
 	update_introgression_by_scaffold()
