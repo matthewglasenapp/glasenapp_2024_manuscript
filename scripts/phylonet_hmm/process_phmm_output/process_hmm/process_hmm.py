@@ -35,7 +35,7 @@ phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffo
 scaffold_info_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/scaffolds.tsv"
 
 # Specify the file identifying any 100 kb gaps present in the nexus alignments 
-gaps_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/100kb_gaps.bed"
+gaps_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/25kb_gaps.bed"
 
 # Specify the paths to the BAM files for each species used for assessing coverage depth
 # Must be in alphabetical order by species name 

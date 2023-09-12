@@ -1,6 +1,6 @@
 import os 
 import json
-phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments"
+phylonet_hmm_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/hmm_input/scaffold_nexus_alignments/"
 probability_file_dir = "/hb/scratch/mglasena/phylonet_hmm/probability_files/"
 
 coordinate_by_scaffold_dict = dict()

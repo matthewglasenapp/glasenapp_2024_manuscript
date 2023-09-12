@@ -44,7 +44,7 @@ def write_intorgression_probabilities_to_json(scaffold):
 		outfile.write(json_object)
 
 def main():
-	#get_all_bestrun_files()
+	get_all_bestrun_files()
 	
 	print("get_bestrun_files_by_scaffold")
 	get_bestrun_files_by_scaffold()

@@ -8,7 +8,7 @@ from Bio import SeqIO
 
 num_cores = 24
 
-root_dir = "/hb/scratch/mglasena/test_rna_metrics/species_tree/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/species_tree_genes/"
 
 # nw_utils directory
 nw_utils = "/hb/home/mglasena/software/newick_utils/src/"
@@ -26,7 +26,7 @@ reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF
 gff_file = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.gff"
 
 # Path to filtered multisample vcf file
-vcf_file = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_vcf_files/filtered_genotype_calls_individual_genotypes.g.vcf.gz"
+vcf_file = "/hb/scratch/mglasena/phylonet_hmm/hpul_sfra_invariant_sites_vcf/filtered_genotype_calls_individual_genotypes.g.vcf.gz"
 
 # Bed file containing a record for each protein coding gene in the S. purpuratus assembly. See the ncbi/ directory for scripts to generate this file
 protein_coding_genes_bed_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/protein_coding_genes.bed"
@@ -42,27 +42,19 @@ introgressed_genes = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investiga
 
 # Specify species to include for ortholog finder. MUST BE ALPHABETICAL!
 # Strongylocentrotidae Subset
-#subset_sample_list = ['depressus_SRR5767284', 'droebachiensis_SRR5767286', 'fragilis_SRR5767279', 'franciscanus_SRR5767282', 'intermedius_SRR5767280', 'nudus_SRR5767281', 'pallidus_SRR5767285', 'pulcherrimus_SRR5767283', 'purpuratus_SRR7211988']
 subset_sample_list = ['fragilis_SRR5767279', 'pulcherrimus_SRR5767283']
 
 # Specify thresholds for filtering. 
-min_cov_threshold = 5
+min_cov_threshold = 10
 
 prop_1x_threshold = 0.75
 
-prop_10x_threshold = 0.0
+prop_10x_threshold = 0.5
 
 # Average coverage of S. purpuratus exons for each sample
 mean_coverage_spur5_exons = {
-"depressus_SRR5767284": 47.5,
-"droebachiensis_SRR5767286" : 41.5,
 "fragilis_SRR5767279": 46.8,
-"franciscanus_SRR5767282": 33.8,
-"intermedius_SRR5767280": 44.2,
-"nudus_SRR5767281": 40.5,
-"pallidus_SRR5767285": 15,
 "pulcherrimus_SRR5767283": 44.3,
-"purpuratus_SRR7211988": 100.3,
 }
 
 # Initialize new dictionary containing the average coverage of S. purpuratus exons for each sample in subset_sample_list variable
@@ -492,6 +484,8 @@ def run_paml(gene_path):
 	os.system("codeml")
 
 def main():
+	os.chdir(root_dir)
+
 	subset_coverage_dict()
 
 	bed_file_list = get_zipped_bed_file_list()
@@ -537,7 +531,7 @@ def main():
 
 	for file in phylip_alignment_path_list:
 		file_dir = file.split("consensAlign.ordered.phylip")[0]
-		copy = "cp codeml.ctl " + file_dir
+		copy = "cp /hb/home/mglasena/dissertation/scripts/phylonet_hmm/paml/codeml.ctl " + file_dir
 		os.system(copy)
 
 	gene_paths_list = get_gene_dir_paths()

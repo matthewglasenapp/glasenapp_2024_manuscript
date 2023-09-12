@@ -5,8 +5,6 @@ library(ggarchery)
 
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/output_visualizations/arachidonate_5_lipoxygenase/")
 
-theme() # Increase the margin at the top
-
 introgression_probabilities = fromJSON(file = "NW_022145601.1.json")
 class(introgression_probabilities)
 

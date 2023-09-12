@@ -3,11 +3,9 @@ import os
 reference_genome = "/hb/groups/pogson_group/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
 
 # Raw genotype calls file
-#genotype_calls = "/hb/groups/pogson_group/dissertation/data/raw_vcf_files/genotype_calls.g.vcf.gz"
-
 genotype_calls_split_multiallelics = "/hb/groups/pogson_group/dissertation/data/raw_vcf_files/genotype_calls_split_multiallelics.g.vcf.gz"
 
-output_directory = "/hb/scratch/mglasena/data/genotypes/phylonet_hmm/dro-pal/"
+output_directory = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/"
 
 samples_to_include = {
 "fragilis_SRR5767279" : "QB3KMK013",

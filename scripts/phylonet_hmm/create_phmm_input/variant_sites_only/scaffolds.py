@@ -9,17 +9,17 @@ num_jobs = 21
 
 # Need to manually input the samples to exlcude from the multisample vcf file in the subset_vcf_by_scaffold() function.  
 
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/"
+
 reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
 
 # File with scaffold names, one per line
 scaffold_list_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/scaffolds.txt"
 
-filtered_vcf = "/hb/scratch/mglasena/invariant_sites_vcf_phylonet_hmm/combined_vcf_files/filtered_genotype_calls_individual_genotypes.g.vcf.gz"
+filtered_vcf = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/3bp_filtered_genotype_calls_pf.g.vcf.gz"
 
 # Path to vcf2phylip program
 vcf2phylip_path = "/hb/home/mglasena/software/vcf2phylip/"
-
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/"
 
 os.mkdir(root_dir + "hmm_input/")
 os.mkdir(root_dir + "hmm_input/vcf_by_scaffold/")

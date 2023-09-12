@@ -6,7 +6,7 @@ output_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadat
 
 gap_dict = dict()
 
-gap_threshold = 100000
+gap_threshold = 25000
 
 def get_coordinate_files():
 	find_coordinate_files = "find {} -type f -name *coordinates* > coordinate_files".format(root_dir)
@@ -67,7 +67,7 @@ def get_gap_stats():
 			f.write(scaffold + "\t" + str(number_gaps) + "\n") 
 
 def write_bed_file():
-	with open(output_dir + "100kb_gaps.bed","w") as f:
+	with open(output_dir + "25kb_gaps.bed","w") as f:
 		for key,value in gap_dict.items():
 			for gap in value:
 				scaffold = gap.split(":")[0]

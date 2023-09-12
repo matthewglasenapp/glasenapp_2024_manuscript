@@ -21,14 +21,14 @@ bam_file_paths_list = [
 
 threads = 4
 
-introgressed_gene_coverage_dict = dict()
+species_tree_gene_coverage_dict = dict()
 
-# Total bases introgressed
+# Total bases species_tree
 tract_length_dist = list(csv.reader(open(process_hmm_output_dir + "tract_length_dist.csv","r")))
-total_bases_introgressed = sum([int(item) for item in tract_length_dist[0]])
-print("Total Bases Introgressed: {}".format(total_bases_introgressed))
+total_bases_species_tree = sum([int(item) for item in tract_length_dist[0]])
+print("Total Bases species_tree: {}".format(total_bases_species_tree))
 
-# Introgression tract file in bed format
+# Species tree tract file in bed format
 tract_file = process_hmm_output_dir + "tracts_pf.bed"
 
 # Coverage depth of each tract for each species 
@@ -37,8 +37,8 @@ tract_coverage_file = process_hmm_output_dir + "tract_coverage.tsv"
 # Bed file of all S. purpuratus protein coding genes 
 gene_list_file = genome_metadata_dir + "protein_coding_genes.bed"
 
-# File of unique protein-coding exons 
-exon_list_file = genome_metadata_dir + "unique_exons.bed"
+# File of unique protein-coding sequences (CDS) 
+CDS_list_file = genome_metadata_dir + "unique_CDS.bed"
 
 # Gene metadata from Echinobase 
 #os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
@@ -69,10 +69,10 @@ ECB_SPU_dict = dict()
 # Same dictionary as gene_dictionary, but formatted as {LOC_ID: ECB-GENEPAGE-ID, name, synonyms, curation_stats, info, ECB GO Terms, ECB KO Terms, Tu GO Terms}
 LOC_gene_dictionary = dict()
 
-# Dictionary for genes overlapping with an introgression tract {LOC_ID: data}
+# Dictionary for genes overlapping with a species tree tract {LOC_ID: data}
 gene_intersection_dict = dict()
 
-# Dictionary of the average coverage depths of each introgression tract for each species
+# Dictionary of the average coverage depths of each species tree tract for each species
 tract_coverage_depth_dict = dict()
 
 coordinate_by_scaffold_dict = dict()
@@ -278,7 +278,7 @@ def add_GO_KO_termns_to_gene_dictionary():
 
 	# Deal with redundant Tu et al. terms here!
 
-# Use bedtools intersect to create file bed file containing the overlap between introgression tracts and protein coding genes 
+# Use bedtools intersect to create file bed file containing the overlap between species tree tracts and protein coding genes 
 def intersect_genes(tract_file, gene_file, outfile):
 	print("Intersecting {} with {}. Writing results to {}".format(tract_file, gene_file, outfile))
 	os.system("bedtools intersect -a " + tract_file + " -b " + gene_file + " -wo > " + outfile)
@@ -396,10 +396,10 @@ def create_gene_intersection_dict(overlap_file):
 			gene_coordinates = str(record[4]) + ":" + str(record[5]) + "-" + str(record[6])
 			gene_length = int(record[6]) - int(record[5])
 			bp_overlap = int(record[14])
-			percent_introgressed = bp_overlap / gene_length * 100
+			percent_species_tree = bp_overlap / gene_length * 100
 
 			# Populate gene_intersection_dict with all of the assigned variables
-			gene_intersection_dict[gene_id] = [gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, tract_id, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
+			gene_intersection_dict[gene_id] = [gene_name, gene_length, bp_overlap, percent_species_tree, gene_coordinates, tract_id, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
 
 	print("Length of gene_intersection_dict: {}".format(len(gene_intersection_dict)))
 
@@ -485,8 +485,8 @@ def create_tract_info_file(overlap_file):
 	
 	csv_file.close()
 
-def write_introgressed_genes_to_bed():
-	with open("introgressed_genes.bed","w") as f:
+def write_species_tree_genes_to_bed():
+	with open("species_tree_genes.bed","w") as f:
 		for key,value in gene_intersection_dict.items():
 				scaffold = value[4].split(":")[0]
 				start = value[4].split(":")[1].split("-")[0]
@@ -515,30 +515,30 @@ def parse_mosdepth(mosdepth_region_file):
 		gene = record.split("\t")[3]
 		coverage = float(record.split("\t")[4])
 
-		if gene not in introgressed_gene_coverage_dict:
-			introgressed_gene_coverage_dict[gene] = [coverage]
+		if gene not in species_tree_gene_coverage_dict:
+			species_tree_gene_coverage_dict[gene] = [coverage]
 		else:
-			introgressed_gene_coverage_dict[gene].append(coverage)
+			species_tree_gene_coverage_dict[gene].append(coverage)
 
 def update_gene_intersection_dict():
 	for key,value in gene_intersection_dict.items():
 		values = value
-		gene_intersection_dict[key] = [values[0], values[1], values[2], values[3], values[4], introgressed_gene_coverage_dict[key][0], introgressed_gene_coverage_dict[key][1], introgressed_gene_coverage_dict[key][2], introgressed_gene_coverage_dict[key][3], values[5], values[6], values[7], values[8], values[9], values[10], values[11], values[12]]
+		gene_intersection_dict[key] = [values[0], values[1], values[2], values[3], values[4], species_tree_gene_coverage_dict[key][0], species_tree_gene_coverage_dict[key][1], species_tree_gene_coverage_dict[key][2], species_tree_gene_coverage_dict[key][3], values[5], values[6], values[7], values[8], values[9], values[10], values[11], values[12]]
 
-	with open("fully_introgressed_genes_coverage.tsv","w") as f:
-		for key,value in introgressed_gene_coverage_dict.items():
+	with open("fully_species_tree_genes_coverage.tsv","w") as f:
+		for key,value in species_tree_gene_coverage_dict.items():
 			if gene_intersection_dict[key][3] == 100:
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
-	with open("majority_bases_introgressed_genes_coverage.tsv","w") as f:
-		for key,value in introgressed_gene_coverage_dict.items():
+	with open("majority_bases_species_tree_genes_coverage.tsv","w") as f:
+		for key,value in species_tree_gene_coverage_dict.items():
 			if gene_intersection_dict[key][3] > 50:
 				f.write(key + "\t" + str(value[0]) + "\t" + str(value[1]) + "\t" + str(value[2]) + "\t" + str(value[3]) + "\n")
 
 def create_gene_intersection_file():
 	csv_file = open("intersect.tsv","w")
 	writer = csv.writer(csv_file, delimiter="\t")	
-	header = ["NCBI Gene ID", "Name", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Introgression Tract(s)", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Info", "Echinobase GO", "Echinobase KO", "Tu GO"]
+	header = ["NCBI Gene ID", "Name", "Length", "species_tree Bases", "Percent Bases species_tree", "Coordinates", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Species Tree Tract(s)", "ECB Gene ID", "Gene Synonyms", "Curation Status", "Info", "Echinobase GO", "Echinobase KO", "Tu GO"]
 	writer.writerow(header)
 	
 	for key,value in gene_intersection_dict.items():
@@ -547,10 +547,10 @@ def create_gene_intersection_file():
 	
 	csv_file.close()
 
-def get_exon_overlap():
+def get_CDS_overlap():
 	overlapping_bases = []
 
-	with open("exon_overlap.bed","r") as f:
+	with open("CDS_overlap.bed","r") as f:
 		inputs = f.read().splitlines()
 
 	for overlap in inputs:
@@ -571,18 +571,18 @@ def get_gene_overlap():
 
 def find_psg_overlap():
 	psg_list = list(csv.reader(open(psg_file,"r"), delimiter = ","))
-	introgressed_genes_list = list(csv.reader(open("intersect.tsv","r"), delimiter = "\t"))
+	species_tree_genes_list = list(csv.reader(open("intersect.tsv","r"), delimiter = "\t"))
 
 	# Get list of SPU identifiers from the set of positively selected genes 
 	psg_list = [n for n in psg_list[4:1012]]
 
 	csv_file = open("psg_intersect.tsv","w")
 	writer = csv.writer(csv_file, delimiter = "\t")	
-	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul"]
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "species_tree Bases", "Percent Bases species_tree", "Coordinates", "Overlapping species tree tract(s)", "Sdro", "Sfra", "Spal", "Hpul"]
 	writer.writerow(header)
 	
 	for gene in psg_list:
-			for record in introgressed_genes_list:
+			for record in species_tree_genes_list:
 				if gene[0] in record or gene[1] in record or gene[2] in record:
 					data = [record[0], record[1], record[12], gene[0], gene[1], gene[2], psg_list.index(gene), record[2], record[3], record[4], record[5], record[10], record[6], record[7], record[8], record[9]]
 					writer.writerow(data)
@@ -596,7 +596,7 @@ def main():
 	add_GO_KO_termns_to_gene_dictionary()
 	
 	intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
-	intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
+	intersect_genes(tract_file, CDS_list_file, "CDS_overlap.bed")
 	
 	handle_duplicates_and_reverse_dictionary()
 
@@ -609,13 +609,13 @@ def main():
 
 	create_gene_intersection_dict("gene_overlap.bed")
 
-	#create_gene_intersection_dict("exon_overlap.bed")
+	#create_gene_intersection_dict("CDS_overlap.bed")
 
 	create_tract_info_file("gene_overlap.bed")
 
-	write_introgressed_genes_to_bed()
+	write_species_tree_genes_to_bed()
 
-	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("introgressed_genes.bed", bam_file) for bam_file in bam_file_paths_list)
+	Parallel(n_jobs=len(bam_file_paths_list))(delayed(run_mosdepth)("species_tree_genes.bed", bam_file) for bam_file in bam_file_paths_list)
 
 	mosdepth_output_file_list = get_mosdepth_output_file_list()
 
@@ -625,19 +625,19 @@ def main():
 	update_gene_intersection_dict()
 
 	create_gene_intersection_file()
-	#create_exon_intersection_file()
+	#create_CDS_intersection_file()
 
-	overlapping_coding_bases = get_exon_overlap()
+	overlapping_coding_bases = get_CDS_overlap()
 	overlapping_genic_bases = get_gene_overlap()
 	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
-	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
+	overlapping_intergenic_bases = total_bases_species_tree - overlapping_genic_bases
 
 	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
 	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
 	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
 	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
 
-	print("Total introgressed bases: {}".format(total_bases_introgressed))
+	print("Total species_tree bases: {}".format(total_bases_species_tree))
 	print(overlapping_coding_bases + overlapping_intronic_bases + overlapping_intergenic_bases)
 
 	find_psg_overlap()

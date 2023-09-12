@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 # Number of threads to use for coverage depth analysis with mosdepth. Do not exceed 4. 
 threads = 4
 
-# Specify the directory that contains protein_coding_genes.bed, unique_exons.bed, GenePageGeneralInfo_AllGenes.txt, GeneGoTerms.txt, GeneKoTerms.txt, tu_2012_go.csv, and psg.csv
+# Specify the directory that contains protein_coding_genes.bed, unique_CDS.bed, GenePageGeneralInfo_AllGenes.txt, GeneGoTerms.txt, GeneKoTerms.txt, tu_2012_go.csv, and psg.csv
 genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/"
 
 # Specify the directory with output from process_hmm.py 
@@ -37,8 +37,8 @@ tract_coverage_file = process_hmm_output_dir + "tract_coverage.tsv"
 # Bed file of all S. purpuratus protein coding genes 
 gene_list_file = genome_metadata_dir + "protein_coding_genes.bed"
 
-# File of unique protein-coding exons 
-exon_list_file = genome_metadata_dir + "unique_exons.bed"
+# File of unique protein-coding sequences (CDS)
+CDS_list_file = genome_metadata_dir + "unique_CDs.bed"
 
 # Gene metadata from Echinobase 
 #os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
@@ -489,9 +489,9 @@ def create_tract_info_file(overlap_file):
 		else:
 			tract_coverage_depth_dict[key].append(["n/a"])
 
-	exon_overlaps = open("exon_overlap.bed","r").read().splitlines()
+	CDS_overlaps = open("CDS_overlap.bed","r").read().splitlines()
 
-	for record in exon_overlaps:
+	for record in CDS_overlaps:
 		tract_name = record.split("\t")[3].replace("_","-")
 		bases_overlapped = int(record.split("\t")[-1])
 
@@ -588,11 +588,11 @@ def create_gene_intersection_file():
 	
 	csv_file.close()
 
-# Calculate the number of exon bases declared introgressed by PhyloNet-HMM
-def get_exon_overlap():
+# Calculate the number of CDS bases declared introgressed by PhyloNet-HMM
+def get_CDS_overlap():
 	overlapping_bases = []
 
-	inputs = open("exon_overlap.bed","r").read().splitlines()
+	inputs = open("CDS_overlap.bed","r").read().splitlines()
 
 	for overlap in inputs:
 		overlapping_bases.append(int(overlap.split("\t")[14]))
@@ -716,7 +716,7 @@ def main():
 	add_GO_KO_termns_to_gene_dictionary()
 	
 	intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
-	intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
+	intersect_genes(tract_file, CDS_list_file, "CDS_overlap.bed")
 	
 	handle_duplicates_and_reverse_dictionary()
 
@@ -729,7 +729,7 @@ def main():
 
 	create_gene_intersection_dict("gene_overlap.bed")
 
-	#create_gene_intersection_dict("exon_overlap.bed")
+	#create_gene_intersection_dict("CDS_overlap.bed")
 
 	create_tract_info_file("gene_overlap.bed")
 
@@ -745,9 +745,9 @@ def main():
 	update_gene_intersection_dict()
 
 	create_gene_intersection_file()
-	#create_exon_intersection_file()
+	#create_CDS_intersection_file()
 
-	overlapping_coding_bases = get_exon_overlap()
+	overlapping_coding_bases = get_CDS_overlap()
 	overlapping_genic_bases = get_gene_overlap()
 	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
 	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases

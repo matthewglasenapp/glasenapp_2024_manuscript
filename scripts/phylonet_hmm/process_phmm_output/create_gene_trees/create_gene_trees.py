@@ -6,13 +6,12 @@ num_cores = 24
 # Mapping of DNA sample names to species names 
 sample_names = {
 'QB3KMK013': 'fragilis',
-'QB3KMK010': 'franciscanus',
 'QB3KMK002': 'pallidus',
 'QB3KMK014': 'droebachiensis',
 'QB3KMK016': 'pulcherrimus',
-'QB3KMK012': 'intermedius',
-'SPUR.00': 'purpuratus',
 }
+
+output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/create_gene_trees/"
 
 # nw_utils directory
 nw_utils = "/hb/home/mglasena/software/newick_utils/src/"
@@ -30,13 +29,13 @@ reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF
 gff_file = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.gff"
 
 # Path to filtered multisample vcf file
-vcf_file = "/hb/home/mglasena/dissertation/data/genotypes/franciscanus/insertions_removed.g.vcf.gz"
+vcf_file = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/3bp_filtered_genotype_calls_pf.g.vcf.gz"
 
 # Intersection file containing introgressed genes
 intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/intersect.tsv"
 
 # PSG intersection file
-psg_intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/psg_intersect.tsv"
+psg_intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/updated_psg_intersect.tsv"
 
 # Get list of introgressed gene NCBI LOC IDs
 def get_gene_list():
@@ -123,7 +122,7 @@ def update_gene_intersection_file():
 def update_psg_intersection_file():
 	csv_file = open("psg_intersection_file.tsv","w")
 	writer = csv.writer(csv_file, delimiter="\t")
-	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Gene Tree"]
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Coding Bases", "Percent Coding", "Gene Tree"]
 	writer.writerow(header)
 
 	for record in open(psg_intersect_file).read().splitlines()[1:]:
@@ -152,6 +151,8 @@ def clean_gene_trees(input_file, output_file):
 	os.system(clean)
 
 def main():
+	os.chdir(output_dir)
+
 	gene_lst = get_gene_list()
 
 	os.system("mkdir single_gene_gff_records/")
