@@ -467,9 +467,10 @@ def reformat_phylip(input_phylip_file):
 		output_file.write(line_4 + "\n")
 		output_file.write(line_5 + "\n")
 
-def run_iqtree(fasta_alignment_path):
-	run_iqtree = "iqtree -s {} -m MFP".format(fasta_alignment_path)
-	os.system(run_iqtree)
+def create_tree_file(fasta_alignment_path):
+	with open(fasta_alignment_path + ".treefile", "w") as f:
+		tree = "(QB3KMK016,QB3KMK013),;"
+		f.write(tree)
 
 def get_gene_dir_paths():
 	parent_directory = root_dir + "single_copy_ortholog_fasta_alignments/"
@@ -526,7 +527,7 @@ def main():
 
 	phylip_alignment_path_list = get_phylip_alignment_paths()
 	Parallel(n_jobs=num_cores)(delayed(reformat_phylip)(fasta_file) for fasta_file in phylip_alignment_path_list)
-	Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in phylip_alignment_path_list)
+	Parallel(n_jobs=num_cores)(delayed(create_tree_file)(fasta_file) for fasta_file in phylip_alignment_path_list)
 
 	for file in phylip_alignment_path_list:
 		file_dir = file.split("consensAlign.ordered.phylip")[0]

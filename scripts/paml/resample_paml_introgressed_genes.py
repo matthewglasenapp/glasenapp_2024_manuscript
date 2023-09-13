@@ -2,10 +2,12 @@ import csv
 import random
 from statistics import mean
 
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/"
+
 # Number of bootstrap replicates
 num_replicates = 1000
 
-paml_output_file = "dNdS.tsv"
+paml_output_file = root_dir + "dNdS.tsv"
 
 paml_lst = [item.split("\t") for item in open(paml_output_file,"r").read().splitlines()[1:]]
 
@@ -70,6 +72,8 @@ def write_csv(output_file_name, dist):
 	output_csv.close()
 
 def main():
+	os.chdir(root_dir)
+
 	create_paml_output_dict()
 	create_pseudoreplicate_dict()
 	

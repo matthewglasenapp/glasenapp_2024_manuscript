@@ -2,13 +2,15 @@ import os
 import csv
 import math 
 
-parent_directory = "/hb/scratch/mglasena/paml_80/introgression_tracts/single_copy_ortholog_fasta_alignments/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgression_genes/"
+
+fasta_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/single_copy_ortholog_fasta_alignments/"
 
 dN_dS_dict = dict()
 
 def get_gene_paths():
-    subdirectory_lst = os.listdir(parent_directory)
-    gene_paths_lst = [parent_directory + subdir for subdir in subdirectory_lst]
+    subdirectory_lst = os.listdir(fasta_alignment_dir)
+    gene_paths_lst = [fasta_alignment_dir + subdir for subdir in subdirectory_lst]
     return gene_paths_lst
 
 def extract_paml(gene):
@@ -51,6 +53,8 @@ def write_data_to_csv():
     output_tsv_file.close()
 
 def main():
+    os.chdir(root_dir)
+
     gene_paths_list = get_gene_paths()
 
     for gene in gene_paths_list:

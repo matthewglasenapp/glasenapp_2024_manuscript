@@ -1,13 +1,15 @@
-### Goal: Create 1,000 replicate datasets of 106 genes ###
+### Goal: Create 1,000 replicate datasets of ___ genes, the same number that were introgressed ###
 
 import csv 
 import random
 from statistics import mean
 
-# Number of bootstrap replicates
-num_replicates = 1000
+root_dir = "root_dir = /hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/species_tree_genes/"
 
-paml_output_file = "dNdS.tsv"
+paml_output_file = root_dir + "dNdS.tsv"
+
+# Number of bootstrap replicates
+num_replicates = len(open(paml_output_file,"r").read().splitlines()[1:])
 
 paml_lst = [item.split("\t") for item in open(paml_output_file,"r").read().splitlines()[1:]]
 
@@ -72,6 +74,7 @@ def write_csv(output_file_name, dist):
 	output_csv.close()
 
 def main():
+	os.chdir(root_dir)
 	create_paml_output_dict()
 	create_replicate_dict()
 	
