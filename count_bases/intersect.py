@@ -19,7 +19,7 @@ intergenic_bases_introgressed_80 = 124087808
 total_bases_21_largest_scaffolds = 828464848
 
 def subset_unique_exons_file():
-	unique_exons = open(exon_file,"r").read().splitlines()
+	unique_exons = gzip.open(exon_file,"r").read().splitlines()
 	subset_unique_exons = [item for item in unique_exons if item.split("\t")[0] in scaffold_lst]
 	
 	with open("subset_unqiue_exons.bed","w") as f:
@@ -28,7 +28,7 @@ def subset_unique_exons_file():
 			f.write("\n")
 
 def count_exon_bases():
-	exon_lst = open("subset_unqiue_exons.bed","r").read().splitlines()
+	exon_lst = gzip.open("subset_unqiue_exons.bed","r").read().splitlines()
 
 	base_counter = 0 
 
@@ -39,7 +39,7 @@ def count_exon_bases():
 	return base_counter
 
 def subset_protein_coding_genes_files():
-	protein_coding_genes = open(protein_coding_genes_file,"r").read().splitlines()
+	protein_coding_genes = gzip.open(protein_coding_genes_file,"r").read().splitlines()
 	subset_protein_coding_genes = [item for item in protein_coding_genes if item.split("\t")[0] in scaffold_lst]
 	
 	with open("subset_protein_coding_genes","w") as f:
@@ -48,7 +48,7 @@ def subset_protein_coding_genes_files():
 			f.write("\n")
 
 def count_genic_bases():
-	gene_lst = open("subset_protein_coding_genes","r").read().splitlines()
+	gene_lst = gzip.open("subset_protein_coding_genes","r").read().splitlines()
 
 	base_counter = 0 
 
