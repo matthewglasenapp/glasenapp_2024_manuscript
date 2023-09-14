@@ -28,6 +28,8 @@ bam_file_paths_list = [
 "/hb/home/mglasena/bam_files/pulcherrimus_SRR5767283_dedup_aligned_reads.bam"
 ]
 
+scaffold_file = genome_metadata_dir + "scaffolds.tsv"
+
 # Introgression tract file in bed format
 tract_file = process_hmm_output_dir + "tracts_pf.bed"
 
@@ -38,7 +40,10 @@ tract_coverage_file = process_hmm_output_dir + "tract_coverage.tsv"
 gene_list_file = genome_metadata_dir + "protein_coding_genes.bed"
 
 # File of unique protein-coding sequences (CDS)
-CDS_list_file = genome_metadata_dir + "unique_CDs.bed"
+CDS_list_file = genome_metadata_dir + "unique_CDS.bed"
+
+# File of unique exons
+exon_list_file = genome_metadata_dir + "unique_exons.bed"
 
 # Gene metadata from Echinobase 
 #os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
@@ -588,26 +593,13 @@ def create_gene_intersection_file():
 	
 	csv_file.close()
 
-# Calculate the number of CDS bases declared introgressed by PhyloNet-HMM
-def get_CDS_overlap():
+def get_record_overlap(record_file):
 	overlapping_bases = []
 
-	inputs = open("CDS_overlap.bed","r").read().splitlines()
+	inputs = open(record_file, "r").read().splitlines()
 
 	for overlap in inputs:
-		overlapping_bases.append(int(overlap.split("\t")[14]))
-
-	return sum(overlapping_bases)
-
-# Calculate the number of gene bases declared introgressed by PhyloNet-HMM
-def get_gene_overlap():
-	overlapping_bases = []
-
-	with open("gene_overlap.bed","r") as f:
-		inputs = f.read().splitlines()
-
-	for overlap in inputs:
-		overlapping_bases.append(int(overlap.split("\t")[14]))
+		overlapping_bases.append(int(overlap.split("\t")[-1]))
 
 	return sum(overlapping_bases)
 
@@ -707,6 +699,48 @@ def update_introgression_by_scaffold():
 
 	csv_file.close()
 
+def count_autosomal_assembly_bases_by_record_type(input_file):
+	scaffold_lst = [item.split("\t")[0] for item in open(scaffold_file,"r").read().splitlines()]
+	records = open(input_file, "r").read().splitlines()
+	autosomal_records = [item for item in records if item.split("\t")[0] in scaffold_lst]
+
+	autosomal_record_bases = 0
+	for record in autosomal_records:
+		length = int(record.split("\t")[2]) - int(record.split("\t")[1])
+		autosomal_record_bases += length
+
+	return autosomal_record_bases
+
+def print_base_breakdown_summary():
+	total_autosomal_bases = sum([int(item.split("\t")[1]) for item in open(scaffold_file,"r").read().splitlines()])
+	autosomal_exon_bases = count_autosomal_assembly_bases_by_record_type(exon_list_file)
+	autosomal_CDS_bases = count_autosomal_assembly_bases_by_record_type(CDS_list_file)
+	autosomal_genic_bases = count_autosomal_assembly_bases_by_record_type(gene_list_file)
+	autosomal_intron_bases = autosomal_genic_bases - autosomal_exon_bases
+	autosomal_intergenic_bases = total_autosomal_bases - autosomal_genic_bases
+
+	print("There are {} bases on the 21 largest scaffolds.".format(total_autosomal_bases))
+	print("{} percent of autosomal bases are protein-coding".format(autosomal_CDS_bases / total_autosomal_bases * 100))
+	print("{} percent of autosomal bases are intronic".format(autosomal_intron_bases / total_autosomal_bases * 100))
+	print("{} percent of autosomal bases are intergenic".format(autosomal_intergenic_bases / total_autosomal_bases * 100))
+
+	overlapping_coding_bases = get_record_overlap("CDS_overlap.bed")
+	overlapping_exon_bases = get_record_overlap("exon_overlap.bed")
+	overlapping_genic_bases = get_record_overlap("gene_overlap.bed")
+	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
+	overlapping_intronic_bases = overlapping_genic_bases - overlapping_exon_bases
+
+	print("Total bases introgressed: {}".format(total_bases_introgressed))
+	print("Overlapping intergenic bases: {} ({}%)".format(overlapping_intergenic_bases, overlapping_intergenic_bases / total_bases_introgressed * 100))
+	print("Overlapping genic bases: {} ({}%)".format(overlapping_genic_bases, overlapping_genic_bases / total_bases_introgressed * 100))
+	print("Overlapping exonic bases: {} ({}%)".format(overlapping_exon_bases, overlapping_exon_bases / total_bases_introgressed * 100))
+	print("Overlapping coding bases: {} ({}%)".format(overlapping_coding_bases, overlapping_coding_bases / total_bases_introgressed * 100))
+	print("Overlapping intronic bases: {} ({}%)".format(overlapping_intronic_bases, overlapping_intronic_bases / total_bases_introgressed * 100))
+
+	print("{} percent of the coding bases on the 21 largest scaffolds were introgressed".format((overlapping_coding_bases / autosomal_CDS_bases)*100))
+	print("{} percent of the intron bases on the 21 largest scaffolds were introgressed".format((intron_bases_introgressed_90 / autosomal_intron_bases)*100))
+	print("{} percent of the intergenic bases on the 21 largest scaffolds were introgressed".format((intergenic_bases_introgressed_90 / autosomal_intergenic_bases)*100))
+
 def main():
 	os.chdir(output_dir)
 	
@@ -717,6 +751,7 @@ def main():
 	
 	intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
 	intersect_genes(tract_file, CDS_list_file, "CDS_overlap.bed")
+	intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
 	
 	handle_duplicates_and_reverse_dictionary()
 
@@ -746,20 +781,11 @@ def main():
 
 	create_gene_intersection_file()
 	#create_CDS_intersection_file()
-
-	overlapping_coding_bases = get_CDS_overlap()
-	overlapping_genic_bases = get_gene_overlap()
-	overlapping_intronic_bases = overlapping_genic_bases - overlapping_coding_bases
-	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
-
-	print("Total bases introgressed: {}".format(total_bases_introgressed))
-	print("Overlapping intergenic bases: {}".format(overlapping_intergenic_bases))
-	print("Overlapping genic bases: {}".format(overlapping_genic_bases))
-	print("Overlapping coding bases: {}".format(overlapping_coding_bases))
-	print("Overlapping intronic bases: {}".format(overlapping_intronic_bases))
 	
 	find_psg_overlap()
 	update_introgression_by_scaffold()
+
+	print_base_breakdown_summary()
 
 if __name__ == "__main__":
 	main()
