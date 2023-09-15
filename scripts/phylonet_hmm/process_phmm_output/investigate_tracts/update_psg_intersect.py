@@ -7,7 +7,7 @@ genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genom
 root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/"
 
 # File of unique protein-coding CDSs 
-CDS_list_file = genome_metadata_dir + "unique_CDS.bed"
+CDS_list_file = genome_metadata_dir + "nonoverlapping_unique_CDS.bed"
 
 psg_tract_LOC_dict = dict()
 
@@ -58,7 +58,7 @@ def update_psg_intersect_csv():
 		LOC_ID = line.split("\t")[0]
 		if LOC_ID in LOC_coding_base_overlap_dict:
 			base_overlap = LOC_coding_base_overlap_dict[LOC_ID]
-			percent_coding = float(base_overlap / int(line.split("\t")[7]))
+			percent_coding = float(base_overlap / int(line.split("\t")[7]) * 100) 
 			data = line.split("\t")
 			data.append(base_overlap)
 			data.append(percent_coding)

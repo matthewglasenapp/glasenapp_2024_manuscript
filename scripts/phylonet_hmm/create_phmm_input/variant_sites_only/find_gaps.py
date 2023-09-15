@@ -56,7 +56,7 @@ def get_gap_stats():
 
 	Mb_gap_lst = [item for item in gap_lst if item >= 1000000]
 
-	print("There were {} gaps greater than 100kb in length".format(len(gap_lst)))
+	print("There were {} gaps greater than 25kb in length".format(len(gap_lst)))
 	print("The largest gap was {}.".format(max(gap_lst)))
 	print("There were {} gaps greater than 1Mb in length".format(len(Mb_gap_lst)))
 

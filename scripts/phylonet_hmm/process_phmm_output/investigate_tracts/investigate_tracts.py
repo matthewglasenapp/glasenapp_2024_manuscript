@@ -39,11 +39,13 @@ tract_coverage_file = process_hmm_output_dir + "tract_coverage.tsv"
 # Bed file of all S. purpuratus protein coding genes 
 gene_list_file = genome_metadata_dir + "protein_coding_genes.bed"
 
+nonverlapping_gene_list_file = genome_metadata_dir + "nonoverlapping_protein_coding_genes.bed"
+
 # File of unique protein-coding sequences (CDS)
-CDS_list_file = genome_metadata_dir + "unique_CDS.bed"
+CDS_list_file = genome_metadata_dir + "nonoverlapping_unique_CDS.bed"
 
 # File of unique exons
-exon_list_file = genome_metadata_dir + "unique_exons.bed"
+exon_list_file = genome_metadata_dir + "nonoverlapping_unique_exons.bed"
 
 # Gene metadata from Echinobase 
 #os.system("wget http://ftp.echinobase.org/pub/GenePageReports/GenePageGeneralInfo_AllGenes.txt")
@@ -370,7 +372,6 @@ def create_coordinate_dict(coordinate_file_list):
 # Populate gene_intersection_dict with info from the genes that intersect introgression tracts 
 def create_gene_intersection_dict(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
-	print("Number of records in overlap file: {}".format(len(overlaps)))
 
 	for record in overlaps:
 		record = record.split("\t")
@@ -426,10 +427,9 @@ def create_gene_intersection_dict(overlap_file):
 			# Populate gene_intersection_dict with all of the assigned variables
 			gene_intersection_dict[gene_id] = [gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, tract_id, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
 
-	print("Length of gene_intersection_dict: {}".format(len(gene_intersection_dict)))
-
 # Create file called tract_info.csv that provides data for each introgression tract identified by PhyloNet-HMM
-# Adjust start/stop coordinates for trimmed introgression tracts that spanned 10kb gaps
+# Adjust start/stop coordinates for trimmed introgression tracts that spanned gaps so that number of overlapping SNVs can be calculated 
+# Tract coordinates were trimmed based on gaps between genotypes in process_hmm.py. Tracts with trimmed coordinates may not have a corresponding coordinate in the original coordinate file
 def create_tract_info_file(overlap_file):
 	overlaps = open(overlap_file,"r").read().splitlines()
 	
@@ -451,13 +451,13 @@ def create_tract_info_file(overlap_file):
 				print("Start in coordinate_by_scaffold_dict: {}".format(start_pos))
 			else:
 				print("Finding new Start")
-				start_pos = 0
 				i = 0
+				start_pos = int(coordinate_by_scaffold_dict[scaffold][i])
 				while start_pos < int(start):
-					start_pos = int(coordinate_by_scaffold_dict[scaffold][i])
 					i += 1
-
-				start_pos = int(coordinate_by_scaffold_dict[scaffold][i+1])
+					start_pos = int(coordinate_by_scaffold_dict[scaffold][i])
+					
+				start_pos = int(coordinate_by_scaffold_dict[scaffold][i])
 			
 				print("New Start: {}".format(start_pos))
 
@@ -466,17 +466,15 @@ def create_tract_info_file(overlap_file):
 				stop_pos = int(stop)
 			else:
 				print("Finding New Stop")
-				stop_pos = int(coordinate_by_scaffold_dict[scaffold][-1])
 				i = len(coordinate_by_scaffold_dict[scaffold]) - 1
+				stop_pos = int(coordinate_by_scaffold_dict[scaffold][-1])
 				while stop_pos > int(stop):
 					i -= 1
 					stop_pos = int(coordinate_by_scaffold_dict[scaffold][i])
 			
-				stop_pos = int(coordinate_by_scaffold_dict[scaffold][i-1])
-
 				print("New Stop: {}".format(stop_pos))
 
-				SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(str(stop_pos))) - int(coordinate_by_scaffold_dict[scaffold].index(str(start_pos))) + 1
+			SNV_sites = int(coordinate_by_scaffold_dict[scaffold].index(str(stop_pos))) - int(coordinate_by_scaffold_dict[scaffold].index(str(start_pos))) + 1
 
 		tract_coverage_depth_dict[key].append(SNV_sites)
 		
@@ -520,8 +518,8 @@ def create_tract_info_file(overlap_file):
 		start = key.split(":")[1].split("-")[0]
 		stop = key.split(":")[1].split("-")[1]
 		length = int(stop) - int(start)
-		snv_per_bp = int(value[12])/length
-		percent_coding = value[14] / length
+		snv_per_kb = int(value[12])/length * 1000
+		percent_coding = value[14] / length * 100 
 		data = [key, scaffold, start, stop, length, value[12], snv_per_bp, value[14], percent_coding, value[0], value[1], value[2], value[3], ",".join(value[13]), value[4], value[5], value[6], value[7], value[8], value[9], value[10], value[11]]
 		writer.writerow(data)
 	
@@ -715,7 +713,7 @@ def print_base_breakdown_summary():
 	total_autosomal_bases = sum([int(item.split("\t")[1]) for item in open(scaffold_file,"r").read().splitlines()])
 	autosomal_exon_bases = count_autosomal_assembly_bases_by_record_type(exon_list_file)
 	autosomal_CDS_bases = count_autosomal_assembly_bases_by_record_type(CDS_list_file)
-	autosomal_genic_bases = count_autosomal_assembly_bases_by_record_type(gene_list_file)
+	autosomal_genic_bases = count_autosomal_assembly_bases_by_record_type(nonverlapping_gene_list_file)
 	autosomal_intron_bases = autosomal_genic_bases - autosomal_exon_bases
 	autosomal_intergenic_bases = total_autosomal_bases - autosomal_genic_bases
 
@@ -726,7 +724,7 @@ def print_base_breakdown_summary():
 
 	overlapping_coding_bases = get_record_overlap("CDS_overlap.bed")
 	overlapping_exon_bases = get_record_overlap("exon_overlap.bed")
-	overlapping_genic_bases = get_record_overlap("gene_overlap.bed")
+	overlapping_genic_bases = get_record_overlap("nonoverlapping_gene_overlap.bed")
 	overlapping_intergenic_bases = total_bases_introgressed - overlapping_genic_bases
 	overlapping_intronic_bases = overlapping_genic_bases - overlapping_exon_bases
 
@@ -738,8 +736,8 @@ def print_base_breakdown_summary():
 	print("Overlapping intronic bases: {} ({}%)".format(overlapping_intronic_bases, overlapping_intronic_bases / total_bases_introgressed * 100))
 
 	print("{} percent of the coding bases on the 21 largest scaffolds were introgressed".format((overlapping_coding_bases / autosomal_CDS_bases)*100))
-	print("{} percent of the intron bases on the 21 largest scaffolds were introgressed".format((intron_bases_introgressed_90 / autosomal_intron_bases)*100))
-	print("{} percent of the intergenic bases on the 21 largest scaffolds were introgressed".format((intergenic_bases_introgressed_90 / autosomal_intergenic_bases)*100))
+	print("{} percent of the intron bases on the 21 largest scaffolds were introgressed".format((overlapping_intronic_bases / autosomal_intron_bases)*100))
+	print("{} percent of the intergenic bases on the 21 largest scaffolds were introgressed".format((overlapping_intergenic_bases / autosomal_intergenic_bases)*100))
 
 def main():
 	os.chdir(output_dir)
@@ -750,6 +748,7 @@ def main():
 	add_GO_KO_termns_to_gene_dictionary()
 	
 	intersect_genes(tract_file, gene_list_file, "gene_overlap.bed")
+	intersect_genes(tract_file, nonverlapping_gene_list_file, "nonoverlapping_gene_overlap.bed")
 	intersect_genes(tract_file, CDS_list_file, "CDS_overlap.bed")
 	intersect_genes(tract_file, exon_list_file, "exon_overlap.bed")
 	

@@ -6,3 +6,5 @@ awk '$3 == "CDS"' | \
 sort -u -k1,1 -k4,4n -k5,5n > unique_CDS.gff
 
 convert2bed --input=gff --output=bed < unique_CDS.gff > unique_CDS.bed
+
+bedtools merge -i unique_CDS.bed > nonoverlapping_unique_CDS.bed
