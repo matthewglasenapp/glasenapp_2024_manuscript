@@ -520,7 +520,7 @@ def create_tract_info_file(overlap_file):
 		length = int(stop) - int(start)
 		snv_per_kb = int(value[12])/length * 1000
 		percent_coding = value[14] / length * 100 
-		data = [key, scaffold, start, stop, length, value[12], snv_per_bp, value[14], percent_coding, value[0], value[1], value[2], value[3], ",".join(value[13]), value[4], value[5], value[6], value[7], value[8], value[9], value[10], value[11]]
+		data = [key, scaffold, start, stop, length, value[12], snv_per_kb, value[14], percent_coding, value[0], value[1], value[2], value[3], ",".join(value[13]), value[4], value[5], value[6], value[7], value[8], value[9], value[10], value[11]]
 		writer.writerow(data)
 	
 	csv_file.close()

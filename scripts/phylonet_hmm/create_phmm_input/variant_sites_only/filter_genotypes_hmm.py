@@ -1,6 +1,6 @@
 import os 
 
-reference_genome = "/hb/groups/pogson_group/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
+reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
 
 # Raw genotype calls file
 genotype_calls_split_multiallelics = "/hb/home/mglasena/raw_vcf_files/genotype_calls_split_multiallelics.g.vcf.gz"
@@ -55,7 +55,7 @@ def merge_vcfs():
 	os.system("rm " + input_indel)
 
 def select_passed_variants():
-	filtered_vcf = "filtered_genotype_calls.g.vcf.gz"
+	filtered_vcf = output_directory + "filtered_genotype_calls.g.vcf.gz"
 	output_file = output_directory + "filtered_genotype_calls_pf.g.vcf.gz"
 	select_variants = "gatk SelectVariants -R {} -V {} -O {} --exclude-filtered true".format(reference_genome, filtered_vcf, output_file)
 	os.system(select_variants)
@@ -82,9 +82,9 @@ def vcf_stats(input_file):
 	os.system("rm samples_file.txt")
 
 def main():
-	separate_SNP_INDEL()
-	filter_variants()
-	merge_vcfs()
+	# separate_SNP_INDEL()
+	# filter_variants()
+	# merge_vcfs()
 	select_passed_variants()
 	bcftools_filter()
 	index_vcf(output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz")
