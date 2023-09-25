@@ -427,7 +427,7 @@ def create_gene_intersection_dict(overlap_file):
 			# Populate gene_intersection_dict with all of the assigned variables
 			gene_intersection_dict[gene_id] = [gene_name, gene_length, bp_overlap, percent_introgressed, gene_coordinates, tract_id, gene_ecb_id, gene_synonyms, gene_curation_status, gene_info, gene_ECB_GO, gene_ECB_KO, gene_tu_GO]
 
-# Create file called tract_info.csv that provides data for each introgression tract identified by PhyloNet-HMM
+# Create file called tract_info.tsv that provides data for each introgression tract identified by PhyloNet-HMM
 # Adjust start/stop coordinates for trimmed introgression tracts that spanned gaps so that number of overlapping SNVs can be calculated 
 # Tract coordinates were trimmed based on gaps between genotypes in process_hmm.py. Tracts with trimmed coordinates may not have a corresponding coordinate in the original coordinate file
 def create_tract_info_file(overlap_file):
@@ -507,10 +507,10 @@ def create_tract_info_file(overlap_file):
 		if len(value) == 14:
 			value.append(0)
 
-	csv_file = open("tract_info.csv","w")
-	writer = csv.writer(csv_file)	
+	csv_file = open("tract_info.tsv","w")
+	writer = csv.writer(csv_file, delimiter = "\t")	
 
-	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/bp", "Overlapping Coding Bases", "Percent Coding", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Genes", "Sdro 1x", "Sdro 10x", "Sfra 1x", "Sfra 10x", "Spal 1x", "Spal 10x", "Hpul 1x", "Hpul 10x"]
+	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/kb", "Overlapping Coding Bases", "Percent Coding", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Genes", "Sdro 1x", "Sdro 10x", "Sfra 1x", "Sfra 10x", "Spal 1x", "Spal 10x", "Hpul 1x", "Hpul 10x"]
 	writer.writerow(header)
 	
 	for key,value in tract_coverage_depth_dict.items():
@@ -656,8 +656,8 @@ def update_introgression_by_scaffold():
 	combined_tract_length_by_scaffold = dict()
 	combined_tract_length_by_scaffold_10kb = dict()
 
-	tracts = open(output_dir + "tract_info.csv","r").read().splitlines()[1:]
-	tracts = [tract.split(",") for tract in tracts]
+	tracts = open(output_dir + "tract_info.tsv","r").read().splitlines()[1:]
+	tracts = [tract.split("\t") for tract in tracts]
 
 	for tract in tracts:
 		scaffold = tract[1].replace("-","_")

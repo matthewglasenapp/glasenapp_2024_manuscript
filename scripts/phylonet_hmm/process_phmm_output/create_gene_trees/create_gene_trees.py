@@ -44,12 +44,14 @@ def get_gene_list():
 
 # Using S. purpuratus gff3 file, make gff file for each gene that passed previous filters
 def make_sco_gff(gene):
+	if "/" in gene:
+		gene = gene.replace("/","_")
 	command = "grep {} {} > single_gene_gff_records/{}.record".format(gene, gff_file, gene)
 	os.system(command)
 
-# Create fasta matrix for each gene in sco_gff.gff file  
+# Create fasta matrix for each gene in intersect_gff.gff file  
 def run_vcf2fasta():
-	run_vcf2fasta = "{} --fasta {} --vcf {} --gff sco_gff.gff --feat {}".format(vcf2fasta, reference_genome, vcf_file, feature)
+	run_vcf2fasta = "{} --fasta {} --vcf {} --gff intersect_gff.gff --feat {}".format(vcf2fasta, reference_genome, vcf_file, feature)
 	os.system(run_vcf2fasta)
 
 # Iqtree does not tolerate the '*'' symbol. Replace '*' with 'N'
@@ -158,28 +160,28 @@ def main():
 	os.system("mkdir single_gene_gff_records/")
 	Parallel(n_jobs=num_cores)(delayed(make_sco_gff)(gene) for gene in gene_lst)
 
-	# Concatenate all single gene gff records into "sco_gff.gff" file
-	os.system('find ./single_gene_gff_records/ -type f -name "*.record" -exec cat {} \\; > sco_gff.gff')
+	# Concatenate all single gene gff records into "intersect_gff.gff" file
+	os.system('find ./single_gene_gff_records/ -type f -name "*.record" -exec cat {} \\; > intersect_gff.gff')
 	
 	# Delete the single gene records
 	os.system('find ./single_gene_gff_records/ -type f -name "*.record" -delete')
 	os.system('rmdir single_gene_gff_records/')
 
 	run_vcf2fasta()
-	replace_missing_genotype_char()
+	# replace_missing_genotype_char()
 	
-	fasta_file_list = os.listdir("vcf2fasta_gene/")
-	Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_file_list)
+	# fasta_file_list = os.listdir("vcf2fasta_gene/")
+	# Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_file_list)
 	
-	tree_file_lst = [item for item in os.listdir("vcf2fasta_gene/") if "treefile" in item]
-	Parallel(n_jobs=num_cores)(delayed(edit_tree_files)(input_file) for input_file in tree_file_lst)
+	# tree_file_lst = [item for item in os.listdir("vcf2fasta_gene/") if "treefile" in item]
+	# Parallel(n_jobs=num_cores)(delayed(edit_tree_files)(input_file) for input_file in tree_file_lst)
 
-	update_gene_intersection_file()
-	update_psg_intersection_file()
+	# update_gene_intersection_file()
+	# update_psg_intersection_file()
 
-	clean_up_iqtree_files()
-	concatenate_trees()
-	clean_gene_trees("concatenated_trees.nwk", "clean_single_locus_trees.nwk")
+	# clean_up_iqtree_files()
+	# concatenate_trees()
+	# clean_gene_trees("concatenated_trees.nwk", "clean_single_locus_trees.nwk")
 
 if __name__ == "__main__":
 	main()

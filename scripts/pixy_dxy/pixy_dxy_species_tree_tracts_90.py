@@ -5,6 +5,8 @@ from statistics import mean
 
 cores = 24
 
+number_replicates = 1000
+
 root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/pixy_dxy/species_tree_tracts/"
 
 replicate_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/null_intervals/"
