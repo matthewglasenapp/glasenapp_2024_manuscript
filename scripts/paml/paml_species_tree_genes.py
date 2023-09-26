@@ -37,8 +37,8 @@ bed_file_dir = "/hb/home/mglasena/dissertation/data/mosdepth/mrna_cov/"
 # Sample bed file from the output of mrna.py
 bed_file = "/hb/home/mglasena/dissertation/data/mosdepth/mrna_cov/pallidus_SRR5767285.regions.bed.gz"
 
-# File containing genes with the majority of ther bases introgressed 
-introgressed_genes = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts_species_tree/majority_bases_introgressed_genes_coverage.tsv"
+# File containing genes with the majority of ther bases species_tree 
+species_tree_genes = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts_species_tree/majority_bases_species_tree_genes_coverage.tsv"
 
 # Specify species to include for ortholog finder. MUST BE ALPHABETICAL!
 subset_sample_list = ['fragilis_SRR5767279', 'pulcherrimus_SRR5767283']
@@ -220,38 +220,38 @@ def create_mrna_gene_dict():
 	print("{} mitochondrial mRNAs were removed".format(mt_rna_counter))
 	print("{} mRNA records in mrna_gene_dict".format(len(mrna_gene_dict)))
 
-# Identify introgressed genes that are single-copy and passing filter. 
+# Identify species_tree genes that are single-copy and passing filter. 
 # Remove all other records from mrna_gene_dict  
-def find_introgressed_sco():
-	# Get list of gene LOC IDs for genes that had a majority of their bases introgressed 
-	gene_lst = [item.split("\t")[0] for item in open(introgressed_genes,"r").read().splitlines()]
-	print("{} genes with the majority of their bases introgressed".format(len(gene_lst)))
+def find_species_tree_sco():
+	# Get list of gene LOC IDs for genes that had a majority of their bases species_tree 
+	gene_lst = [item.split("\t")[0] for item in open(species_tree_genes,"r").read().splitlines()]
+	print("{} genes with the majority of their bases species_tree".format(len(gene_lst)))
 
 	# Initialize list for genes that have a single-copy mRNA that passes filter
-	sco_introgressed_genes = []
+	sco_species_tree_genes = []
 
 	for gene in gene_lst:
 		if gene in mrna_gene_dict.values():
-			sco_introgressed_genes.append(gene)
+			sco_species_tree_genes.append(gene)
 
-	print("{} single-copy introgressed genes added to sco_introgressed_genes list".format(len(sco_introgressed_genes)))
+	print("{} single-copy species_tree genes added to sco_species_tree_genes list".format(len(sco_species_tree_genes)))
 
 	records_written = 0
 	records_written_lst = []
 	
 	with open(protein_coding_genes_bed_file,"r") as f:
-		with open("passed_records_majority_introgressed.bed","w") as f2:
+		with open("passed_records_majority_species_tree.bed","w") as f2:
 			for line in f:
-				if line.split("\t")[3].split("gene-")[1] in sco_introgressed_genes:
+				if line.split("\t")[3].split("gene-")[1] in sco_species_tree_genes:
 					records_written_lst.append(line.split("\t")[3].split("gene-")[1])
 					records_written += 1
 					f2.write(line)
 
-	print("{} records written to passed_records_majority_introgressed.bed".format(records_written))
+	print("{} records written to passed_records_majority_species_tree.bed".format(records_written))
 
 	mrna_gene_dict_keys_to_pop = []
 	for key,value in mrna_gene_dict.items():
-		if not value in sco_introgressed_genes:
+		if not value in sco_species_tree_genes:
 			mrna_gene_dict_keys_to_pop.append(key)
 
 	for mrna in mrna_gene_dict_keys_to_pop:
@@ -262,7 +262,7 @@ def find_introgressed_sco():
 
 # Get list of parent gene identifiers for those genes that passed all filters. Example: Dbxref=GeneID:582406
 def get_gene_ids():
-	get_info_column = "awk '{ print $10 }' passed_records_majority_introgressed.bed > gene_list"
+	get_info_column = "awk '{ print $10 }' passed_records_majority_species_tree.bed > gene_list"
 	os.system(get_info_column)
 
 	with open("gene_list","r") as f, open("gene_ids","w") as f2:
@@ -497,7 +497,7 @@ def main():
 	filter_rna_dict()
 	get_mrna_gff()
 	create_mrna_gene_dict()
-	find_introgressed_sco()
+	find_species_tree_sco()
 
 	gene_ids = get_gene_ids()
 

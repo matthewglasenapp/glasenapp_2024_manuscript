@@ -5,7 +5,7 @@ import csv
 import random
 from statistics import mean
 
-root_dir = "root_dir = /hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/species_tree_genes/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/species_tree_genes/"
 
 paml_output_file = root_dir + "dNdS.tsv"
 
@@ -13,6 +13,10 @@ paml_output_file = root_dir + "dNdS.tsv"
 num_replicates = len(open(paml_output_file,"r").read().splitlines()[1:])
 
 paml_lst = [item.split("\t") for item in open(paml_output_file,"r").read().splitlines()[1:]]
+
+# Get the sample size of introgressed genes with paml metrics
+introgressed_genes_paml_output_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/dNdS.tsv"
+sample_size_introgressed = len(open(introgressed_genes_paml_output_file,"r").read().splitlines()[1:])
 
 replicate_dict = dict()
 
@@ -29,7 +33,7 @@ def get_random_gene():
 
 def create_replicate():
 	resampled_paml_lst = []
-	for i in range(1, 107):
+	for i in range(1, sample_size_introgressed + 1):
 		resampled_paml_lst.append(get_random_gene())
 	return resampled_paml_lst
 
