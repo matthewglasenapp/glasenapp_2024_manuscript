@@ -4,26 +4,14 @@ import csv
 
 num_cores = 24
 
-# sample_names = {
-# 'QB3KMK013': 'fragilis',
-# 'QB3KMK002': 'pallidus',
-# 'QB3KMK014': 'droebachiensis',
-# 'QB3KMK016': 'pulcherrimus',
-# }
-
-# outgroup = "pulcherrimus"
-
 sample_names = {
 'QB3KMK013': 'fragilis',
-'QB3KMK010': 'franciscanus',
 'QB3KMK002': 'pallidus',
 'QB3KMK014': 'droebachiensis',
 'QB3KMK016': 'pulcherrimus',
-'QB3KMK012': 'intermedius',
-'SPUR.00': 'purpuratus',
 }
 
-outgroup = "franciscanus"
+outgroup = "pulcherrimus"
 
 output_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/ten_kb_tracts_gene_trees/"
 make_output_dir = "mkdir -p {}".format(output_dir)
@@ -31,7 +19,7 @@ os.system(make_output_dir)
 
 vcf2phylip_path = "/hb/home/mglasena/software/vcf2phylip/"
 
-genotype_file = "/hb/home/mglasena/dissertation/data/genotypes/franciscanus/3bp_filtered_genotype_calls_pf.g.vcf.gz"
+genotype_file = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/3bp_filtered_genotype_calls_pf.g.vcf.gz"
 
 introgression_tract_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/ten_kb_tracts.bed"
 
@@ -43,22 +31,24 @@ nw_utils = "/hb/home/mglasena/software/newick_utils/src/"
 def get_list_of_regions():
 	regions = open(introgression_tract_file,"r").read().splitlines()
 	regions = [region.split("\t")[3].replace("_","-").replace("-","_",1) for region in regions]
-	# vcf files are 1 indexed
-	regions = [region.split(":")[0] + ":" + str(int(region.split("-")[0].split(":")[1])+1) + "-" + region.split("-")[1] for region in regions]
 	return regions
 
 def subset_vcf(region):
+	# vcf files are 1 indexed
+	one_indexed_region = region.split(":")[0] + ":" + str(int(region.split("-")[0].split(":")[1])+1) + "-" + region.split("-")[1]
+	print(region)
+	print(one_indexed_region)
+
 	output_directory = output_dir + region
 	os.system("mkdir " + output_directory)
 	output_file = output_directory + "/" + region + ".vcf.gz"
-	view = "bcftools view -r {} -o {} {}".format(region, output_file, genotype_file)
+	view = "bcftools view -r {} -o {} {}".format(one_indexed_region, output_file, genotype_file)
+	print(view)
 	os.system(view)
 
 def create_fasta_alignments(region):
 	input_file = output_dir + region + "/" + region + ".vcf.gz"
-	# Transition back to 0 indexed to be consistent with the tract naming via bed format
-	zero_indexed_region = region.split(":")[0] + ":" + str(int(region.split("-")[0].split(":")[1])-1) + "-" + region.split("-")[1]
-	output_directory = output_dir + zero_indexed_region
+	output_directory = output_dir + region
 	run_vcf2phylip = "python3 {}vcf2phylip.py -w --input {} -p -f --output-folder {} --output-prefix {}".format(vcf2phylip_path, input_file, output_directory, zero_indexed_region)
 	os.system(run_vcf2phylip)
 
@@ -131,31 +121,48 @@ def edit_tree_files(input_file):
 	os.system(order_rooted_file)
 
 def update_tract_info_csv_file():
+	get_rooted_tree_file_lst = 'find $PWD -type f -name *rooted.nwk* > rooted_tree_file_lst.txt'
+	get_rooted_bl_removed_tree_file_lst = 'find $PWD -type f -name *rooted_bl_removed.nwk* > rooted_bl_removed_tree_file_lst'
+	os.system(get_rooted_tree_file_lst)
+	os.system(get_rooted_bl_removed_tree_file_lst)
+	rooted_tree_file_lst = open("rooted_tree_file_lst.txt","r").read().splitlines()
+	rooted_bl_removed_tree_file_lst = open("rooted_bl_removed_tree_file_lst","r").read().splitlines()
+	os.system("rm rooted_tree_file_lst.txt")
+	os.system("rm rooted_bl_removed_tree_file_lst")
+
 	tract_info_lines = open(tract_info_file,"r").read().splitlines()[1:]
 	
-	updated_csv = tract_info_file.split("tract_info.tsv")[0] + "updated_tract_info.csv"
+	updated_csv = tract_info_file.split("tract_info.tsv")[0] + "updated_tract_info.tsv"
 	output_csv = open(updated_csv,"w")
 	writer = csv.writer(output_csv, delimiter = "\t")		
 
 	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/bp", "Overlapping Coding Bases", "Percent Coding", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Genes", "Sdro 1x", "Sdro 10x", "Sfra 1x", "Sfra 10x", "Spal 1x", "Spal 10x", "Hpul 1x", "Hpul 10x", "Gene Tree", "Sdro-Spla sister?", "Bootstrap Support"]
 	writer.writerow(header)
 
+	counter = 0 
 	for line in tract_info_lines:
+		counter +=1 
+		print(counter)
 		length = int(line.split("\t")[4])
 		if length >= 10000:
 			tract = line.split("\t")[0].replace("-", "_", 1)
 			gene_tree_file = output_dir + tract + "/" + tract + "_rooted.nwk"
-			gene_tree = open(gene_tree_file,"r").read().split("\n")[0]
-			topology_file = output_dir + tract + "/" + tract + "_rooted_bl_removed.nwk"
-			topology = open(topology_file,"r").read().split("\n")[0]
-
-			substring = "(droebachiensis,pallidus)"
-			if substring in string:
-				dro_pal_sister = "Yes"
-				bootstrap = string.split("(droebachiensis,pallidus)")[1].split(",")[0]
+			
+			if gene_tree_file in rooted_tree_file_lst:
+				gene_tree = open(gene_tree_file,"r").read().split("\n")[0]
+				topology_file = output_dir + tract + "/" + tract + "_rooted_bl_removed.nwk"
+				topology = open(topology_file,"r").read().split("\n")[0]
+				substring = "(droebachiensis,pallidus)"
+				if substring in topology:
+					dro_pal_sister = "Yes"
+					bootstrap = topology.split("(droebachiensis,pallidus)")[1].split(",")[0]
+				else:
+					dro_pal_sister = "No"
+					bootstrap = "n/a"
 			else:
-				dro_pal_sister = "No"
-				bootstrap = "n/a"
+				gene_tree = ""
+				dro_pal_sister = ""
+				bootstrap = ""
 
 		else:
 			gene_tree = ""
@@ -171,19 +178,19 @@ def update_tract_info_csv_file():
 	output_csv.close()
 
 def main():
-	# os.chdir(output_dir)
+	os.chdir(output_dir)
 
-	# regions = get_list_of_regions()
+	regions = get_list_of_regions()
 
-	# Parallel(n_jobs=num_cores)(delayed(subset_vcf)(region) for region in regions)
+	Parallel(n_jobs=num_cores)(delayed(subset_vcf)(region) for region in regions)
 	
-	# Parallel(n_jobs=num_cores)(delayed(create_fasta_alignments)(region) for region in regions)
+	Parallel(n_jobs=num_cores)(delayed(create_fasta_alignments)(region) for region in regions)
 
-	# fasta_files = get_fasta_alignment_paths()
+	fasta_files = get_fasta_alignment_paths()
 
-	# Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_files)
+	Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_files)
 
-	#clean_up_iqtree_files()
+	clean_up_iqtree_files()
 
 	tree_files = get_tree_file_path_list()
 

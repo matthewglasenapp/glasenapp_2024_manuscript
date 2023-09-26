@@ -66,9 +66,10 @@ def select_passed_variants():
 def bcftools_filter():
 	input_file = output_directory + "filtered_genotype_calls_pf.g.vcf.gz"
 	output_file = output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz"
-	filter = '''bcftools filter --SnpGap 3 -e 'AC==0' -Ou {} | bcftools filter -S . -e 'FMT/DP<3 | FMT/GQ<20' | bcftools norm -m +any -f {} | bcftools filter -e 'ALT="*"' -Oz -o {}'''.format(input_file, reference_genome, output_file)
+	#filter = '''bcftools filter --SnpGap 3 -e 'AC==0' -Ou {} | bcftools filter -S . -e 'FMT/DP<3 | FMT/GQ<20' | bcftools norm -m +any -f {} | bcftools filter -e 'ALT="*"' -Oz -o {}'''.format(input_file, reference_genome, output_file)
+	filter = '''bcftools filter --SnpGap 3 -e 'AC==0' -Ou {} | bcftools filter -S . -e 'FMT/DP<3 | FMT/GQ<20' | bcftools norm -m +any -f {} -Oz -o {}'''.format(input_file, reference_genome, output_file)
 	os.system(filter)
-	os.system("rm " + input_file)
+	#os.system("rm " + input_file)
 
 def index_vcf(input_file):
 	index = "gatk IndexFeatureFile -I {}".format(input_file)
@@ -88,7 +89,7 @@ def main():
 	select_passed_variants()
 	bcftools_filter()
 	index_vcf(output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz")
-	vcf_stats(output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz")
+	#vcf_stats(output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz")
 
 if __name__ == "__main__":
 	main()

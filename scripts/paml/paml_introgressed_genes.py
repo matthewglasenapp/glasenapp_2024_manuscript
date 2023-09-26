@@ -38,7 +38,7 @@ bed_file_dir = "/hb/home/mglasena/dissertation/data/mosdepth/mrna_cov/"
 bed_file = "/hb/home/mglasena/dissertation/data/mosdepth/mrna_cov/pallidus_SRR5767285.regions.bed.gz"
 
 # File containing genes with the majority of ther bases introgressed 
-introgressed_genes = "/hb/scratch/mglasena/process_hmm_90/investigate_tracts/majority_bases_introgressed_genes_coverage.tsv"
+introgressed_genes = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/majority_bases_introgressed_genes_coverage.tsv"
 
 # Specify species to include for ortholog finder. MUST BE ALPHABETICAL!
 subset_sample_list = ['fragilis_SRR5767279', 'pulcherrimus_SRR5767283']
@@ -457,15 +457,11 @@ def reformat_phylip(input_phylip_file):
 	line_1 = input_file[0]
 	line_2 = "  ".join(input_file[1].split(" "))
 	line_3 = "  ".join(input_file[2].split(" "))
-	line_4 = "  ".join(input_file[3].split(" "))
-	line_5 = "  ".join(input_file[4].split(" "))
 
 	with open(output_dir + "consensAlign.ordered.phylip","w") as output_file:
 		output_file.write(line_1 + "\n")
 		output_file.write(line_2 + "\n")
 		output_file.write(line_3 + "\n")
-		output_file.write(line_4 + "\n")
-		output_file.write(line_5 + "\n")
 
 def create_tree_file(fasta_alignment_path):
 	with open(fasta_alignment_path + ".treefile", "w") as f:

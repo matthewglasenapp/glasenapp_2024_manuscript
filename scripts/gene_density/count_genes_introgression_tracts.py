@@ -23,7 +23,7 @@ replicate_interval_file_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/
 gene_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/protein_coding_genes.bed"
 
 # BED file containing all unique protein-coding CDS in the S. purpuratus reference genome assembly 
-CDS_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/unique_CDS.bed"
+CDS_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/nonoverlapping_unique_CDS.bed"
 
 # Initialize dictionary to record the number of overlapping genes per replicate interval file
 count_genes_dict = dict()
@@ -43,7 +43,7 @@ os.system(make_output_directory_CDS)
 
 # Use bedtools intersect to create file bed file containing the overlap between an interval file and a feature file
 def intersect(tract_file, overlap_file, output_directory):
-	outfile = output_directory + tract_file.split("/")[-1] + ".bed"
+	outfile = output_directory + tract_file.split("/")[-1]
 	os.system("bedtools intersect -a " + tract_file + " -b " + overlap_file + " -wo > " + outfile)
 
 def count_genes(intersect_file):
@@ -53,9 +53,9 @@ def count_genes(intersect_file):
 
 	for line in overlaps:
 		if line.split("\t")[7] in overlap_dict:
-			overlap_dict[line.split("\t")[7]][1] += int(line.split("\t")[14])
+			overlap_dict[line.split("\t")[7]][1] += int(line.split("\t")[-1])
 		else:
-			overlap_dict[line.split("\t")[7]] = [((int(line.split("\t")[6])) - (int(line.split("\t")[5]))), int(line.split("\t")[14])]
+			overlap_dict[line.split("\t")[7]] = [((int(line.split("\t")[6])) - (int(line.split("\t")[5]))), int(line.split("\t")[-1])]
 
 	filtered_overlap_dict = {key:value for key,value in overlap_dict.items() if value[1]/value[0] >= percent_gene_overlap_threshold}
 
@@ -74,9 +74,9 @@ def count_coding_bases(intersect_file):
 
 	for line in overlaps:
 		if line.split("\t")[7] in overlap_dict:
-			overlap_dict[line.split("\t")[7]] += int(line.split("\t")[14])
+			overlap_dict[line.split("\t")[7]] += int(line.split("\t")[-1])
 		else:
-			overlap_dict[line.split("\t")[7]] = int(line.split("\t")[14])
+			overlap_dict[line.split("\t")[7]] = int(line.split("\t")[-1])
 
 	total_coding_bases = sum(overlap_dict.values())
 

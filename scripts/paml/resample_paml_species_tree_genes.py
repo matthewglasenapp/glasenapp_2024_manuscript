@@ -1,5 +1,6 @@
 ### Goal: Create 1,000 replicate datasets of ___ genes, the same number that were introgressed ###
 
+import os
 import csv 
 import random
 from statistics import mean
