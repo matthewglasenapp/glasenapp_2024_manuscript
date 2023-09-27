@@ -67,8 +67,8 @@ fig1 <- ggplot(df_long, aes(x = value, fill = dist_type)) +
     posterior_probability ~ metric,
     scales = "free", independent = "all",
     labeller = labeller(posterior_probability = c(
-      "probability_90" = "Posterior Probability: 90%",
-      "probability_80" = "Posterior Probability: 80%"),
+      "probability_90" = "90% threshold",
+      "probability_80" = "80% threshold"),
       metric = c(
         mean_dN = "Mean dN",
         mean_dS = "Mean dS",
@@ -80,18 +80,15 @@ fig1 <- ggplot(df_long, aes(x = value, fill = dist_type)) +
   labs(x = "", y = "Probability Density", fill = "") +
   theme_bw() +
   theme(strip.placement = "outside",
-        axis.title = element_text(size = 16),
+        axis.title = element_text(size = 20),
         legend.position = "top",
         panel.grid = element_blank(),
-        strip.text.y = element_text(size = 9, angle = 270),
-        strip.text.x = element_text(size = 14), # Font size for facet labels
-        legend.text = element_text(size = 10),
+        strip.text.y = element_text(size = 14, angle = 270),
+        strip.text.x = element_text(size = 18), # Font size for facet labels
+        legend.text = element_text(size = 16),
         axis.text = element_text(size = 8)
   ) +
-  guides(fill = guide_legend(title = NULL)) + 
-  scale_x_continuous(labels = scales::dollar_format(scale = 0.01)) # Format x-axis labels with "$" symbol and 2 decimal places
-
-  #scale_x_continuous(labels = label_number(accuracy = 0.01))
+  guides(fill = guide_legend(title = NULL))
 
 fig1
 
