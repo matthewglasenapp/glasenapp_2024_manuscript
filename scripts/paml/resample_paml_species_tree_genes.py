@@ -10,13 +10,12 @@ root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/species_tree_g
 paml_output_file = root_dir + "dNdS.tsv"
 
 # Number of bootstrap replicates
-num_replicates = len(open(paml_output_file,"r").read().splitlines()[1:])
+num_replicates = 1000
 
 paml_lst = [item.split("\t") for item in open(paml_output_file,"r").read().splitlines()[1:]]
 
 # Get the sample size of introgressed genes with paml metrics
-introgressed_genes_paml_output_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/dNdS.tsv"
-sample_size_introgressed = len(open(introgressed_genes_paml_output_file,"r").read().splitlines()[1:])
+sample_size_introgressed = len(open(paml_output_file,"r").read().splitlines()[1:])
 
 replicate_dict = dict()
 
@@ -46,26 +45,26 @@ def create_replicate_dict():
 def get_distributions():
 	distribution_dict = dict()
 
-	mean_dN_dist = []
 	mean_dS_dist = []
+	mean_dN_dist = []
 	mean_dNdS_dist = []
 	
 	for key,value in replicate_dict.items():
-		dN_list = []
 		dS_list = []
+		dN_list = []
 		dNdS_list = []
 
 		for gene in value:
-			dN_list.append(float((paml_output_dict[gene][0])))
-			dS_list.append(float(paml_output_dict[gene][1]))
+			dS_list.append(float((paml_output_dict[gene][0])))
+			dN_list.append(float(paml_output_dict[gene][1]))
 			dNdS_list.append(float(paml_output_dict[gene][2]))
 
-		mean_dN_dist.append(mean(dN_list))
 		mean_dS_dist.append(mean(dS_list))
+		mean_dN_dist.append(mean(dN_list))
 		mean_dNdS_dist.append(mean(dNdS_list))
 
-	distribution_dict["mean_dN"] = mean_dN_dist
 	distribution_dict["mean_dS"] = mean_dS_dist
+	distribution_dict["mean_dN"] = mean_dN_dist
 	distribution_dict["mean_dNdS_dist"] = mean_dNdS_dist
 
 	return distribution_dict

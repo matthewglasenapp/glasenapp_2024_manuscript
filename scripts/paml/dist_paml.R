@@ -1,16 +1,10 @@
 library(ggplot2)
-library(fitdistrplus)
-library(sjPlot)
-library(ggpubr)
-library(plyr)
 library(dplyr)
 library(tidyr)
 library(ggh4x)
+library(scales)
 
-# Change margin settings
-#par(mar=c(2,2,2,1))
-
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/paml/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/paml/")
 
 introgression_tract_dN_90 = "mean_dN_introgression_tract_90.csv"
 species_tree_tract_dN_90 = "mean_dN_species_tree_90.csv"
@@ -73,46 +67,62 @@ fig1 <- ggplot(df_long, aes(x = value, fill = dist_type)) +
     posterior_probability ~ metric,
     scales = "free", independent = "all",
     labeller = labeller(posterior_probability = c(
-      "probability_90" = "Posterior\nProbability\n> 90%",
-      "probability_80" = "Posterior\nProbability\n> 80%"),
+      "probability_90" = "Posterior Probability: 90%",
+      "probability_80" = "Posterior Probability: 80%"),
       metric = c(
         mean_dN = "Mean dN",
         mean_dS = "Mean dS",
         mean_dNdS = "Mean dNdS"
       )
     ), switch = "x") +
-  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"),
+  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#999999"),
                     labels = c("Introgression Tract", "Genome-Wide Background")) +
   labs(x = "", y = "Probability Density", fill = "") +
-  theme_blank() +
+  theme_bw() +
   theme(strip.placement = "outside",
-        axis.title = element_text(size = 20),
+        axis.title = element_text(size = 16),
         legend.position = "top",
         panel.grid = element_blank(),
-        strip.text.y = element_text(size = 12, angle = 0),
-        strip.text.x = element_text(size = 16), # Font size for facet labels
-        legend.text = element_text(size = 16)
+        strip.text.y = element_text(size = 9, angle = 270),
+        strip.text.x = element_text(size = 14), # Font size for facet labels
+        legend.text = element_text(size = 10),
+        axis.text = element_text(size = 8)
   ) +
-  guides(fill = guide_legend(title = NULL))
+  guides(fill = guide_legend(title = NULL)) + 
+  scale_x_continuous(labels = scales::dollar_format(scale = 0.01)) # Format x-axis labels with "$" symbol and 2 decimal places
+
+  #scale_x_continuous(labels = label_number(accuracy = 0.01))
 
 fig1
 
 ggsave(filename = "dist_paml.eps", plot = fig1)
-ggsave(filename = "dist_paml.png", plot = fig1)
+ggsave(filename = "dist_paml.png", width=169, units = "mm", plot = fig1)
 
 mean(dist_dN_introgression_tract_90)
-mean(dist_dN_species_tree_90)
 mean(dist_dS_introgression_tract_90)
-mean(dist_dS_species_tree_90)
 mean(dist_dNdS_introgression_tract_90)
-mean(dist_dNdS_species_tree_90)
 
 mean(dist_dN_introgression_tract_80)
-mean(dist_dN_species_tree_80)
 mean(dist_dS_introgression_tract_80)
-mean(dist_dS_species_tree_80)
 mean(dist_dNdS_introgression_tract_80)
-mean(dist_dNdS_species_tree_80)
+
+model1 <- lm(dist_dN_species_tree_90 ~ 1)
+model2 <- lm(dist_dS_species_tree_90 ~ 1)
+model3 <- lm(dist_dNdS_species_tree_90 ~ 1)
+model4 <- lm(dist_dN_species_tree_80 ~ 1)
+model5 <- lm(dist_dS_species_tree_80 ~ 1)
+model6 <- lm(dist_dNdS_species_tree_80 ~ 1)
+
+confint(model1, level=0.95)
+confint(model2, level=0.95)
+confint(model3, level=0.95)
+confint(model4, level=0.95)
+confint(model5, level=0.95)
+confint(model6, level=0.95)
+
+
+
+
 
 ####
 T-Tests

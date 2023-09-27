@@ -1,11 +1,12 @@
 import os 
 
+output_directory = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/"
+
 reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
 
 # Raw genotype calls file
-genotype_calls_split_multiallelics = "/hb/home/mglasena/raw_vcf_files/genotype_calls_split_multiallelics.g.vcf.gz"
-
-output_directory = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/"
+genotype_calls = "/hb/home/mglasena/raw_vcf_files/genotype_calls.g.vcf.gz"
+genotype_calls_split_multiallelics = output_directory + "genotype_calls_split_multiallelics.g.vcf.gz"
 
 samples_to_include = {
 "fragilis_SRR5767279" : "QB3KMK013",
@@ -13,6 +14,13 @@ samples_to_include = {
 "droebachiensis_SRR5767286" : "QB3KMK014",
 "pulcherrimus_SRR5767283" : "QB3KMK016",
 }
+
+# Only run once to get split multiallelic file!
+def split_multiallelics():
+	input_file = genotype_calls
+	output_file = output_directory + "genotype_calls_split_multiallelics.g.vcf.gz"
+	norm = "bcftools norm -m- -f {} -Oz -o {} {}".format(reference_genome, output_file, input_file)
+	os.system(norm)
 
 def separate_SNP_INDEL():
 	sample_string = ""
@@ -66,8 +74,7 @@ def select_passed_variants():
 def bcftools_filter():
 	input_file = output_directory + "filtered_genotype_calls_pf.g.vcf.gz"
 	output_file = output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz"
-	#filter = '''bcftools filter --SnpGap 3 -e 'AC==0' -Ou {} | bcftools filter -S . -e 'FMT/DP<3 | FMT/GQ<20' | bcftools norm -m +any -f {} | bcftools filter -e 'ALT="*"' -Oz -o {}'''.format(input_file, reference_genome, output_file)
-	filter = '''bcftools filter --SnpGap 3 -e 'AC==0' -Ou {} | bcftools filter -S . -e 'FMT/DP<3 | FMT/GQ<20' | bcftools norm -m +any -f {} -Oz -o {}'''.format(input_file, reference_genome, output_file)
+	filter = '''bcftools filter --SnpGap 3 -e 'AC==0' -Ou {} | bcftools filter -S . -e 'FMT/DP<3 | FMT/GQ<20' | bcftools norm -m +any -f {} | bcftools filter -S . -e 'ALT="*"' -Oz -o {}'''.format(input_file, reference_genome, output_file)
 	os.system(filter)
 	#os.system("rm " + input_file)
 
@@ -83,9 +90,13 @@ def vcf_stats(input_file):
 	os.system("rm samples_file.txt")
 
 def main():
-	# separate_SNP_INDEL()
-	# filter_variants()
-	# merge_vcfs()
+	# Leave commented out unless running for the first time
+	split_multiallelics()
+	index_vcf(output_directory + "genotype_calls_split_multiallelics.g.vcf.gz")
+
+	separate_SNP_INDEL()
+	filter_variants()
+	merge_vcfs()
 	select_passed_variants()
 	bcftools_filter()
 	index_vcf(output_directory + "3bp_filtered_genotype_calls_pf.g.vcf.gz")

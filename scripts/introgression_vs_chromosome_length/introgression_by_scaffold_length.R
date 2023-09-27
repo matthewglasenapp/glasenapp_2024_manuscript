@@ -1,13 +1,11 @@
 library(ggplot2)
 
-setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/introgression_by_scaffold_length/")
+setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/data/introgression_vs_chromosome_length/")
 
-file = "introgression_by_scaffold_updated_90.tsv"
-#file = "introgression_by_scaffold_updated_80.tsv"
+#file = "introgression_by_scaffold_updated_90.tsv"
+file = "introgression_by_scaffold_updated_80.tsv"
 
 data = read.csv(file, sep = "\t")
-
-#data$percent_introgressed <- data$combined_tract_length / data$length.spanned.by.first.and.last.sites..bp.
 
 data$percent_introgressed <- data$combined_tract_length / data$length.spanned.by.first.and.last.sites..bp.*100
 

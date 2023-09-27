@@ -1,8 +1,6 @@
-setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/phylonet_hmm/output_visualizations/tract_length_dist/")
+setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/data/phylonet_hmm/output_visualizations/tract_length_dist/")
 
-library(ggExtra)
 library(ggplot2)
-#x = read.csv("all_tracts.csv",header=F)
 
 dist_90_file = read.csv("tract_dist_90.csv",header=F)
 dist_80_file = read.csv("tract_dist_80.csv",header=F)
@@ -25,13 +23,13 @@ figure1 <- ggplot() +
   theme(panel.background = element_blank()) + 
   stat_bin(binwidth = 10000, aes(y=..count.., label=ifelse(..count..==0,"",..count..)), geom="text", vjust = -.5)
 
-figure
+figure1
 
 ggsave(filename = "tract_dist_80.svg", plot = figure)
 
 ------------------------------------------------------------------
 
-setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/phylonet_hmm/output_visualizations/tract_length_dist/")
+setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/data/phylonet_hmm/output_visualizations/tract_length_dist/")
 dist_90_file = read.csv("tract_dist_90.csv",header=F)
 dist_80_file = read.csv("tract_dist_80.csv",header=F)
 dist_90 = unlist(dist_90_file)
@@ -62,9 +60,9 @@ figure2 <- ggplot(data = combined_data, aes(x = value)) +
     panel.background = element_blank(),
     strip.background = element_blank(),
     strip.placement = "outside",
-    text = element_text(size = 12),  # Adjust font size for all text elements
-    axis.title = element_text(size = 14),  # Adjust font size for axis titles
-    strip.text = element_text(size = 14),  # Adjust font size for facet labels
+    text = element_text(size = 16),  # Adjust font size for all text elements
+    axis.title = element_text(size = 18),  # Adjust font size for axis titles
+    strip.text = element_text(size = 18),  # Adjust font size for facet labels
   ) +
   stat_bin(binwidth = 10000, aes(y = ..count.., label = ifelse(..count.. == 0, "", ..count..)), geom = "text", vjust = -0.5) + 
   facet_wrap(~ group, ncol = 1, strip.position = "top", scales = "free_y")  # Stacked facets in one
@@ -72,6 +70,7 @@ figure2 <- ggplot(data = combined_data, aes(x = value)) +
 figure2
 
 ggsave(filename = "tract_length_distribution.svg", plot = figure2, width=169, units = "mm")
+ggsave(filename = "tract_length_distribution.png", plot = figure2, width=169, height = 200, units = "mm")
 
 
 

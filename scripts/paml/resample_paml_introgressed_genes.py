@@ -40,26 +40,26 @@ def create_pseudoreplicate_dict():
 def get_distributions():
 	distribution_dict = dict()
 
-	mean_dN_dist = []
 	mean_dS_dist = []
+	mean_dN_dist = []
 	mean_dNdS_dist = []
 	
 	for key,value in pseudoreplicate_dict.items():
-		dN_list = []
 		dS_list = []
+		dN_list = []
 		dNdS_list = []
 
 		for gene in value:
-			dN_list.append(float((paml_output_dict[gene][0])))
-			dS_list.append(float(paml_output_dict[gene][1]))
+			dS_list.append(float((paml_output_dict[gene][0])))
+			dN_list.append(float(paml_output_dict[gene][1]))
 			dNdS_list.append(float(paml_output_dict[gene][2]))
 
-		mean_dN_dist.append(mean(dN_list))
 		mean_dS_dist.append(mean(dS_list))
+		mean_dN_dist.append(mean(dN_list))
 		mean_dNdS_dist.append(mean(dNdS_list))
 
-	distribution_dict["mean_dN"] = mean_dN_dist
 	distribution_dict["mean_dS"] = mean_dS_dist
+	distribution_dict["mean_dN"] = mean_dN_dist
 	distribution_dict["mean_dNdS"] = mean_dNdS_dist
 
 	return distribution_dict

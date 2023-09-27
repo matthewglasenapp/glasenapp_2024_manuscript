@@ -1,14 +1,6 @@
 library(ggplot2)
-library(fitdistrplus)
-library(sjPlot)
-library(ggpubr)
-library(plyr)
-library(dplyr)
 
-# Change margin settings
-par(mar=c(2,2,2,1))
-
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/count_genes/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/gene_density")
 
 # Define the csv files with list of gene and base countscounts 
 introgression_tract_psg_count_90 = "introgression_tract_psg_count_90.csv"
@@ -22,10 +14,10 @@ dist_species_tree_tract_psg_90 <- scan(species_tree_tract_psg_count_90, what = n
 dist_introgression_tract_psg_80 <- scan(introgression_tract_psg_count_80, what = numeric(), sep = ",")
 dist_species_tree_tract_psg_80 <- scan(species_tree_tract_psg_count_80, what = numeric(), sep = ",")
 
-mb_introgressed_90 = 4.644092
-mb_introgressed_80 = 27.476503
-mb_species_tree_90 = 4.644060
-mb_species_tree_80 = 27.343212
+mb_introgressed_90 = 3.747392
+mb_introgressed_80 = 21.820425
+mb_species_tree_90 = 3.747392
+mb_species_tree_80 = 21.820425
 
 dist_introgression_tract_psg_90 <- dist_introgression_tract_psg_90 / mb_introgressed_90
 dist_species_tree_tract_psg_90 <- dist_species_tree_tract_psg_90 / mb_species_tree_90
@@ -67,7 +59,7 @@ fig1 <- ggplot(data = df, aes(x = psg_count, fill = dist_type)) +
     x = "Mean Number of Positively Selected Genes",
     y = "Probability Density",
     fill = "Dist Type"
-  ) + theme_blank() +
+  ) + theme_bw() +
   theme(
     axis.title = element_text(size = 14),
     legend.position = "right",
@@ -79,7 +71,15 @@ fig1
 
 #####
 
-model <- lm(dist_species_tree_tract_psg_80 ~ 1)
+model1 <- lm(dist_species_tree_tract_psg_80 ~ 1)
+model2 <- lm(dist_species_tree_tract_psg_90 ~ 1)
 
 # Calculate the confidence interval
-confint(model, level=0.95)
+confint(model1, level=0.95)
+confint(model2, level=0.95)
+
+mean(dist_introgression_tract_psg_80)
+mean(dist_introgression_tract_psg_90)
+
+
+

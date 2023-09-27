@@ -1,14 +1,6 @@
 library(ggplot2)
-library(fitdistrplus)
-library(sjPlot)
-library(ggpubr)
-library(plyr)
-library(dplyr)
 
-# Change margin settings
-par(mar=c(2,2,2,1))
-
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/count_genes/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/gene_density/")
 
 # Define the csv files with list of gene counts at 90% posterior probability threshold
 introgression_tract_gene_count_90 = "introgression_tract_gene_count_90.csv"
@@ -24,10 +16,10 @@ dist_species_tree_tract_genes_90 <- scan(species_tree_tract_gene_count_90, what 
 dist_introgression_tract_genes_80 <- scan(introgression_tract_gene_count_80, what = numeric(), sep = ",")
 dist_species_tree_tract_genes_80 <- scan(species_tree_tract_gene_count_80, what = numeric(), sep = ",")
 
-mb_introgressed_90 = 4.644092
-mb_introgressed_80 = 27.476503
-mb_species_tree_90 = 4.644060
-mb_species_tree_80 = 27.343212
+mb_introgressed_90 = 3.747392
+mb_introgressed_80 = 21.820425
+mb_species_tree_90 = 3.747392
+mb_species_tree_80 = 21.820425
 
 dist_introgression_tract_genes_90 <- dist_introgression_tract_genes_90 / mb_introgressed_90
 dist_species_tree_tract_genes_90 <- dist_species_tree_tract_genes_90 / mb_species_tree_90
@@ -46,7 +38,7 @@ df$posterior_probability <- factor(df$posterior_probability, levels = c("probabi
 
 # Plot data
 fig1 <- ggplot(data = df, aes(x = gene_count, fill = dist_type)) +
-  geom_density(aes(y=after_stat(density))) + 
+  geom_density(aes(y=after_stat(density)),alpha=0.8) + 
   facet_wrap(
     ~ posterior_probability,
     ncol = 1,
@@ -60,28 +52,36 @@ fig1 <- ggplot(data = df, aes(x = gene_count, fill = dist_type)) +
       )
     )
   ) +
-  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F"), labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")
+  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#999999"), labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")
   ) + labs(
-    x = "Mean Number of Protein Coding Genes/Mb",
+    x = "Mean Number of\nProtein-Coding Genes/Mb",
     y = "Probability Density",
     fill = "Dist Type"
-  ) + theme_blank() +
+  ) + theme_bw() +
   theme(
-    axis.title = element_text(size = 14),
-    legend.position = "right",
+    axis.title = element_text(size = 16),
+    legend.text = element_text(size = 12),
+    strip.text.x = element_text(size = 12),
     panel.grid = element_blank(), 
+    legend.position = "top",
+    axis.text = element_text(size = 12)
   ) + 
   guides(fill = guide_legend(title = NULL))
 
 fig1
 
 ggsave(filename = "dist_genes.eps", plot = fig1)
-ggsave(filename = "dist_genes.png", plot = fig1)
+ggsave(filename = "dist_genes.png", width=169, units = "mm", plot = fig1)
 
 ######
 
-model <- lm(dist_introgression_tract_genes_80 ~ 1)
+model1 <- lm(dist_species_tree_tract_genes_80 ~ 1)
+model2 <- lm(dist_species_tree_tract_genes_90 ~ 1)
 
 # Calculate the confidence interval
-confint(model, level=0.95)
+confint(model1, level=0.95)
+confint(model2, level=0.95)
+
+mean(dist_introgression_tract_genes_80)
+mean(dist_introgression_tract_genes_90)
 

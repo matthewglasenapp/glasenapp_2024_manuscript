@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/output_visualizations/tracts_by_scaffold/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/phylonet_hmm/output_visualizations/tracts_by_scaffold/")
 
 mytheme <- theme_classic() + theme(
   legend.position = "top",
@@ -36,7 +36,7 @@ plot_data <- data.frame(
 figure <- ggplot(plot_data) +
   geom_segment(
     aes(x = start, xend = end, y = chromosome, yend = chromosome),
-    color = "blue", size = 7
+    color = "blue", linewidth = 7
   ) +
   geom_segment(
     data = scaffold_lengths,
