@@ -67,6 +67,12 @@ tu_go_terms = genome_metadata_dir + "tu_2012_go.csv"
 # CSV file of 6,520 single copy orthologs from Kober and Pogson. Rows 5 - 1,012 contain the 1,008 genes with significant tests for positive selection
 psg_file = genome_metadata_dir + "psg.csv"
 
+# CSV file of branch-sites tests for S. droebachiensis from Kober and Pogson, 2017
+Sdro_bsites_file = genome_metadata_dir + "Sdro_BSites_Genes.txt"
+
+# CSV file of branch-sites test for S. pallidus from Kober and Pogson, 2017
+Spal_bsites_file = genome_metadata_dir + "Spal_BSites_Genes.txt"
+
 # Initialize dictionary for coverage depth for each introgression tract by species 
 introgressed_gene_coverage_dict = dict()
 
@@ -606,7 +612,7 @@ def find_psg_overlap():
 	psg_list = list(csv.reader(open(psg_file,"r"), delimiter = ","))
 
 	intersect_file = output_dir + "intersect.tsv"
-	introgressed_genes_list = list(csv.reader(open(intersect_file,"r"), delimiter = "\t"))
+	introgressed_genes_list = list(csv.reader(open(intersect_file,"r"), delimiter = "\t"))[1:]
 
 	# Get list of SPU identifiers from the set of positively selected genes 
 	psg_list = [n for n in psg_list[4:1012]]
@@ -618,12 +624,41 @@ def find_psg_overlap():
 	writer.writerow(header)
 	
 	for gene in psg_list:
-			for record in introgressed_genes_list:
-				if gene[0] in record or gene[1] in record or gene[2] in record:
-					data = [record[0], record[1], record[12], gene[0], gene[1], gene[2], psg_list.index(gene), record[2], record[3], record[4], record[5], record[10], record[6], record[7], record[8], record[9]]
-					writer.writerow(data)
+		# e.g., SPU_008159
+		spu_id = gene[0]
+		for record in introgressed_genes_list:
+			record_synonyms_lst = [item.strip() for item in record[12].split("|")]
+			if spu_id in record_synonyms_lst:
+				data = [record[0], record[1], record[12], gene[0], gene[1], gene[2], psg_list.index(gene), record[2], record[3], record[4], record[5], record[10], record[6], record[7], record[8], record[9]]
+				writer.writerow(data)
 	
 	csv_file.close()
+
+def find_bsites_overlap(input_file):
+	sample = input_file.split("/")[-1].split("_")[0]
+	bsites = list(csv.reader(open(input_file,"r"), delimiter = "\t"))
+
+	intersect_file = output_dir + "intersect.tsv"
+	introgressed_genes_list = list(csv.reader(open(intersect_file,"r"), delimiter = "\t"))[1:]
+
+	# Get list of SPU identifiers from the set of positively selected genes 
+	bsites_genes = [n for n in bsites[1:]]
+
+	csv_output = output_dir + sample + "_bsites_intersect.tsv"
+	csv_file = open(csv_output,"w")
+	writer = csv.writer(csv_file, delimiter = "\t")	
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG ?", "PSG Rank", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul"]
+	writer.writerow(header)
+	
+	for gene in bsites_genes:
+		spu_id = gene[0]
+		psg_yes_no = gene[12]
+		psg_rank = gene[13]
+		for record in introgressed_genes_list:
+			record_synonyms_lst = record[12].split("|")
+			if spu_id in record_synonyms_lst:
+				data = [record[0], record[1], record[12], gene[0], gene[19], gene[20], psg_yes_no, psg_rank, record[2], record[3], record[4], record[5], record[10], record[6], record[7], record[8], record[9]]
+				writer.writerow(data)
 
 def update_introgression_by_scaffold():
 	# Create dictionary of fully and partially introgressed genes. Add to introgression_by_scaffold.csv
@@ -782,6 +817,9 @@ def main():
 	#create_CDS_intersection_file()
 	
 	find_psg_overlap()
+	find_bsites_overlap(Sdro_bsites_file)
+	find_bsites_overlap(Spal_bsites_file)
+	
 	update_introgression_by_scaffold()
 
 	print_base_breakdown_summary()

@@ -51,6 +51,7 @@ def count_overlapping_psg(intersect_file):
 			for value in LOC_SPU_dict[record]:
 				if value in psg_list:
 					counter += 1
+					break
 	
 	return counter
 
