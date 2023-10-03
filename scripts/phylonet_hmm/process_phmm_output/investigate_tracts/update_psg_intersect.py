@@ -47,12 +47,14 @@ def get_coding_base_counts():
 
 		# Bedtools merge gets rid of identifer info columns. Make sure that the overlapped CDS is actually within the LOC coordinates
 		# Sometimes an introgression tract spans CDS from more than one gene, and that CDS was getting double-counted
+		CDS_start = int(record.split("\t")[6])
 		CDS_end = int(record.split("\t")[7])
 		LOC_start = int(record.split("\t")[4].split(":")[1].split("-")[0])
+		LOC_end = int(record.split("\t")[4].split(":")[1].split("-")[1])
 		
-		if LOC_ID in LOC_coding_base_overlap_dict and CDS_end >= LOC_start:
+		if LOC_ID in LOC_coding_base_overlap_dict and CDS_start >= LOC_start and CDS_end <= LOC_end:
 			LOC_coding_base_overlap_dict[LOC_ID] += base_overlap
-		elif CDS_end >= LOC_start:
+		elif CDS_start >= LOC_start and CDS_end <= LOC_end:
 			LOC_coding_base_overlap_dict[LOC_ID] = base_overlap
 
 	print(LOC_coding_base_overlap_dict)
@@ -63,21 +65,28 @@ def update_psg_intersect_csv():
 	csv_output = root_dir + "updated_psg_intersect.tsv"
 	csv_file = open(csv_output,"w")
 	writer = csv.writer(csv_file, delimiter = "\t")	
-	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Coding Bases", "Percent Coding"]
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Coding Bases", "Total Coding Bases", "Percent Coding Bases Introgressed"]
 	writer.writerow(header)
 
 	for line in psg_intersect_file_lines:
 		LOC_ID = line.split("\t")[0]
 		if LOC_ID in LOC_coding_base_overlap_dict:
-
+			base_overlap = LOC_coding_base_overlap_dict[LOC_ID]
+			# Deal with weird edge case of different case across different file types for eef1G, six1
+			if LOC_ID == "eef1g":
+				LOC_ID = "eef1G"
+			if LOC_ID == "six1":
+				LOC_ID = "Six1"
+			
+			print(LOC_ID)
 			# Get total coding base count for LOC
 			count_LOC_coding_bases = "cat {} | grep '{}' | bedtools merge -i - | awk '{{sum += $3 - $2}} END {{print sum}}'".format(full_CDS_file, LOC_ID)
 			total_coding_bases_LOC = int(subprocess.check_output(count_LOC_coding_bases, shell=True, universal_newlines=True))
-			
-			base_overlap = LOC_coding_base_overlap_dict[LOC_ID]
+		
 			percent_coding = float((base_overlap / total_coding_bases_LOC) * 100) 
 			data = line.split("\t")
 			data.append(base_overlap)
+			data.append(total_coding_bases_LOC)
 			data.append(percent_coding)
 			writer.writerow(data)
 		else:

@@ -14,6 +14,7 @@ LOC_SPU_dict = dict()
 # Initialize dictionary to record the number of overlapping genes per replicate interval file
 count_genes_dict = dict()
 
+# Proportion, not percentage
 percent_gene_overlap_threshold = 0.5
 
 def make_LOC_SPU_dict():
@@ -34,7 +35,7 @@ def count_overlapping_psg(intersect_file):
 	overlap_dict = dict()
 
 	for line in overlaps:
-		if line.split("\t")[7] in overlap_dict:
+		if line.split("\t")[7] in overlap_dict.keys():
 			overlap_dict[line.split("\t")[7]][1] += int(line.split("\t")[14])
 		else:
 			overlap_dict[line.split("\t")[7]] = [((int(line.split("\t")[6])) - (int(line.split("\t")[5]))), int(line.split("\t")[14])]
@@ -47,9 +48,13 @@ def count_overlapping_psg(intersect_file):
 
 	counter = 0
 	for record in filtered_overlap_dict:
+		# Deal with weird edge case, change in nomenclature from arc2 to bst1
+		if record == "arc2":
+			record = "bst1"
 		if record in LOC_SPU_dict:
 			for value in LOC_SPU_dict[record]:
 				if value in psg_list:
+					print(record)
 					counter += 1
 					break
 	
