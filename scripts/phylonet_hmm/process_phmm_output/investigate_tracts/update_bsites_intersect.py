@@ -5,7 +5,7 @@ import subprocess
 # Specify the directory that contains protein_coding_genes.bed, unique_CDSs.bed, GenePageGeneralInfo_AllGenes.txt, GeneGoTerms.txt, GeneKoTerms.txt, tu_2012_go.csv, and psg.csv
 genome_metadata_dir = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/"
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_80/investigate_tracts/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/"
 
 # File of unique protein-coding CDSs 
 merged_CDS_file = genome_metadata_dir + "nonoverlapping_unique_CDS.bed"
@@ -26,9 +26,10 @@ Spal_LOC_coding_base_overlap_dict = dict()
 def get_psg_overlapped_tracts(overlap_file):
 	sample = overlap_file.split("/")[-1].split("_")[0]
 	psg_list = open(overlap_file,"r").read().splitlines()[1:]
-	output_file_name = overlap_file.split("/")[-1].split("_intersect.tsv")[0]
+	output_file_prefix = overlap_file.split("/")[-1].split("_intersect.tsv")[0]
+	output_file = root_dir + output_file_prefix + "_overlapped_tracts.bed"
 	
-	with open(root_dir + output_file_name + "_overlapped_tracts.bed","w") as f:
+	with open(output_file,"w") as f:
 		for psg in psg_list:
 			overlapping_tracts = psg.split("\t")[12].split(",")
 			
@@ -45,6 +46,11 @@ def get_psg_overlapped_tracts(overlap_file):
 				start = tract.split(":")[1].split("-")[0]
 				stop = tract.split(":")[1].split("-")[1]
 				f.write(scaffold + "\t" + start + "\t" + stop + "\t" + tract + "\t" + LOC_ID + "_" + gene_coordinates + "\n")
+
+	output_sorted = output_file.split(".bed")[0] + "_sorted.bed"
+	eliminate_duplicates = "cat {} | sort | uniq > {}".format(output_file, output_sorted)
+	os.system(eliminate_duplicates)
+	os.system("rm {}".format(output_file))
 
 # Use bedtools intersect to create file bed file containing the overlap between introgression tracts and protein coding genes 
 def intersect_genes(tract_file, gene_file, outfile):
@@ -166,8 +172,8 @@ def main():
 	get_psg_overlapped_tracts(Sdro_bsites_overlap)
 	get_psg_overlapped_tracts(Spal_bsites_overlap)
 	
-	#intersect_genes("Sdro_bsites_overlapped_tracts.bed", merged_CDS_file, "Sdro_bsites_CDS_overlap.bed")
-	#intersect_genes("Spal_bsites_overlapped_tracts.bed", merged_CDS_file, "Spal_bsites_CDS_overlap.bed")
+	intersect_genes("Sdro_bsites_overlapped_tracts_sorted.bed", merged_CDS_file, "Sdro_bsites_CDS_overlap.bed")
+	intersect_genes("Spal_bsites_overlapped_tracts_sorted.bed", merged_CDS_file, "Spal_bsites_CDS_overlap.bed")
 
 	get_coding_base_counts(root_dir + "Spal_bsites_CDS_overlap.bed")
 	get_coding_base_counts(root_dir + "Sdro_bsites_CDS_overlap.bed")

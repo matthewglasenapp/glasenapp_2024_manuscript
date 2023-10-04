@@ -54,7 +54,7 @@ fig1 <- ggplot(data = df, aes(x = base_count, fill = dist_type)) +
   ) +
   scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#999999"), labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")
   ) + labs(
-    x = "Mean Percent Coding",
+    x = "Percent Coding",
     y = "Probability Density",
     fill = "Dist Type"
   ) + theme_bw() +
