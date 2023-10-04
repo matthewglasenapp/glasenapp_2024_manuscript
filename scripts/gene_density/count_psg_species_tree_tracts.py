@@ -1,11 +1,11 @@
 import os
 import csv 
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/gene_density/introgression_tracts/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/gene_density/species_tree_tracts/"
 
-output_directory_genes = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/gene_density/introgression_tracts/bedtools_intersect_dir_genes/"
+output_directory_genes = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/gene_density/species_tree_tracts/bedtools_intersect_dir_genes/"
 
-all_genes_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/all_genes.csv"
+all_genes_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts_species_tree/all_genes.csv"
 
 psg_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/psg.csv"
 
