@@ -49,7 +49,7 @@ def subset_vcf(region):
 def create_fasta_alignments(region):
 	input_file = output_dir + region + "/" + region + ".vcf.gz"
 	output_directory = output_dir + region
-	run_vcf2phylip = "python3 {}vcf2phylip.py -w --input {} -p -f --output-folder {} --output-prefix {}".format(vcf2phylip_path, input_file, output_directory, zero_indexed_region)
+	run_vcf2phylip = "python3 {}vcf2phylip.py -w --input {} -p -f --output-folder {} --output-prefix {}".format(vcf2phylip_path, input_file, output_directory, region)
 	os.system(run_vcf2phylip)
 
 # Iqtree does not tolerate the '*'' symbol. Replace '*' with 'N'

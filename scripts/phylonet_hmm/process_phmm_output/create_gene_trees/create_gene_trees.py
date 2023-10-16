@@ -29,7 +29,7 @@ reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF
 gff_file = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.gff"
 
 # Path to filtered multisample vcf file
-vcf_file = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/filtered_genotype_calls.g.vcf.gz"
+vcf_file = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/3bp_filtered_genotype_calls_pf.g.vcf.gz"
 
 # Intersection file containing introgressed genes
 intersect_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/investigate_tracts/intersect.tsv"
@@ -168,20 +168,20 @@ def main():
 	os.system('rmdir single_gene_gff_records/')
 
 	run_vcf2fasta()
-	# replace_missing_genotype_char()
+	replace_missing_genotype_char()
 	
-	# fasta_file_list = os.listdir("vcf2fasta_gene/")
-	# Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_file_list)
+	fasta_file_list = os.listdir("vcf2fasta_gene/")
+	Parallel(n_jobs=num_cores)(delayed(run_iqtree)(fasta_file) for fasta_file in fasta_file_list)
 	
-	# tree_file_lst = [item for item in os.listdir("vcf2fasta_gene/") if "treefile" in item]
-	# Parallel(n_jobs=num_cores)(delayed(edit_tree_files)(input_file) for input_file in tree_file_lst)
+	tree_file_lst = [item for item in os.listdir("vcf2fasta_gene/") if "treefile" in item]
+	Parallel(n_jobs=num_cores)(delayed(edit_tree_files)(input_file) for input_file in tree_file_lst)
 
-	# update_gene_intersection_file()
-	# update_psg_intersection_file()
+	update_gene_intersection_file()
+	update_psg_intersection_file()
 
-	# clean_up_iqtree_files()
-	# concatenate_trees()
-	# clean_gene_trees("concatenated_trees.nwk", "clean_single_locus_trees.nwk")
+	clean_up_iqtree_files()
+	concatenate_trees()
+	clean_gene_trees("concatenated_trees.nwk", "clean_single_locus_trees.nwk")
 
 if __name__ == "__main__":
 	main()
