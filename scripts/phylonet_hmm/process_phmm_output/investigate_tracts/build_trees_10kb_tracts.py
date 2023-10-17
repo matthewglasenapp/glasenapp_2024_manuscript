@@ -136,7 +136,7 @@ def update_tract_info_csv_file():
 	output_csv = open(updated_csv,"w")
 	writer = csv.writer(output_csv, delimiter = "\t")		
 
-	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/bp", "Overlapping Coding Bases", "Percent Coding", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Genes", "Sdro 1x", "Sdro 10x", "Sfra 1x", "Sfra 10x", "Spal 1x", "Spal 10x", "Hpul 1x", "Hpul 10x", "Gene Tree", "Sdro-Spla sister?", "Bootstrap Support"]
+	header = ["tract_name", "Scaffold", "Start", "Stop", "Length", "SNV Sites", "SNV/kb", "Overlapping Coding Bases", "Percent Coding", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Genes", "Sdro 1x", "Sdro 10x", "Sfra 1x", "Sfra 10x", "Spal 1x", "Spal 10x", "Hpul 1x", "Hpul 10x", "Gene Tree", "Sdro-Spal sister?", "Bootstrap Support"]
 	writer.writerow(header)
 
 	counter = 0 

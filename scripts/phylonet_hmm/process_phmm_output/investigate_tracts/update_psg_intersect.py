@@ -92,6 +92,7 @@ def update_psg_intersect_csv():
 		else:
 			data = line.split("\t")
 			data.append("0")
+			data.append("0")
 			data.append("0.0")
 			writer.writerow(data)
 

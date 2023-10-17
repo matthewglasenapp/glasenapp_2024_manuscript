@@ -124,7 +124,7 @@ def update_gene_intersection_file():
 def update_psg_intersection_file():
 	csv_file = open("psg_intersection_file.tsv","w")
 	writer = csv.writer(csv_file, delimiter="\t")
-	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Coding Bases", "Percent Coding", "Gene Tree"]
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG #", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Coding Bases", "Total Coding Bases", "Percent Coding", "Gene Tree"]
 	writer.writerow(header)
 
 	for record in open(psg_intersect_file).read().splitlines()[1:]:
@@ -148,8 +148,8 @@ def concatenate_trees():
 # nw_topology creates cladogram. Option -I gets rid of branch lengths. 
 # nw_order orders the tree so that trees with identical topologies will have identical newick strings. Ooption -c d reorders the tree in such a way as to remove the ladder. 
 def clean_gene_trees(input_file, output_file):
-	outgroup = "franciscanus"
-	clean = "{}nw_reroot {} {} | {}nw_topology -I - | {}nw_order -c d - > {}".format(nw_utils, input_file, outgroup, nw_utils, nw_utils, output_file)
+	outgroup = "pulcherrimus"
+	clean = "nw_reroot {} {} | nw_topology -I - | nw_order -c d - > {}".format(input_file,outgroup,output_file)
 	os.system(clean)
 
 def main():
