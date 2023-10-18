@@ -36,7 +36,7 @@ plot_data <- data.frame(
 figure <- ggplot(plot_data) +
   geom_segment(
     aes(x = start, xend = end, y = chromosome, yend = chromosome),
-    color = "blue", linewidth = 7
+    color = "blue", linewidth = 5
   ) +
   geom_segment(
     data = scaffold_lengths,
@@ -55,5 +55,6 @@ figure <- ggplot(plot_data) +
 
 figure
 
+#ggsave(filename = "tracts_80.svg", plot = figure)
 ggsave(filename = "tracts_90.svg", plot = figure)
 ggsave(filename = "tracts_90.png", plot = figure)

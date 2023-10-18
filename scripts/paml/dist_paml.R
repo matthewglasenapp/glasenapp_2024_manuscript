@@ -93,6 +93,7 @@ fig1 <- ggplot(df_long, aes(x = value, fill = dist_type)) +
 fig1
 
 ggsave(filename = "dist_paml.eps", plot = fig1)
+ggsave(filename = "dist_paml.svg", plot = fig1)
 ggsave(filename = "dist_paml.png", width=169, units = "mm", plot = fig1)
 
 mean(dist_dN_introgression_tract_90)

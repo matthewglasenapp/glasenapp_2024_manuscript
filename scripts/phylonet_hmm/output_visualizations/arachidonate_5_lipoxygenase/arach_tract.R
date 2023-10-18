@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyverse)
 library(ggarchery)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/phylonet_hmm/output_visualizations/arachidonate_5_lipoxygenase/")
+setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/phylonet_hmm/output_visualizations/arachidonate_5_lipoxygenase/")
 
 introgression_probabilities = fromJSON(file = "NW_022145601.1.json")
 class(introgression_probabilities)
@@ -108,6 +108,6 @@ figure
 
 ggsave(filename="arach.png",plot=figure)
   
-ggsave(filename = "arach.svg", width = 11, height = 8.5, plot = figure, dpi = 700)
+ggsave(filename = "arach.svg", width = 11, height = 9, plot = figure, dpi = 700)
 ggsave(filename = "arach.png", width = 11, height = 8.5, plot = figure)
 

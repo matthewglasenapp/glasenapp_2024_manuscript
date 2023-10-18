@@ -98,11 +98,12 @@ def get_coding_base_counts(CDS_overlap_file):
 def update_psg_intersect_csv(original_intersect_file):
 	sample = original_intersect_file.split("/")[-1].split("_")[0]
 	psg_intersect_file_lines = open(original_intersect_file,"r").read().splitlines()[1:]
+	gene_tree_dir = root_dir.split("/investigate_tracts/")[0] + "/create_gene_trees/"
 
 	csv_output = root_dir + "updated_" + original_intersect_file.split("/")[-1]
 	csv_file = open(csv_output,"w")
 	writer = csv.writer(csv_file, delimiter = "\t")	
-	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG ?", "PSG Rank", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Coding Bases", "Total Coding Bases", "Percent Coding Bases Introgressed"]
+	header = ["NCBI Gene ID", "Name", "Synonyms", "Kober and Pogson Gene ID", "Kober and Pogson Name", "Kober and Pogson Synonyms", "PSG ?", "PSG Rank", "Length", "Introgressed Bases", "Percent Bases Introgressed", "Coordinates", "Overlapping introgression tract(s)", "Sdro", "Sfra", "Spal", "Hpul", "Overlapping Coding Bases", "Total Coding Bases", "Percent Coding Bases Introgressed", "Gene Tree"]
 	writer.writerow(header)
 
 	for line in psg_intersect_file_lines:
@@ -127,6 +128,11 @@ def update_psg_intersect_csv(original_intersect_file):
 				data.append(base_overlap)
 				data.append(total_coding_bases_LOC)
 				data.append(percent_coding)
+				if LOC_ID + ".nwk" in os.listdir(gene_tree_dir):
+					gene_tree = open(gene_tree_dir+ LOC_ID + ".nwk", "r").readline()
+					data.append(gene_tree)
+				else:
+					data.append("missing")
 				writer.writerow(data)
 			
 			else:
@@ -134,6 +140,11 @@ def update_psg_intersect_csv(original_intersect_file):
 				data.append("0")
 				data.append("0.0")
 				data.append("0.0")
+				if LOC_ID + ".nwk" in os.listdir(gene_tree_dir):
+					gene_tree = open(gene_tree_dir+ LOC_ID + ".nwk", "r").readline()
+					data.append(gene_tree)
+				else:
+					data.append("missing")
 				writer.writerow(data)
 		
 		elif sample == "Spal":		
@@ -155,6 +166,11 @@ def update_psg_intersect_csv(original_intersect_file):
 				data.append(base_overlap)
 				data.append(total_coding_bases_LOC)
 				data.append(percent_coding)
+				if LOC_ID + ".nwk" in os.listdir(gene_tree_dir):
+					gene_tree = open(gene_tree_dir+ LOC_ID + ".nwk", "r").readline()
+					data.append(gene_tree)
+				else:
+					data.append("missing")
 				writer.writerow(data)
 			
 			else:
@@ -162,6 +178,11 @@ def update_psg_intersect_csv(original_intersect_file):
 				data.append("0")
 				data.append("0.0")
 				data.append("0.0")
+				if LOC_ID + ".nwk" in os.listdir(gene_tree_dir):
+					gene_tree = open(gene_tree_dir+ LOC_ID + ".nwk", "r").readline()
+					data.append(gene_tree)
+				else:
+					data.append("missing")
 				writer.writerow(data)
 		
 	csv_file.close()

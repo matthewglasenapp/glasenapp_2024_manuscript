@@ -71,6 +71,7 @@ fig1 <- ggplot(data = df, aes(x = gene_count, fill = dist_type)) +
 fig1
 
 ggsave(filename = "dist_genes.eps", plot = fig1)
+ggsave(filename = "dist_genes.svg", plot = fig1)
 ggsave(filename = "dist_genes.png", width=169, units = "mm", plot = fig1)
 
 ######

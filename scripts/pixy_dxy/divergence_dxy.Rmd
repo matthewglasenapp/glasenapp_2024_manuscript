@@ -201,6 +201,7 @@ plot(fig2)
 setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/data/pixy_dxy/")
 ggsave(filename = "dXY.eps", plot = fig2)
 ggsave(filename = "dXY.png", plot = fig2)
+ggsave(filename = "dXY.svg", plot = fig2)
 ```
 
 

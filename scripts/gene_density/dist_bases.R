@@ -71,6 +71,7 @@ fig1 <- ggplot(data = df, aes(x = base_count, fill = dist_type)) +
 fig1
 
 ggsave(filename = "dist_coding.eps", plot = fig1)
+ggsave(filename = "dist_coding.svg", plot = fig1)
 ggsave(filename = "dist_bases.png", width=169, units = "mm", plot = fig1)
 
 ###
