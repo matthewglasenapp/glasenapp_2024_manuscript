@@ -1,18 +1,10 @@
 # Auto detect text files and perform LF normalization
-* text=auto
-*.csv linguist-language=text
-*.tsv linguist-language=text
-*.bed linguist-language=text
-*.gff linguist-language=text
-*.json linguist-language=text
-*.md linguist-language=text
-*.ctl linguist-language=text
-*.docx linguist-language=text
-*.csv linguist-documentation
-*.tsv linguist-documentation
-*.bed linguist-documentation
-*.gff linguist-documentation
-*.json linguist-documentation
-*.md linguist-documentation
-*.ctl linguist-documentation
-*.docx linguist-documentation
+#* text=auto
+*.csv linguist-vendored
+*.tsv linguist-vendored
+*.bed linguist-vendored
+*.gff linguist-vendored
+*.json linguist-vendored
+*.md linguist-vendored
+*.ctl linguist-vendored
+
