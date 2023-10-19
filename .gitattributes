@@ -7,3 +7,4 @@
 *.json linguist-language=text
 *.md linguist-language=text
 *.ctl linguist-language=text
+*.docx linguist-language=text
