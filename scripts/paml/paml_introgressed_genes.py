@@ -6,6 +6,7 @@ from joblib import Parallel, delayed
 import statistics
 from Bio import SeqIO
 
+# Num cores available for parallel computing
 num_cores = 24
 
 root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/"
