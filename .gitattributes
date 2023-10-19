@@ -1,6 +1,7 @@
 # Auto detect text files and perform LF normalization
 #* text=auto
 data/* linguist-vendored
+scripts/* linguist-vendored
 *.csv linguist-vendored
 *.tsv linguist-vendored
 *.bed linguist-vendored
@@ -8,4 +9,3 @@ data/* linguist-vendored
 *.json linguist-vendored
 *.md linguist-vendored
 *.ctl linguist-vendored
-
