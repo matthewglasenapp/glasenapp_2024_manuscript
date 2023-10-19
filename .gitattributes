@@ -8,3 +8,11 @@
 *.md linguist-language=text
 *.ctl linguist-language=text
 *.docx linguist-language=text
+*.csv linguist-documentation
+*.tsv linguist-documentation
+*.bed linguist-documentation
+*.gff linguist-documentation
+*.json linguist-documentation
+*.md linguist-documentation
+*.ctl linguist-documentation
+*.docx linguist-documentation
