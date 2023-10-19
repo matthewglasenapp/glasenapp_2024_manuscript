@@ -1,5 +1,5 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+#* text=auto
 *.csv linguist-language=text
 *.tsv linguist-language=text
 *.bed linguist-language=text
