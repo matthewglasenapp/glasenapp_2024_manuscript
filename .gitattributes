@@ -5,3 +5,4 @@
 *.bed linguist-language=text
 *.gff linguist-language=text
 *.json linguist-language=text
+*.md linguist-language=text
