@@ -154,50 +154,6 @@ plot(species_tree_tract_80_qqplot)
 ```
 
 ## Homogeneity of variances 
-
-``` {r, echo=FALSE}
-library(dplyr)
-library(knitr)
-
-# Your original code
-result <- df %>%
-  group_by(dist_type, posterior_probability) %>%
-  summarise(sd_mean_divergence = sd(mean_divergence),
-            variance_mean_divergence = sd_mean_divergence^2,
-            .groups = "drop") %>%
-  arrange(posterior_probability)
-
-# Rename the variables for the table
-result <- result %>%
-  rename(
-    "Standard Deviation" = sd_mean_divergence,
-    "Variance" = variance_mean_divergence,
-    "Posterior Probability" = posterior_probability,
-    "Tract Type" = dist_type
-  )
-
-# Create vectors to rename values within the table
-dist_type_rename <- c("introgression_tract" = "Introgression", "species_tree_tract" = "Species Tree")
-posterior_probability_rename <- c("probability_90" = "90%", "probability_80" = "80%")
-
-# Apply the renaming to the data frame
-result <- result %>%
-  mutate(
-    `Tract Type` = case_when(
-      `Tract Type` %in% names(dist_type_rename) ~ dist_type_rename[`Tract Type`],
-      TRUE ~ as.character(`Tract Type`)
-    ),
-    `Posterior Probability` = case_when(
-      `Posterior Probability` %in% names(posterior_probability_rename) ~ posterior_probability_rename[`Posterior Probability`],
-      TRUE ~ as.character(`Posterior Probability`)
-    )
-  )
-
-# Print the kable table with customized values
-knitr::kable(result, digits = 8, align = "c", format.args = list(scientific = FALSE))
-```
-
-
 ### F-test to assess homogeneity of variances between Introgression Tract and Species Tree Tract
 ``` {r, echo=FALSE, message=FALSE, warning=FALSE}
 # Perform variance tests

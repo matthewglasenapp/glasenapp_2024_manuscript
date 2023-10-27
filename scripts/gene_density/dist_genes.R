@@ -1,4 +1,5 @@
 library(ggplot2)
+library(fitdistrplus)
 
 setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/gene_density/")
 
@@ -35,6 +36,68 @@ df <- data.frame(
 
 # Reorder levels of posterior_probability
 df$posterior_probability <- factor(df$posterior_probability, levels = c("probability_90", "probability_80"))
+
+# Plot histogram
+fig1 <- ggplot(data = df, aes(x = gene_count, fill = dist_type)) +
+  geom_histogram(aes(y=after_stat(density)), alpha = 0.4, color = "black", binwidth = 1) +
+  geom_density(alpha=0) + 
+  facet_wrap(
+    ~ posterior_probability,
+    ncol = 1,
+    scales = "free_x",
+    labeller = labeller(
+      posterior_probability = c(
+        "probability_90" = "Posterior Probability Threshold: 90%",
+        "probability_80" = "Posterior Probability Threshold: 80%"
+      )
+    )
+  ) +
+  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#FDBF6F")) +
+  labs(
+    x = "Divergence",
+    y = "Frequency",
+    fill = "Dist Type"
+  ) + theme_blank() +
+  theme(
+    legend.position = "none",
+    panel.grid = element_blank()
+  )
+
+fig1
+
+# Gene Counts: Plot histogram and overlay normal fit 
+# Introgression tracts 90%
+fit.norm_introgressed_genes_90 = fitdist(df$gene_count[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_90"], "norm")
+fit.norm_introgressed_genes_90$aic
+fit.lnorm_introgressed_genes_90 = fitdist(df$gene_count[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_90"], "lnorm")
+fit.lnorm_introgressed_genes_90$aic
+#plot(fit.norm_genes)
+
+# Species Tree Tracts 90%
+fit.norm_species_tree_genes_90 = fitdist(df$gene_count[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_90"], "norm")
+fit.norm_species_tree_genes_90$aic
+fit.lnorm_species_tree_genes_90 = fitdist(df$gene_count[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_90"], "lnorm")
+fit.lnorm_species_tree_genes_90$aic
+#plot(fit.norm_genes)
+
+#Introgression Tracts 80%
+fit.norm_introgressed_genes_80 = fitdist(df$gene_count[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_80"], "norm")
+fit.norm_introgressed_genes_90$aic
+fit.lnorm_introgressed_genes_80 = fitdist(df$gene_count[df$dist_type == "introgression_tract" & df$posterior_probability == "probability_80"], "lnorm")
+fit.lnorm_introgressed_genes_90$aic
+#plot(fit.norm_genes)
+
+#Species Tree Tracts 80%
+fit.norm_species_tree_genes_80 = fitdist(df$gene_count[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_80"], "norm")
+fit.norm_species_tree_genes_80$aic
+fit.lnorm_species_tree_genes_80 = fitdist(df$gene_count[df$dist_type == "species_tree_tract" & df$posterior_probability == "probability_80"], "lnorm")
+fit.lnorm_species_tree_genes_80$aic
+#plot(fit.norm_genes)
+
+# Check for homogeneity of variances by calculating the variance (sd^2) of each treatment
+out_genes=aggregate(gene_count~dist_type,data=df,FUN="sd")
+out_genes$xvar=out_genes$gene_count^2
+print(out_genes)
 
 # Plot data
 fig1 <- ggplot(data = df, aes(x = gene_count, fill = dist_type)) +
