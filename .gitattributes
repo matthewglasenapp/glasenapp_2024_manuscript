@@ -9,3 +9,4 @@
 *.json linguist-language=JSON
 *.txt linguist-language=Text
 *.bed linguist-language=Text
+*.ctl linguist-language=Text
