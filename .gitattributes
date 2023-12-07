@@ -1,2 +1,11 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+# .gitattributes
+*.html linguist-language=HTML
+*.Rmd linguist-language=R
+*.py linguist-language=Python
+*.sh linguist-language=Shell
+*.gff linguist-language=Text
+*.csv linguist-language=Text
+*.json linguist-language=JSON
+*.txt linguist-language=Text
+*.bed linguist-language=Text
