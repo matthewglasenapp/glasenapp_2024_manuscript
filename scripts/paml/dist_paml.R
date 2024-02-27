@@ -4,7 +4,7 @@ library(tidyr)
 library(ggh4x)
 library(scales)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/paml/")
+setwd("/Users/matt/Documents/Github/glasenapp_2024_manuscript/data/paml/")
 
 introgression_tract_dN_90 = "mean_dN_introgression_tract_90.csv"
 species_tree_tract_dN_90 = "mean_dN_species_tree_90.csv"

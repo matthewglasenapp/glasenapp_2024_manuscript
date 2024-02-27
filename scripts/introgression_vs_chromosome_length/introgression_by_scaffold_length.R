@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/data/introgression_vs_chromosome_length/")
+setwd("/Users/matt/Documents/GitHub/glasenapp_2024_manuscript/data/introgression_vs_chromosome_length/")
 
 file = "introgression_by_scaffold_updated_90.tsv"
 #file = "introgression_by_scaffold_updated_80.tsv"
@@ -39,7 +39,9 @@ fig2 <- ggplot(data, aes(x=gene_density, y=percent_introgressed)) +
   theme_classic() + 
   geom_smooth(method="lm", color = "black") +
   theme(axis.title.x = element_text(size=18, face="bold"),
-        axis.title.y = element_text(size=18, face="bold"), axis.text.x = element_text(size=18), axis.text.y = element_text(size=18))
+        axis.title.y = element_text(size=18, face="bold"), axis.text.x = element_text(size=18), axis.text.y = element_text(size=18)) + 
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black")
+
 
 fig2
 

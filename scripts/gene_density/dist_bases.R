@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/gene_density/")
+setwd("/Users/matt/Documents/Github/glasenapp_2024_manuscript/data/gene_density/")
 
 # Define the csv files with list of gene counts at 90% posterior probability threshold
 introgression_tract_base_count_90 = "introgression_tract_base_count_90.csv"

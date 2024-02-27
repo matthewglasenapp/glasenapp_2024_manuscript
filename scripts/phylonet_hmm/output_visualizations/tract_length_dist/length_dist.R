@@ -1,4 +1,4 @@
-setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/data/phylonet_hmm/output_visualizations/tract_length_dist/")
+setwd("/Users/matt/Documents/GitHub/glasenapp_2024_manuscript/data/phylonet_hmm/output_visualizations/tract_length_dist/")
 
 library(ggplot2)
 
@@ -29,7 +29,7 @@ ggsave(filename = "tract_dist_80.svg", plot = figure)
 
 ------------------------------------------------------------------
 
-setwd("/Users/matt/Documents/GitHub/dissertation_chapter_2/data/phylonet_hmm/output_visualizations/tract_length_dist/")
+setwd("/Users/matt/Documents/GitHub/glasenapp_2024_manuscript/data/phylonet_hmm/output_visualizations/tract_length_dist/")
 dist_90_file = read.csv("tract_dist_90.csv",header=F)
 dist_80_file = read.csv("tract_dist_80.csv",header=F)
 dist_90 = unlist(dist_90_file)
