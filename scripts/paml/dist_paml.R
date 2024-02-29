@@ -1,129 +1,192 @@
 library(ggplot2)
-library(dplyr)
 library(tidyr)
-library(ggh4x)
-library(scales)
+library(dplyr)
+library(cowplot)
 
-setwd("/Users/matt/Documents/Github/glasenapp_2024_manuscript/data/paml/")
+setwd("/Users/matt/Documents/GitHub/glasenapp_2024_manuscript/data/paml/")
 
-introgression_tract_dN_90 = "mean_dN_introgression_tract_90.csv"
-species_tree_tract_dN_90 = "mean_dN_species_tree_90.csv"
+# dN 90% posterior probability threshold
+#-------------------------------------------------------------------------------
+# Load the csv files containing the distribution of mean dXY values and read as a one-dimensional vector
+dN_introgressed_90_file = "dN_introgressed_90.csv"
+dN_non_introgressed_90_file = "dN_non_introgressed_90.csv"
 
-introgression_tract_dS_90 = "mean_dS_introgression_tract_90.csv"
-species_tree_tract_dS_90 = "mean_dS_species_tree_90.csv"
+dist_dN_introgressed_90 <- scan(dN_introgressed_90_file, what = numeric(), sep = ",")
+dist_dN_non_introgressed_90 <- scan(dN_non_introgressed_90_file, what = numeric(), sep = ",")
 
-introgression_tract_dNdS_90 = "mean_dNdS_introgression_tract_90.csv"
-species_tree_tract_dNdS_90 = "mean_dNdS_species_tree_90.csv"
+num_items = length(dist_dN_introgressed_90)
 
-introgression_tract_dN_80 = "mean_dN_introgression_tract_80.csv"
-species_tree_tract_dN_80 = "mean_dN_species_tree_80.csv"
+# Add one-dimensional vectors of mean dXY values to a dataframe called df
+df_dN_90 <- data.frame(
+  dist_type = factor(c(rep("introgressed", num_items), rep("non_introgressed", num_items))),
+  dN = c(dist_dN_introgressed_90, dist_dN_non_introgressed_90))
 
-introgression_tract_dS_80 = "mean_dS_introgression_tract_80.csv"
-species_tree_tract_dS_80 = "mean_dS_species_tree_80.csv"
+# Calculate Z-scores for mean_divergence within each dist_type
+df_dN_90_filtered <- df_dN_90 %>%
+  group_by(dist_type) %>%
+  mutate(z_score = scale(dN)) %>%
+  filter(abs(z_score) < 4) %>%
+  ungroup()
 
-introgression_tract_dNdS_80 = "mean_dNdS_introgression_tract_80.csv"
-species_tree_tract_dNdS_80 = "mean_dNdS_species_tree_80.csv"
+# Remove the z_score column if you no longer need it
+df_dN_90_filtered <- select(df_dN_90_filtered, -z_score)
 
-# Read the CSV file as a one-dimensional vector
-dist_dN_introgression_tract_90 <- scan(introgression_tract_dN_90, what = numeric(), sep = ",")
-dist_dN_species_tree_90 <- scan(species_tree_tract_dN_90, what = numeric(), sep = ",")
-dist_dS_introgression_tract_90 <- scan(introgression_tract_dS_90, what = numeric(), sep = ",")
-dist_dS_species_tree_90 <- scan(species_tree_tract_dS_90, what = numeric(), sep = ",")
-dist_dNdS_introgression_tract_90 <- scan(introgression_tract_dNdS_90, what = numeric(), sep = ",")
-dist_dNdS_species_tree_90 <- scan(species_tree_tract_dNdS_90, what = numeric(), sep = ",")
+mean_values <- aggregate(dN ~ dist_type, df_dN_90_filtered, mean)
 
-dist_dN_introgression_tract_80 <- scan(introgression_tract_dN_80, what = numeric(), sep = ",")
-dist_dN_species_tree_80 <- scan(species_tree_tract_dN_80, what = numeric(), sep = ",")
-dist_dS_introgression_tract_80 <- scan(introgression_tract_dS_80, what = numeric(), sep = ",")
-dist_dS_species_tree_80 <- scan(species_tree_tract_dS_80, what = numeric(), sep = ",")
-dist_dNdS_introgression_tract_80 <- scan(introgression_tract_dNdS_80, what = numeric(), sep = ",")
-dist_dNdS_species_tree_80 <- scan(species_tree_tract_dNdS_80, what = numeric(), sep = ",")
-
-df <- data.frame(
-  dist_type = factor(c(rep("introgression_tract", 1000), rep("species_tree_tract", 1000), rep("introgression_tract", 1000), rep("species_tree_tract", 1000))),
-  mean_dN = c(dist_dN_introgression_tract_90, dist_dN_species_tree_90, dist_dN_introgression_tract_80, dist_dN_species_tree_80),
-  mean_dS = c(dist_dS_introgression_tract_90, dist_dS_species_tree_90, dist_dS_introgression_tract_80, dist_dS_species_tree_80),
-  mean_dNdS = c(dist_dNdS_introgression_tract_90, dist_dNdS_species_tree_90, dist_dNdS_introgression_tract_80, dist_dNdS_species_tree_80),
-  posterior_probability = factor(c(rep("probability_90", 2000), rep("probability_80", 2000)))
-  )
-  
-# Convert data to long format
-df_long <- df %>% pivot_longer(cols = c(mean_dN, mean_dS, mean_dNdS),
-                               names_to = "metric",
-                               values_to = "value")
-
-# Reorder the levels of the metric variable
-df_long$metric <- factor(df_long$metric, levels = c("mean_dN", "mean_dS", "mean_dNdS"))
-
-# Reorder the levels of the metric variable
-df_long$posterior_probability <- factor(df_long$posterior_probability, levels = c("probability_90", "probability_80"))
-
-###########
-
-# Create the ggplot using facet_grid for independent scales
-fig1 <- ggplot(df_long, aes(x = value, fill = dist_type)) +
-  geom_density(aes(y=after_stat(density)), alpha=0.8) +
-  facet_grid2(
-    posterior_probability ~ metric,
-    scales = "free", independent = "all",
-    labeller = labeller(posterior_probability = c(
-      "probability_90" = "90% threshold",
-      "probability_80" = "80% threshold"),
-      metric = c(
-        mean_dN = "Mean dN",
-        mean_dS = "Mean dS",
-        mean_dNdS = "Mean dNdS"
-      )
-    ), switch = "x") +
-  scale_fill_manual(values = c("introgression_tract" = "#A6CEE3", "species_tree_tract" = "#999999"),
-                    labels = c("Introgression Tract", "Genome-Wide Background")) +
-  labs(x = "", y = "Probability Density", fill = "") +
+dN_90 <- ggplot(data = df_dN_90_filtered, aes(x = dN, color = dist_type)) +
+  stat_density(geom="line",position="identity", size = 1.1) + 
+  geom_vline(data = mean_values, aes(xintercept = dN, linetype = dist_type, color = dist_type),
+             linetype = "dashed", size = 0.7, show.legend = FALSE) +
+  geom_text(data = mean_values, aes(x = dN, label = round(dN, 3), y = 0.0, color = dist_type), vjust = 0.0, hjust = -0.1, show.legend = FALSE, size = 2.5) +
+  scale_color_manual(values = c("introgressed" = "#1F78B4", "non_introgressed" = "#333333"),
+                     labels = c("introgressed" = "Introgressed Genes", "non_introgressed" = "Non-Introgressed Genes")) +
+  labs(
+    x = "dN",
+    y = "Probability Density",
+    color = "Dist Type"
+  ) + 
   theme_bw() +
-  theme(strip.placement = "outside",
-        axis.title = element_text(size = 20),
-        legend.position = "top",
-        panel.grid = element_blank(),
-        strip.text.y = element_text(size = 14, angle = 270),
-        strip.text.x = element_text(size = 18), # Font size for facet labels
-        legend.text = element_text(size = 16),
-        axis.text = element_text(size = 8)
+  theme(
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_text(size = 9),
+    axis.title.y = element_text(size = 10), 
+    axis.line = element_line(color = "black", linewidth = 0.5),
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.text = element_text(size = 10)
   ) +
-  guides(fill = guide_legend(title = NULL))
+  scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) +
+  guides(color = guide_legend(title = NULL))
 
-fig1
+# Display the plot
+print(dN_90)
 
-ggsave(filename = "dist_paml.eps", plot = fig1)
-ggsave(filename = "dist_paml.svg", plot = fig1)
-ggsave(filename = "dist_paml.png", width=169, units = "mm", plot = fig1)
+# dS 90% posterior probability threshold
+#-------------------------------------------------------------------------------
+# Load the csv files containing the distribution of mean dXY values and read as a one-dimensional vector
+dS_introgressed_90_file = "dS_introgressed_90.csv"
+dS_non_introgressed_90_file = "dS_non_introgressed_90.csv"
 
-mean(dist_dN_introgression_tract_90)
-mean(dist_dS_introgression_tract_90)
-mean(dist_dNdS_introgression_tract_90)
+dist_dS_introgressed_90 <- scan(dS_introgressed_90_file, what = numeric(), sep = ",")
+dist_dS_non_introgressed_90 <- scan(dS_non_introgressed_90_file, what = numeric(), sep = ",")
 
-mean(dist_dN_introgression_tract_80)
-mean(dist_dS_introgression_tract_80)
-mean(dist_dNdS_introgression_tract_80)
+num_items = length(dist_dS_introgressed_90)
 
-model1 <- lm(dist_dN_species_tree_90 ~ 1)
-model2 <- lm(dist_dS_species_tree_90 ~ 1)
-model3 <- lm(dist_dNdS_species_tree_90 ~ 1)
-model4 <- lm(dist_dN_species_tree_80 ~ 1)
-model5 <- lm(dist_dS_species_tree_80 ~ 1)
-model6 <- lm(dist_dNdS_species_tree_80 ~ 1)
+# Add one-dimensional vectors of mean dXY values to a dataframe called df
+df_dS_90 <- data.frame(
+  dist_type = factor(c(rep("introgressed", num_items), rep("non_introgressed", num_items))),
+  dS = c(dist_dS_introgressed_90, dist_dS_non_introgressed_90))
 
-confint(model1, level=0.95)
-confint(model2, level=0.95)
-confint(model3, level=0.95)
-confint(model4, level=0.95)
-confint(model5, level=0.95)
-confint(model6, level=0.95)
+# Calculate Z-scores for mean_divergence within each dist_type
+df_dS_90_filtered <- df_dS_90 %>%
+  group_by(dist_type) %>%
+  mutate(z_score = scale(dS)) %>%
+  filter(abs(z_score) < 4) %>%
+  ungroup()
 
+# Remove the z_score column if you no longer need it
+df_dS_90_filtered <- select(df_dS_90_filtered, -z_score)
 
+mean_values <- aggregate(dS ~ dist_type, df_dS_90_filtered, mean)
 
+dS_90 <- ggplot(data = df_dS_90_filtered, aes(x = dS, color = dist_type)) +
+  stat_density(geom="line",position="identity", size = 1.1) + 
+  geom_vline(data = mean_values, aes(xintercept = dS, linetype = dist_type, color = dist_type),
+             linetype = "dashed", size = 0.7, show.legend = FALSE) +
+  geom_text(data = mean_values, aes(x = dS, label = round(dS, 3), y = 0.0, color = dist_type), vjust = 0.0, hjust = -0.1, show.legend = FALSE, size = 2.5) +
+  scale_color_manual(values = c("introgressed" = "#1F78B4", "non_introgressed" = "#333333"),
+                     labels = c("introgressed" = "Introgressed Genes", "non_introgressed" = "Non-Introgressed Genes")) +
+  labs(
+    x = "dS",
+    y = "Probability Density",
+    color = "Dist Type"
+  ) + 
+  theme_bw() +
+  theme(
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_text(size = 9),
+    axis.title.y = element_text(size = 10), 
+    axis.line = element_line(color = "black", linewidth = 0.5),
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.text = element_text(size = 10)
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) +
+  guides(color = guide_legend(title = NULL))
 
+# Display the plot
+print(dS_90)
 
-####
-T-Tests
-t.test(mean_dN~dist_type, data=df, paired=FALSE, var.eq=F, alternative="two.sided")
-t.test(mean_dS~dist_type, data=df, paired=FALSE, var.eq=F, alternative="two.sided")
-t.test(mean_dNdS~dist_type, data=df, paired=FALSE, var.eq=F, alternative="two.sided")
+# dNdS 90% posterior probability threshold
+#-------------------------------------------------------------------------------
+# Load the csv files containing the distribution of mean dXY values and read as a one-dimensional vector
+dNdS_introgressed_90_file = "dNdS_introgressed_90.csv"
+dNdS_non_introgressed_90_file = "dNdS_non_introgressed_90.csv"
+
+dist_dNdS_introgressed_90 <- scan(dNdS_introgressed_90_file, what = numeric(), sep = ",")
+dist_dNdS_non_introgressed_90 <- scan(dNdS_non_introgressed_90_file, what = numeric(), sep = ",")
+
+num_items = length(dist_dNdS_introgressed_90)
+
+# Add one-dimensional vectors of mean dXY values to a dataframe called df
+df_dNdS_90 <- data.frame(
+  dist_type = factor(c(rep("introgressed", num_items), rep("non_introgressed", num_items))),
+  dNdS = c(dist_dNdS_introgressed_90, dist_dNdS_non_introgressed_90))
+
+# Calculate Z-scores for mean_divergence within each dist_type
+df_dNdS_90_filtered <- df_dNdS_90 %>%
+  group_by(dist_type) %>%
+  mutate(z_score = scale(dNdS)) %>%
+  filter(abs(z_score) < 4) %>%
+  ungroup()
+
+# Remove the z_score column if you no longer need it
+df_dNdS_90_filtered <- select(df_dNdS_90_filtered, -z_score)
+
+mean_values <- aggregate(dNdS ~ dist_type, df_dNdS_90_filtered, mean)
+
+dNdS_90 <- ggplot(data = df_dNdS_90_filtered, aes(x = dNdS, color = dist_type)) +
+  stat_density(geom="line",position="identity", size = 1.1) + 
+  geom_vline(data = mean_values, aes(xintercept = dNdS, linetype = dist_type, color = dist_type),
+             linetype = "dashed", size = 0.7, show.legend = FALSE) +
+  geom_text(data = mean_values, aes(x = dNdS, label = round(dNdS, 3), y = 0.0, color = dist_type), vjust = 0.0, hjust = -0.1, show.legend = FALSE, size = 2.5) +
+  scale_color_manual(values = c("introgressed" = "#1F78B4", "non_introgressed" = "#333333"),
+                     labels = c("introgressed" = "Introgressed Genes", "non_introgressed" = "Non-Introgressed Genes")) +
+  labs(
+    x = "dNdS",
+    y = "Probability Density",
+    color = "Dist Type"
+  ) + 
+  theme_bw() +
+  theme(
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_text(size = 9),
+    axis.title.y = element_text(size = 10), 
+    axis.line = element_line(color = "black", linewidth = 0.5),
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.text = element_text(size = 10)
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) +
+  guides(color = guide_legend(title = NULL))
+
+# Display the plot
+print(dNdS_90)
+
+plot <- plot_grid(
+  dN_90 + theme(legend.position="none"),
+  dS_90 + theme(legend.position="none"),
+  dNdS_90 + theme(legend.position="none"),
+  align = 'vh',
+  labels = c('a.', 'b.', 'c.'),
+  nrow = 1
+)
+
+plot
+

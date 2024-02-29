@@ -2,7 +2,7 @@ import os
 import csv
 import math 
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgression_genes/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/"
 
 fasta_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/single_copy_ortholog_fasta_alignments/"
 
@@ -35,7 +35,7 @@ def extract_paml(gene):
                 count += 1
         
             if count == 3 and math.isnan(omega) != True:
-                dN_dS_dict[gene.split('/')[-1]] = [ds, dn, omega]
+                dN_dS_dict[gene.split('/')[-1]] = [dn, ds, omega]
                 count = 0
                 break
     f.close()
@@ -43,7 +43,7 @@ def extract_paml(gene):
 def write_data_to_csv():
     output_tsv_file = open("dNdS.tsv", "w")
     writer = csv.writer(output_tsv_file, delimiter="\t")    
-    header = ["gene", "dS", "dN", "dN/dS"]
+    header = ["gene", "dN", "dS", "dN/dS"]
     writer.writerow(header)
 
     for key, value in dN_dS_dict.items():
