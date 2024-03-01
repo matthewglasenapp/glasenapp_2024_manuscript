@@ -22,7 +22,7 @@ def extract_paml(gene):
         for line in lines:
             line = line.strip()
             
-            if "omega (dN/dS) =  " in line:
+            if "omega (dN/dS) =" in line:
                 omega = float(line.split()[-1])
                 count += 1
             
@@ -38,6 +38,7 @@ def extract_paml(gene):
                 dN_dS_dict[gene.split('/')[-1]] = [dn, ds, omega]
                 count = 0
                 break
+
     f.close()
 
 def write_data_to_csv():
