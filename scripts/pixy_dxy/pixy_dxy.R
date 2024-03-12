@@ -47,48 +47,38 @@ dxy_90 <- ggplot(data = df_dxy_90, aes(x = divergence, color = dist_type)) +
 
 
 # Display the plot
-print(dxy_90)
-
-#ggsave(filename = "dxy_90.png", plot = dxy_90)
+ggsave(filename = "/Users/matt/Desktop/figure_3.pdf", plot = dxy_90)
 
 # 80% posterior probability threshold
 #-------------------------------------------------------------------------------
 # Load the csv files containing the distribution of mean dXY values and read as a one-dimensional vector
-introgression_tract_dxy_dist_file_80 = "introgression_tracts_dxy_dist_80.csv"
-species_tree_tract_dxy_dist_file_80 = "species_tree_tracts_dxy_dist_80.csv"
+dxy_dist_file_80 = "dxy_dist_80.csv"
+dxy_dist_80 = read.csv(dxy_dist_file_80)
 
-dist_introgression_tract_dxy_80 <- scan(introgression_tract_dxy_dist_file_80, what = numeric(), sep = ",")
-dist_species_tree_tract_dxy_80 <- scan(species_tree_tract_dxy_dist_file_80, what = numeric(), sep = ",")
+num_items = length(dxy_dist_80$introgression_tract)
 
-num_items = length(dist_introgression_tract_dxy_80)
+df_dxy_80 <- pivot_longer(dxy_dist_80, cols = c(introgression_tract, species_tree_tract), names_to = "dist_type", values_to = "divergence")
 
-# Add one-dimensional vectors of mean dXY values to a dataframe called df
-df_dxy_80 <- data.frame(
-  dist_type = factor(c(rep("introgression_tract", num_items), rep("species_tree_tract", num_items))),
-  mean_divergence = c(dist_introgression_tract_dxy_80, dist_species_tree_tract_dxy_80))
+df_dxy_80 <- df_dxy_80 %>% arrange(dist_type)
 
-# Calculate Z-scores for mean_divergence within each dist_type
 df_dxy_80_filtered <- df_dxy_80 %>%
   group_by(dist_type) %>%
-  mutate(z_score = scale(mean_divergence)) %>%
+  mutate(z_score = scale(divergence)) %>%
   filter(abs(z_score) < 4) %>%
-  ungroup()
+  ungroup() %>%
+  select(dist_type, divergence)
 
-# Remove the z_score column if you no longer need it
-df_dxy_80_filtered <- select(df_dxy_80_filtered, -z_score)
+mean_values <- aggregate(divergence ~ dist_type, df_dxy_80, mean)
 
-
-mean_values <- aggregate(mean_divergence ~ dist_type, df_dxy_80_filtered, mean)
-
-dxy_80 <- ggplot(data = df_dxy_80_filtered, aes(x = mean_divergence, color = dist_type)) +
+dxy_80 <- ggplot(data = df_dxy_80_filtered, aes(x = divergence, color = dist_type)) +
   stat_density(geom="line",position="identity", size = 1.1) + 
-  geom_vline(data = mean_values, aes(xintercept = mean_divergence, linetype = dist_type, color = dist_type),
+  geom_vline(data = mean_values, aes(xintercept = divergence, linetype = dist_type, color = dist_type),
              linetype = "dashed", size = 0.7, show.legend = FALSE) +
-  geom_text(data = mean_values, aes(x = mean_divergence, label = round(mean_divergence, 3), y = 0.0, color = dist_type), vjust = 0.0, hjust = -0.1, show.legend = FALSE, size = 3) +
+  geom_text(data = mean_values, aes(x = divergence, label = round(divergence, 3), y = 0.0, color = dist_type), vjust = 0.0, hjust = -0.1, show.legend = FALSE, size = 2.5) +
   scale_color_manual(values = c("introgression_tract" = "#1F78B4", "species_tree_tract" = "#333333"),
                      labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")) +
   labs(
-    x = "Mean Nucleotide Divergence",
+    x = "Absolute Nucleotide Divergence (dXY)",
     y = "Probability Density",
     color = "Dist Type"
   ) + 
@@ -107,15 +97,16 @@ dxy_80 <- ggplot(data = df_dxy_80_filtered, aes(x = mean_divergence, color = dis
   scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) +
   guides(color = guide_legend(title = NULL))
 
-
+dxy_80
 # Display the plot
-print(dxy_80)
-
-ggsave(filename = "dxy_80.png", plot = dxy_80)
-
+ggsave(filename = "/Users/matt/Desktop/pixy_80.pdf", plot = dxy_80)
 
 --------
 mean(df_dxy_90$divergence[df_dxy_90$dist_type == "introgression_tract"]) 
 model1 <- lm(df_dxy_90$divergence[df_dxy_90$dist_type == "species_tree_tract"] ~ 1)
+confint(model1, level=0.95)
+
+mean(df_dxy_80$divergence[df_dxy_80$dist_type == "introgression_tract"]) 
+model1 <- lm(df_dxy_80$divergence[df_dxy_80$dist_type == "species_tree_tract"] ~ 1)
 confint(model1, level=0.95)
 

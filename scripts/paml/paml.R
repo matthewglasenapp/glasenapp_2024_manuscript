@@ -246,6 +246,8 @@ combined_plot <- plot_grid(
 
 combined_plot
 
+#ggsave(filename = "/Users/matt/Desktop/nonrandom.pdf", plot = combined_plot)
+
 mean(data$dN[data$dist_type == "introgressed"]) 
 model1 <- lm(data$dN[data$dist_type == "non_introgressed"] ~ 1)
 confint(model1, level=0.95)
@@ -257,4 +259,14 @@ confint(model1, level=0.95)
 mean(data$dNdS[data$dist_type == "introgressed"]) 
 model1 <- lm(data$dNdS[data$dist_type == "non_introgressed"] ~ 1)
 confint(model1, level=0.95)
+
+mean(df_gene$gene_count[df_gene$dist_type == "introgression_tract"])
+mean(df_base$base_count[df_base$dist_type == "introgression_tract"])
+mean(df_psg$psg_count[df_psg$dist_type == "introgression_tract"])
+model5 <- lm(df_gene$gene_count[df_gene$dist_type == "species_tree_tract"] ~ 1)
+model6 <- lm(df_base$base_count[df_base$dist_type == "species_tree_tract"] ~ 1)
+model7 <- lm(df_psg$psg_count[df_psg$dist_type == "species_tree_tract"] ~ 1)
+confint(model5, level=0.95)
+confint(model6, level=0.95)
+confint(model7, level=0.95)
 

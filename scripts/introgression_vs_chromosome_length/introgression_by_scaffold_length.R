@@ -49,5 +49,5 @@ lm <- lm(percent_introgressed ~ gene_density, data = data)
 
 summary(lm)
 
-ggsave(filename = "introgression_by_gene_density.svg", plot = fig2, width=169, units = "mm")
-ggsave(filename = "introgression_by_gene_density.png", plot = fig2, width=169, units = "mm")
+ggsave(filename = "introgression_by_gene_density.pdf", plot = fig2, width=169, units = "mm")
+#ggsave(filename = "introgression_by_gene_density.png", plot = fig2, width=169, units = "mm")

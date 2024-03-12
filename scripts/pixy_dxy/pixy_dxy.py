@@ -65,7 +65,7 @@ def check_dxy_dist_counts():
 		run_pixy(null_interval_dir + "null_intervals.bed", st_output_dir, "null_intervals")
 
 		species_tree_tract_dxy_file = st_output_dir + "null_intervals_dxy.txt"
-		species_tree_tract_dxy_values = [float(item.split("\t")[5]) for item in open(species_tree_tract_dxy_file,"r").read().splitlines()[1:]]
+		species_tree_tract_dxy_values = [float(item.split("\t")[5]) for item in open(species_tree_tract_dxy_file,"r").read().splitlines()[1:] if item.split("\t")[5] != 'NA']
 
 		os.system('rm redo.bed')
 		os.system('rm redo_null_interval_tracts.bed')

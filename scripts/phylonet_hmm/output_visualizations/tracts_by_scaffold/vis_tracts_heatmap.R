@@ -25,8 +25,8 @@ mytheme <- theme_classic() + theme(
 theme_set(mytheme)
 
 # Read the bed file
-#bed_file <- "ten_kb_tracts_80.bed"
-bed_file <- "ten_kb_tracts.bed"
+bed_file <- "ten_kb_tracts_80.bed"
+#bed_file <- "ten_kb_tracts.bed"
 genes <- read.table(bed_file, sep = "\t", header = FALSE)
 # Rename the columns
 colnames(genes) <- c("chromosome", "start", "end", "gene_name")
@@ -84,7 +84,7 @@ figure <- ggplot(plot_data) +
 
 figure
 
-ggsave(filename = "/Users/matt/Desktop/2Mb.pdf", plot = figure)
+ggsave(filename = "/Users/matt/Desktop/2Mb_80.pdf", plot = figure)
 
 #ggsave(filename = "tracts_80.svg", plot = figure)
 #ggsave(filename = "/Users/matt/Desktop/tracts_80.svg", plot = figure)

@@ -15,7 +15,7 @@ dif_dist_dict = dict()
 z_score_threshold = 4
 
 def get_dnds_distributions():
-	# Exclude dNdS = 999.0, which occurs when dS = 0
+	# Exclude genes where dNdS > 1.5. 
 	introgressed_genes_dnds_file = introgressed_genes_dnds_dir + "dNdS.tsv"
 	introgressed_genes_dN = [float(item.split("\t")[1]) for item in open(introgressed_genes_dnds_file,"r").read().splitlines()[1:] if float(item.split("\t")[3]) <= 1.5]
 	#print(introgressed_genes_dN)
@@ -24,7 +24,7 @@ def get_dnds_distributions():
 	#print(introgressed_genes_dNdS)
 	#print(sorted(introgressed_genes_dNdS))
 
-	# Remove severe outliers, e.g. dNdS = 999. Where dS = 0 and short branch lengths 
+	# Remove severe outliers more than 4 standard deviations above the mean
 	zscores_introgressed_genes_dN = zscore(introgressed_genes_dN).tolist()
 	#print(zscores_introgressed_genes_dN)
 	zscores_introgressed_genes_dS = zscore(introgressed_genes_dS).tolist()
@@ -47,7 +47,7 @@ def get_dnds_distributions():
 	introgressed_genes_dNdS_filtered = [introgressed_genes_dNdS[i] for i in range(len(introgressed_genes_dNdS)) if i not in indices_to_remove]
 
 	number_introgressed = len(introgressed_genes_dN_filtered)
-	#print("Number introgressed: {}".format(number_introgressed))
+	print("Number introgressed: {}".format(number_introgressed))
 	#print("Max introgressed dNdS: {}".format(max(introgressed_genes_dNdS_filtered)))
 	
 	# Get non-introgressed set of the same length
@@ -94,7 +94,7 @@ def get_dnds_distributions():
 		final_non_introgressed_genes_dNdS.append(subset_non_introgressed_genes_dNdS_filtered[random_number])
 	
 	#print(final_non_introgressed_genes_dNdS)
-	#print("Number non-introgressed: {}".format(len(final_non_introgressed_genes_dNdS)))
+	print("Number non-introgressed: {}".format(len(final_non_introgressed_genes_dNdS)))
 	#print("Max non-introgressed dNdS: {}".format(max(final_non_introgressed_genes_dNdS)))
 	distribution_dict["dN"] = [introgressed_genes_dN_filtered, final_non_introgressed_genes_dN]
 	distribution_dict["dS"] = [introgressed_genes_dS_filtered, final_non_introgressed_genes_dS]
@@ -159,15 +159,15 @@ def run_approximate_permutation_test(metric, dist_lst, num_replicates):
 
 
 	test_statistic = statistics.mean(introgressed_lst) - statistics.mean(non_introgressed_lst)
-	#print("Mean Introgressed {}: {}".format(metric, statistics.mean(introgressed_lst)))
-	#print("Mean Non-Introgressed {}: {}".format(metric, statistics.mean(non_introgressed_lst)))
-	#print("True Difference: {}".format(test_statistic))
+	print("Mean Introgressed {}: {}".format(metric, statistics.mean(introgressed_lst)))
+	print("Mean Non-Introgressed {}: {}".format(metric, statistics.mean(non_introgressed_lst)))
+	print("True Difference: {}".format(test_statistic))
 	#num_values_larger = len([item for item in difference_dist if item > test_statistic])
 	#prop_values_larger = num_values_larger / len(difference_dist)
 	#p_value = 1 - prop_values_larger
 	proportion_values_larger = sum(value <= test_statistic for value in difference_dist) / len(difference_dist)
-	#print("p value: {}".format(proportion_values_larger))
-	print(proportion_values_larger)
+	print("p value: {}".format(proportion_values_larger))
+	#print(proportion_values_larger)
 
 def write_difference_dist_csv():
 	dif_csv = open(paml_output_dir + "difference_distribution_90.csv","w")
@@ -187,15 +187,15 @@ def write_difference_dist_csv():
 def main():
 	get_dnds_distributions()
 
-	#write_csv("paml_dist")
+	write_csv("paml_dist")
 
-	#for key,value in distribution_dict.items():
-		#run_approximate_permutation_test(key, value, 100000)
+	for key,value in distribution_dict.items():
+		run_approximate_permutation_test(key, value, 100000)
 
-	dNdS_dist = distribution_dict["dNdS"]
-	run_approximate_permutation_test("dNdS", dNdS_dist, 100000)
+	#dNdS_dist = distribution_dict["dNdS"]
+	#run_approximate_permutation_test("dNdS", dNdS_dist, 100000)
 
-	#write_difference_dist_csv()
+	write_difference_dist_csv()
 
 if __name__ == "__main__":
 	main()
