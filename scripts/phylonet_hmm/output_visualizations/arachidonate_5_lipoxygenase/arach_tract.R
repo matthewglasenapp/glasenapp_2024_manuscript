@@ -3,12 +3,12 @@ library(ggplot2)
 library(tidyverse)
 library(ggarchery)
 
-setwd("/Users/matt/Documents/Github/dissertation_chapter_2/data/phylonet_hmm/output_visualizations/arachidonate_5_lipoxygenase/")
+setwd("/Users/matt/Documents/Github/glasenapp_2024_manuscript/data/phylonet_hmm/output_visualizations/arachidonate_5_lipoxygenase/")
 
 introgression_probabilities = fromJSON(file = "NW_022145601.1.json")
 class(introgression_probabilities)
 
-coordinates = read.table("NW_022145601.1_coordinates", header = FALSE)
+coordinates = read.table("NW_022145601.1_coordinates.txt", header = FALSE)
 coordinates = as.vector(coordinates[, 1])
 
 # Create a data frame with the x and y values
@@ -106,7 +106,7 @@ figure <- ggplot(data_df, aes(x = coordinates, y = introgression_probabilities))
 
 figure
 
-ggsave(filename="arach.png",plot=figure)
+ggsave(filename="/Users/matt/Desktop/figure_5.pdf",plot=figure, width = 11, height = 8.5)
   
 ggsave(filename = "arach.svg", width = 11, height = 9, plot = figure, dpi = 700)
 ggsave(filename = "arach.png", width = 11, height = 8.5, plot = figure)

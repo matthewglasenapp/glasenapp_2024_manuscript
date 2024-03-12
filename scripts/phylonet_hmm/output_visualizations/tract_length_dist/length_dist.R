@@ -69,8 +69,10 @@ figure2 <- ggplot(data = combined_data, aes(x = value)) +
 
 figure2
 
-ggsave(filename = "tract_length_distribution.svg", plot = figure2, width=169, units = "mm")
-ggsave(filename = "tract_length_distribution.png", plot = figure2, width=169, height = 200, units = "mm")
+ggsave(filename = "/Users/matt/Desktop/tract_length_dist.pdf", plot = figure2, width=169, units = "mm")
+
+#ggsave(filename = "tract_length_distribution.svg", plot = figure2, width=169, units = "mm")
+#ggsave(filename = "tract_length_distribution.png", plot = figure2, width=169, height = 200, units = "mm")
 
 
 

@@ -63,7 +63,7 @@ plot_data <- data.frame(
 figure <- ggplot(plot_data) +
   geom_blank(data = scaffold_lengths, aes(x = 0, y = chromosome)) + 
   geom_tile(data = df_gene_density, aes(x = window_center, y = chromosome, fill = gene_density),
-            width = df_gene_density$end - df_gene_density$start + 1, height = 0.1) +
+            width = df_gene_density$end - df_gene_density$start + 1, height = 0.2) +
   geom_segment(
     aes(x = start, xend = end, y = chromosome, yend = chromosome),
     color = "black", linewidth = 5
@@ -84,7 +84,7 @@ figure <- ggplot(plot_data) +
 
 figure
 
-ggsave(filename = "/Users/matt/Desktop/100kb.pdf", plot = figure)
+ggsave(filename = "/Users/matt/Desktop/2Mb.pdf", plot = figure)
 
 #ggsave(filename = "tracts_80.svg", plot = figure)
 #ggsave(filename = "/Users/matt/Desktop/tracts_80.svg", plot = figure)

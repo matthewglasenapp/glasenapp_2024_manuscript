@@ -9,7 +9,7 @@ scaffold_lengths_dict = dict()
 scaffold_gene_dict = dict()
 scaffold_windows_dict = dict()
 
-window_size = 1000000
+window_size = 2000000
 
 def create_scaffold_lengths_dict():
 	scaffold_lengths = open(scaffold_lengths_file,"r").read().splitlines()

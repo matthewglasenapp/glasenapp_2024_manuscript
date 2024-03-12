@@ -17,6 +17,8 @@ vcf_file="/hb/scratch/mglasena/phylonet_hmm/hpul_sfra_invariant_sites_vcf/filter
 pop_file="/hb/home/mglasena/dissertation/scripts/phylonet_hmm/pixy_dxy/popfile.txt"
 cores="24"
 
+dxy_dist_dict = dict()
+
 # Bedtools Shuffle
 def shuffle_introgression_tracts(input_file, output_file):
 	shuffle = "bedtools shuffle -i {} -g {} -incl {} -noOverlapping > {}".format(input_file, scaffold_file, species_tree_regions, output_file)
@@ -63,30 +65,40 @@ def check_dxy_dist_counts():
 		run_pixy(null_interval_dir + "null_intervals.bed", st_output_dir, "null_intervals")
 
 		species_tree_tract_dxy_file = st_output_dir + "null_intervals_dxy.txt"
-		species_tree_tract_dxy_values = [float(item.split("\t")[5]) for item in open(species_tree_tract_dxy_file,"r").read().splitlines()[1:] if item.split("\t")[5] != 'NA']
+		species_tree_tract_dxy_values = [float(item.split("\t")[5]) for item in open(species_tree_tract_dxy_file,"r").read().splitlines()[1:]]
 
 		os.system('rm redo.bed')
 		os.system('rm redo_null_interval_tracts.bed')
 
 	# Write tract dxy distributions
-	it_csv = open(it_output_dir + "introgression_tracts_dxy_dist_90.csv","w")
-	it_writer = csv.writer(it_csv)
-	it_writer.writerow(introgression_tract_dxy_values)
-	it_csv.close()
+	# it_csv = open(it_output_dir + "introgression_tracts_dxy_dist_90.csv","w")
+	# it_writer = csv.writer(it_csv)
+	# it_writer.writerow(introgression_tract_dxy_values)
+	# it_csv.close()
 
-	st_csv = open(st_output_dir + "species_tree_tracts_dxy_dist_90.csv","w")
-	st_writer = csv.writer(st_csv)
-	st_writer.writerow(species_tree_tract_dxy_values)
-	st_csv.close()
+	# st_csv = open(st_output_dir + "species_tree_tracts_dxy_dist_90.csv","w")
+	# st_writer = csv.writer(st_csv)
+	# st_writer.writerow(species_tree_tract_dxy_values)
+	# st_csv.close()
+
+	dxy_dist_dict["introgression_tract"] = introgression_tract_dxy_values
+	dxy_dist_dict["species_tree_tract"] = species_tree_tract_dxy_values
+
+	out_csv = open(pixy_output_dir + "dxy_dist_90.csv","w")
+	writer = csv.writer(out_csv)
+	header = ["introgression_tract", "species_tree_tract"]
+	writer.writerow(header)
+	for i in range(0, len(introgression_tract_dxy_values)):
+		data = [introgression_tract_dxy_values[i], species_tree_tract_dxy_values[i]]
+		writer.writerow(data)
+	out_csv.close()
 
 def run_approximate_permutation_test(num_replicates):
 	# Get introgression tract dXY values 
-	introgression_tract_dxy_file = it_output_dir + "introgression_tracts_dxy.txt"
-	introgression_tract_dxy_values = [float(item.split("\t")[5]) for item in open(introgression_tract_dxy_file,"r").read().splitlines()[1:] if item.split("\t")[5] != 'NA']
+	introgression_tract_dxy_values = dxy_dist_dict["introgression_tract"]
 
 	# Get the species tree tract dXY values
-	species_tree_tract_dxy_file = st_output_dir + "null_intervals_dxy.txt"
-	species_tree_tract_dxy_values = [float(item.split("\t")[5]) for item in open(species_tree_tract_dxy_file,"r").read().splitlines()[1:] if item.split("\t")[5] != 'NA']
+	species_tree_tract_dxy_values = dxy_dist_dict["species_tree_tract"]
 
 	# Pool all dXY values (both introgression tract and species tree tract)
 	pooled_dxy = introgression_tract_dxy_values + species_tree_tract_dxy_values
@@ -115,23 +127,29 @@ def run_approximate_permutation_test(num_replicates):
 
 	dif_csv = open(pixy_output_dir + "difference_distribution_90.csv","w")
 	dif_writer = csv.writer(dif_csv)
-	dif_writer.writerow(difference_dist)
+	header = ["dxy"]
+	dif_writer.writerow(header)
+	for i in range(0, len(difference_dist)):
+		data = [difference_dist[i]]
+		dif_writer.writerow(data)
 	dif_csv.close()
 
 	test_statistic = statistics.mean(introgression_tract_dxy_values) - statistics.mean(species_tree_tract_dxy_values)
 	print("Mean Introgression Tract dXY: {}".format(statistics.mean(introgression_tract_dxy_values)))
 	print("Mean Species Tree Tract dXY: {}".format(statistics.mean(species_tree_tract_dxy_values)))
 	print("True Difference: {}".format(test_statistic))
+	proportion_values_larger = sum(value <= test_statistic for value in difference_dist) / len(difference_dist)
+	print("p value: {}".format(proportion_values_larger))
 
 # Sanity Check!
 def run_approximation_test_alternate(num_replicates):
 	# Get introgression tract dXY values 
 	introgression_tract_dxy_file = output_dir + "introgression_tracts_dxy.txt"
-	introgression_tract_dxy_values = [float(item.split("\t")[5]) for item in open(introgression_tract_dxy_file,"r").read().splitlines()[1:] if item.split("\t")[5] != 'NA']
+	introgression_tract_dxy_values = [float(item.split("\t")[5]) for item in open(introgression_tract_dxy_file,"r").read().splitlines()[1:]]
 
 	# Get the species tree tract dXY values
 	species_tree_tract_dxy_file = null_interval_dir + "null_intervals_dxy.txt"
-	species_tree_tract_dxy_values = [float(item.split("\t")[5]) for item in open(species_tree_tract_dxy_file,"r").read().splitlines()[1:] if item.split("\t")[5] != 'NA']
+	species_tree_tract_dxy_values = [float(item.split("\t")[5]) for item in open(species_tree_tract_dxy_file,"r").read().splitlines()[1:]]
 
 	# Pool all dXY values (both introgression tract and species tree tract)
 	pooled_dxy = introgression_tract_dxy_values + species_tree_tract_dxy_values
@@ -174,7 +192,7 @@ def main():
 	shuffle_introgression_tracts(introgression_tract_file, null_interval_dir + "null_intervals.bed")
 	run_pixy(null_interval_dir + "null_intervals.bed", st_output_dir, "null_intervals")
 	check_dxy_dist_counts()
-	run_approximate_permutation_test(1000)
+	run_approximate_permutation_test(100000)
 	#run_approximation_test_alternate(1000)
 
 
