@@ -99,7 +99,7 @@ dxy_80 <- ggplot(data = df_dxy_80_filtered, aes(x = divergence, color = dist_typ
 
 dxy_80
 # Display the plot
-ggsave(filename = "/Users/matt/Desktop/pixy_80.pdf", plot = dxy_80)
+#ggsave(filename = "/Users/matt/Desktop/pixy_80.pdf", plot = dxy_80)
 
 --------
 mean(df_dxy_90$divergence[df_dxy_90$dist_type == "introgression_tract"]) 

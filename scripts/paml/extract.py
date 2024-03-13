@@ -2,9 +2,9 @@ import os
 import csv
 import math 
 
-root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_80/paml/introgressed_genes/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/"
 
-fasta_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_80/paml/introgressed_genes/single_copy_ortholog_fasta_alignments/"
+fasta_alignment_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/paml/introgressed_genes/single_copy_ortholog_fasta_alignments/"
 
 stop_codon_dict = dict()
 dN_dS_dict = dict()

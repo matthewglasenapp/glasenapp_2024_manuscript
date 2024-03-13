@@ -1,0 +1,1 @@
+introgression_by_scaffold_density.R is an R script for running linear regressions of introgression vs. scaffold length and scaffold gene density. 

@@ -1,7 +1,7 @@
 import os 
 from joblib import Parallel, delayed
 
-output_directory = "/hb/home/mglasena/test_vcf/combined_vcf_files/"
+output_directory = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/combined_vcf_files/"
 
 reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"
 

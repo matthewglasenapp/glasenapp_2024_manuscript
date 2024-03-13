@@ -1,0 +1,1 @@
+get_unique_CDS.sh is a bash script for obtaining unqiue CDS sequences from the S. purpuratus reference genome assembly. 

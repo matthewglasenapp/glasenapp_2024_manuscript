@@ -1,0 +1,1 @@
+mosdepth_CDS.py was written to calculate coverage depth metrics for each unique, non overlapping CDS sequence in the S. purpuratus reference genome assembly using mosdepth. The interval BED file used as input to mosdepth can be found at data/spur_genome_metadata/nonoverlapping_unique_CDS.bed

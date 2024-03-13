@@ -246,7 +246,7 @@ combined_plot <- plot_grid(
 
 combined_plot
 
-ggsave(filename = "/Users/matt/Desktop/nonrandom_80.pdf", plot = combined_plot)
+#ggsave(filename = "/Users/matt/Desktop/nonrandom_80.pdf", plot = combined_plot)
 
 mean(data$dN[data$dist_type == "introgressed"]) 
 model1 <- lm(data$dN[data$dist_type == "non_introgressed"] ~ 1)

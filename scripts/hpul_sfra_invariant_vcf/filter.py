@@ -4,16 +4,14 @@ reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF
 
 # Raw genotype calls file. Leave this commented out. 
 genotype_calls = "/hb/scratch/mglasena/phylonet_hmm/hpul_sfra_invariant_sites_vcf/combined_vcf_files/genotype_calls.g.vcf.gz"
-genotype_calls_split_multiallelics = "/hb/scratch/mglasena/phylonet_hmm/hpul_sfra_invariant_sites_vcf/combined_vcf_files/genotype_calls_split_multiallelics.g.vcf.gz"
 
-output_directory = "/hb/scratch/mglasena/dxy/combined_vcf_files/"
+output_directory = "/hb/scratch/mglasena/phylonet_hmm/hpul_sfra_invariant_sites_vcf/combined_vcf_files/"
 
 samples_to_include = {
 "fragilis_SRR5767279" : "QB3KMK013",
 "pulcherrimus_SRR5767283" : "QB3KMK016",
 }
 
-# Only run once to get split multiallelic file!
 def split_multiallelics():
 	input_file = genotype_calls
 	output_file = output_directory + "genotype_calls_split_multiallelics.g.vcf.gz"
@@ -73,7 +71,6 @@ def index_vcf(input_file):
 	os.system(index)
 
 def main():
-	# Leave commented out unless running for the first time
 	split_multiallelics()
 	index_vcf(output_directory + "genotype_calls_split_multiallelics.g.vcf.gz")
 	

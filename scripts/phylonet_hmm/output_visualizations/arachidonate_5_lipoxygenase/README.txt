@@ -1,0 +1,1 @@
+arachidonate_introgression_tract.R is an R script that visualizes introgression posterior probability vs. position along chromosome for the region containing the gene arachidonate-5-lipoxygenase. 

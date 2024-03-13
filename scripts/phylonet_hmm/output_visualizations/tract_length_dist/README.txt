@@ -1,0 +1,1 @@
+tract_length_distribution.R is an R script for plotting the distribution of introgression tract lengths at both the 90% and 80% posterior probability thresholds. 

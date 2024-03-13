@@ -1,6 +1,6 @@
 import os 
 
-root_dir = "/hb/home/mglasena/test_vcf/"
+root_dir = "/hb/scratch/mglasena/phylonet_hmm/phylonet_hmm_variant_sites_vcf/"
 
 # Path to S. purpuratus reference genome file
 reference_genome = "/hb/home/mglasena/dissertation/data/purpuratus_reference/GCF_000002235.5_Spur_5.0_genomic.fna"

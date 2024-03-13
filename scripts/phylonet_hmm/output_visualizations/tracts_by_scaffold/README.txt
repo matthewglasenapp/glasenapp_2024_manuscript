@@ -1,0 +1,1 @@
+visualize_introgression_tracts.R is an R script for plotting the location of introgression tracts along scaffolds and coloring the scaffolds by gene density in windows. 

@@ -5,7 +5,6 @@ cores = 24
 
 root_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/gene_density/introgression_tracts/"
 
-# Specify input files for bedtools shuffle
 number_replicates = 1000
 
 introgression_tract_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/ten_kb_tracts.bed"

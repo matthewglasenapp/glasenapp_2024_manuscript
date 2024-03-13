@@ -1,0 +1,1 @@
+The folders arachidonate_5_lipoxygenase, tract_length_dist, and tracts_by_scaffold include R scripts for visualizing the results of the PhyloNet-HMM analysis
