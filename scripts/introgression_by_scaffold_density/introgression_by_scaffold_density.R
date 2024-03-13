@@ -1,6 +1,6 @@
 library(ggplot2)
 
-setwd("/Users/matt/Documents/GitHub/glasenapp_2024_manuscript/data/introgression_vs_chromosome_length/")
+setwd("/Users/matt/Documents/GitHub/glasenapp_2024_manuscript/data/introgression_by_scaffold_density/")
 
 file = "introgression_by_scaffold_updated_90.tsv"
 #file = "introgression_by_scaffold_updated_80.tsv"

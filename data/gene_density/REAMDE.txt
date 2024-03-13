@@ -1,0 +1,3 @@
+This folder contains csv files of the distribution of coding base counts, protein coding gene counts, and positively selected gene counts for both introgression tracts and species tree tracts. These are input files for scripts/paml/paml_90.R and scripts/paml/paml_80.R, which plot comparisons between introgressed and non-introgressed genes and regions for several metrics. 
+
+chromosome_window_density.csv contains the output of scripts/gene_density/get_density_windows.py. This is a csv file containing the gene density in 2Mb windows across the genome. 

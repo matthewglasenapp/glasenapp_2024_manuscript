@@ -1,0 +1,1 @@
+These subdirectories contain results from the PhyloNet-HMM analysis.

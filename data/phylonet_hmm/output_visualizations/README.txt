@@ -1,0 +1,1 @@
+These subdirectories containt the input files for the visualizations create in scripts/phylonet_hmm/output_visualizations/.

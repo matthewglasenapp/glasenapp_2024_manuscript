@@ -1,0 +1,1 @@
+This folder contains subdirectories with the scripts to perform the anlaysis conducted in Glasenapp and Pogson (2024). 

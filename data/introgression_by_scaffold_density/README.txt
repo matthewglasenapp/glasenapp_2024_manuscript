@@ -1,0 +1,3 @@
+introgression_by_scaffold_updated_90.tsv is a tab-delimited text file containing introgression metrics for each scaffold at the 90% posterior probability threshold and is used as input to scripts/introgression_by_scaffold_density/introgression_by_scaffold_density.R.
+
+introgression_by_scaffold_updated_80.tsv is a tab-delimited text file containing introgression metrics for each scaffold at the 80% posterior probability threshold and is used as input to scripts/introgression_by_scaffold_density/introgression_by_scaffold_density.R.

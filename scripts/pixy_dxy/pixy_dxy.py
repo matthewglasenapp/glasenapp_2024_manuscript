@@ -3,7 +3,7 @@ import statistics
 from random import randint
 import csv
 
-null_interval_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/null_intervals/"
+null_interval_dir = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/pixy_dxy/null_intervals/"
 
 introgression_tract_file = "/hb/scratch/mglasena/phylonet_hmm/process_hmm_90/process_hmm/ten_kb_tracts.bed"
 scaffold_file = "/hb/home/mglasena/dissertation/scripts/phylonet_hmm/genome_metadata/scaffolds.tsv"

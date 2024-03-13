@@ -1,0 +1,1 @@
+This folder contains subdirectories with the results and data files from the analysis performed in Glasenapp and Pogson (2024). 

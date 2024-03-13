@@ -26,7 +26,7 @@ theme_set(mytheme)
 
 # Read the bed file
 #bed_file <- "ten_kb_tracts_80.bed"
-bed_file <- "ten_kb_tracts.bed"
+bed_file <- "ten_kb_tracts_90.bed"
 genes <- read.table(bed_file, sep = "\t", header = FALSE)
 # Rename the columns
 colnames(genes) <- c("chromosome", "start", "end", "gene_name")
