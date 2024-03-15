@@ -148,7 +148,7 @@ base_count_90_files <- c(
 
 # Read the CSV files as one-dimensional vectors
 dist_base_counts_90 <- lapply(base_count_90_files, function(file) {
-  scan(file, what = numeric(), sep = ",") / 3747392
+  scan(file, what = numeric(), sep = ",") / 3747392 * 100
 })
 
 # Create data frames for base count
@@ -165,8 +165,8 @@ sd_base <- sd(df_base[df_base$dist_type == "introgression_tract",]$base_count)
 # Plot base count data
 base <- ggplot(data = df_base[df_base$dist_type == "species_tree_tract", ], aes(x = base_count)) +
   stat_density(geom="line", position="identity", size = 1.1, color = "#333333") + 
-  geom_point(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"), aes(x = mean_base, y = 40), color = "#1F78B4", size = 2) +
-  geom_errorbarh(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"), aes(xmin = mean_base - sd_base, xmax = mean_base + sd_base, y = 40), color = "#1F78B4", height = 5, size = 0.5) +
+  geom_point(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"), aes(x = mean_base, y = 0.5), color = "#1F78B4", size = 2) +
+  geom_errorbarh(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"), aes(xmin = mean_base - sd_base, xmax = mean_base + sd_base, y = 0.5), color = "#1F78B4", height = 0.05, size = 0.5) +
   labs(
     x = "Percent Coding",
     y = "Probability Density"
@@ -246,7 +246,7 @@ combined_plot <- plot_grid(
 
 combined_plot
 
-#ggsave(filename = "/Users/matt/Desktop/nonrandom.pdf", plot = combined_plot)
+ggsave(filename = "/Users/matt/Desktop/figure_4.pdf", plot = combined_plot)
 
 mean(data$dN[data$dist_type == "introgressed"]) 
 model1 <- lm(data$dN[data$dist_type == "non_introgressed"] ~ 1)
