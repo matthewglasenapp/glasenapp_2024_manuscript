@@ -22,7 +22,7 @@ dxy_90 <- ggplot(data = df_dxy_90, aes(x = divergence, color = dist_type)) +
   stat_density(geom="line",position="identity", size = 1.1) + 
   geom_vline(data = mean_values, aes(xintercept = divergence, linetype = dist_type, color = dist_type),
              linetype = "dashed", size = 0.7, show.legend = FALSE) +
- geom_text(data = mean_values, aes(x = divergence, label = round(divergence, 3), y = 0.0, color = dist_type), vjust = 0.0, hjust = -0.1, show.legend = FALSE, size = 2.5) +
+ geom_text(data = mean_values, aes(x = divergence, label = round(divergence, 3), y = 0.0, color = dist_type), vjust = 0.0, hjust = -0.1, show.legend = FALSE, size = 3) +
   scale_color_manual(values = c("introgression_tract" = "#1F78B4", "species_tree_tract" = "#333333"),
                      labels = c("introgression_tract" = "Introgression Tracts", "species_tree_tract" = "Genome-Wide Background")) +
   labs(
@@ -35,16 +35,17 @@ dxy_90 <- ggplot(data = df_dxy_90, aes(x = divergence, color = dist_type)) +
     panel.border = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    axis.title.x = element_text(size = 9),
-    axis.title.y = element_text(size = 10), 
+    axis.title.x = element_text(size =16),
+    axis.title.y = element_text(size = 16), 
     axis.line = element_line(color = "black", linewidth = 0.5),
     legend.position = "bottom",
     legend.direction = "horizontal",
-    legend.text = element_text(size = 10)
+    legend.text = element_text(size = 14)
   ) +
   scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) +
   guides(color = guide_legend(title = NULL))
 
+dxy_90
 
 # Display the plot
 ggsave(filename = "/Users/matt/Desktop/figure_3.pdf", plot = dxy_90)

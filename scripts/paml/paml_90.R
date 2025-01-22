@@ -29,7 +29,7 @@ for (response_var in response_vars) {
     #geom_signif(comparisons = list(c("introgressed", "non_introgressed")), 
     #map_signif_level=FALSE, annotations = c("")) + 
     #annotate("text", x = c(1.5), y = c(1.5), label = "p = 0.01", size = 3, color = "black") +
-    scale_x_discrete(labels = c("introgressed" = "Introgressed", "non_introgressed" = "Non-Introgressed")) +
+    scale_x_discrete(labels = c("introgressed" = "Introgressed", "non_introgressed" = "Non-\nIntrogressed")) +
     labs(x = "", y = response_var$label) +
     scale_fill_manual(values = c("introgressed" = "#1F78B4", "non_introgressed" = "#333333")) +
     scale_color_manual(values = c("introgressed" = "#1F78B4", "non_introgressed" = "#333333")) +
@@ -120,10 +120,50 @@ mean_gene <- mean(df_gene[df_gene$dist_type == "introgression_tract",]$gene_coun
 sd_gene <- sd(df_gene[df_gene$dist_type == "introgression_tract",]$gene_count)
 
 # Plot gene count data
+# gene <- ggplot(data = df_gene, aes(x = gene_count)) +
+#   stat_density(data = df_gene[df_gene$dist_type == "species_tree_tract",], geom="line", position="identity", size = 1.1, color = "#333333") + 
+#   geom_point(data = data.frame(gene_count = mean_gene, dist_type = "introgression_tract"), aes(x = mean_gene, y = 0.1), color = "#1F78B4", size = 2) +
+#   geom_errorbarh(data = data.frame(gene_count = mean_gene, dist_type = "introgression_tract"), aes(xmin = mean_gene - sd_gene, xmax = mean_gene + sd_gene, y = 0.1), color = "#1F78B4", height = 0.01, size = 0.5) +
+#   labs(
+#     x = "Protein-Coding Genes / Mb",
+#     y = "Probability Density"
+#   ) +
+#   theme_bw() +
+#   theme(
+#     panel.border = element_blank(),
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     axis.title.x = element_text(size = 9),
+#     axis.title.y = element_text(size = 10), 
+#     axis.line = element_line(color = "black", linewidth = 0.5),
+#   ) +
+#   scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) + 
+#   guides(color = guide_legend(title = NULL))
+
 gene <- ggplot(data = df_gene, aes(x = gene_count)) +
   stat_density(data = df_gene[df_gene$dist_type == "species_tree_tract",], geom="line", position="identity", size = 1.1, color = "#333333") + 
-  geom_point(data = data.frame(gene_count = mean_gene, dist_type = "introgression_tract"), aes(x = mean_gene, y = 0.1), color = "#1F78B4", size = 2) +
-  geom_errorbarh(data = data.frame(gene_count = mean_gene, dist_type = "introgression_tract"), aes(xmin = mean_gene - sd_gene, xmax = mean_gene + sd_gene, y = 0.1), color = "#1F78B4", height = 0.01, size = 0.5) +
+  geom_vline(xintercept = mean_gene, linetype = "dashed", color = "#1F78B4", size = 0.5) +
+  geom_segment(data = data.frame(gene_count = mean_gene, dist_type = "introgression_tract"),
+               aes(x = mean_gene - sd_gene, xend = mean_gene - sd_gene, y = 0, yend = Inf),
+               color = "#1F78B4", linetype = "dashed", size = 0.25, alpha = 0.25) +
+  geom_segment(data = data.frame(gene_count = mean_gene, dist_type = "introgression_tract"),
+               aes(x = mean_gene + sd_gene, xend = mean_gene + sd_gene, y = 0, yend = Inf),
+               color = "#1F78B4", linetype = "dashed", size = 0.25, alpha = 0.25) +
+  labs(
+    x = "Protein-Coding Genes / Mb",
+    y = "Probability Density"
+  ) +
+  theme_bw() +
+  theme(
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.title.x = element_text(size = 9),
+    axis.title.y = element_text(size = 10), 
+    axis.line = element_line(color = "black", linewidth = 0.5),
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) + 
+  guides(color = guide_legend(title = NULL))
   labs(
     x = "Protein-Coding Genes / Mb",
     y = "Probability Density"
@@ -165,8 +205,13 @@ sd_base <- sd(df_base[df_base$dist_type == "introgression_tract",]$base_count)
 # Plot base count data
 base <- ggplot(data = df_base[df_base$dist_type == "species_tree_tract", ], aes(x = base_count)) +
   stat_density(geom="line", position="identity", size = 1.1, color = "#333333") + 
-  geom_point(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"), aes(x = mean_base, y = 0.5), color = "#1F78B4", size = 2) +
-  geom_errorbarh(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"), aes(xmin = mean_base - sd_base, xmax = mean_base + sd_base, y = 0.5), color = "#1F78B4", height = 0.05, size = 0.5) +
+  geom_vline(xintercept = mean_base, linetype = "dashed", color = "#1F78B4", size = 0.5) +
+  geom_segment(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"),
+               aes(x = mean_base - sd_base, xend = mean_base - sd_base, y = 0, yend = Inf),
+               color = "#1F78B4", linetype = "dashed", size = 0.25, alpha = 0.25) +
+  geom_segment(data = data.frame(base_count = mean_base, dist_type = "introgression_tract"),
+               aes(x = mean_base + sd_base, xend = mean_base + sd_base, y = 0, yend = Inf),
+               color = "#1F78B4", linetype = "dashed", size = 0.25, alpha = 0.25) +
   labs(
     x = "Percent Coding",
     y = "Probability Density"
@@ -208,8 +253,13 @@ sd_psg <- sd(df_psg[df_psg$dist_type == "introgression_tract",]$psg_count)
 # Plot psg count data
 psg <- ggplot(data = df_psg[df_psg$dist_type == "species_tree_tract", ], aes(x = psg_count)) +
   stat_density(geom="line", position="identity", size = 1.1, color = "#333333") + 
-  geom_point(data = data.frame(psg_count = mean_psg, dist_type = "introgression_tract"), aes(x = mean_psg, y = 0.4), color = "#1F78B4", size = 2) +
-  geom_errorbarh(data = data.frame(psg_count = mean_psg, dist_type = "introgression_tract"), aes(xmin = mean_psg - sd_psg, xmax = mean_psg + sd_psg, y = 0.4), color = "#1F78B4", height = 0.05, size = 0.5) +
+  geom_vline(xintercept = mean_psg, linetype = "dashed", color = "#1F78B4", size = 0.5) +
+  geom_segment(data = data.frame(psg_count = mean_psg, dist_type = "introgression_tract"),
+               aes(x = mean_psg - sd_psg, xend = mean_psg - sd_psg, y = 0, yend = Inf),
+               color = "#1F78B4", linetype = "dashed", size = 0.25, alpha = 0.25) +
+  geom_segment(data = data.frame(psg_count = mean_psg, dist_type = "introgression_tract"),
+               aes(x = mean_psg + sd_psg, xend = mean_psg + sd_psg, y = 0, yend = Inf),
+               color = "#1F78B4", linetype = "dashed", size = 0.25, alpha = 0.25) +
   labs(
     x = "Positively Selected Genes / Mb",
     y = "Probability Density"
@@ -225,6 +275,8 @@ psg <- ggplot(data = df_psg[df_psg$dist_type == "species_tree_tract", ], aes(x =
   ) +
   scale_x_continuous(expand = expansion(mult = c(0.09, 0.09))) +
   guides(color = guide_legend(title = NULL))
+
+psg
 
 # Combined plot
 #-------------------------------------------------------------------------------
